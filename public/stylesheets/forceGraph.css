@@ -1,0 +1,315 @@
+body {
+    background-color: rgb(51, 39, 61);
+    font-family: 'Poppins', sans-serif;
+}
+
+#force-graph {
+    position: fixed;
+    top: 0;
+    left: 150px;
+    height: 90vh;
+    width: calc(94vw - 150px);
+    margin: 5vh 5vw 5vh 1vw;
+    border: 2px solid black;
+    background-color: rgb(52, 32, 112);
+    transition: .5s ease all;
+}
+
+svg {
+    font-size: 17px;
+}
+
+circle {
+    opacity: 1;
+    /* stroke: black; */
+    stroke-width: 2px;
+}
+
+.link-path {
+    stroke: rgb(253, 222, 174);
+    stroke-width: 3px;
+    opacity: .8;
+}
+.link-box {
+    stroke-width: 50px;
+    stroke: rgb(253, 222, 174);
+    opacity: .3;
+    filter: blur(10px);
+}
+circle {
+    transition: r .5s ease;
+}
+circle.node {
+    stroke: rgb(175, 150, 194);
+    fill: rgb(255, 185, 102);
+    cursor: all-scroll;
+}
+/* circle.node:active {
+    cursor: grabbing;
+} */
+.node-text, .tool-text {
+    height: 100%;
+    width: 100%;
+    border-radius: 100%;
+    position: relative;
+    display: flex;
+    justify-items: center;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    text-anchor: middle;
+}
+.node-text div, .tool-text div {
+    font-size: 20px;
+    flex: 0 1 auto;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    transition: font-size .5s ease;
+}
+.node-text div {
+    color:black;
+}
+#tools {
+    width: 0px;
+    height: 0px;
+    fill: blue;
+    overflow: visible;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.tool circle {
+    stroke: rgb(197, 197, 243);
+    transition: cx .5s ease, cy .5s ease, r .5s ease;
+}
+.tool foreignObject {
+    transition: x, y, width, height;
+    transition-timing-function: ease;
+    transition-duration: .5s;
+}
+.tool-text {
+    font-size: 17px;
+    color:rgb(52, 32, 112);
+    transition: font-size .5s ease;
+}
+#link-buttons {
+    transition: transform .05s;
+}
+#link-buttons foreignObject {
+    overflow: visible;
+}
+circle.link-vote {
+    stroke: rgb(197, 197, 243);
+    fill: rgb(190, 190, 245);
+}
+#link-upvote.up {
+    fill: rgb(72, 216, 72);
+}
+#link-downvote.down {
+    fill: rgb(189, 71, 126);
+}
+.link-tool-text {
+    color: rgb(52, 32, 112);
+}
+.show-links {
+    cursor: zoom-in;
+}
+.add-link {
+    cursor: crosshair;
+}
+.unloader {
+    cursor: zoom-out;
+}
+.wiki-link {
+    cursor: help;
+}
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+.result {
+    cursor: crosshair;
+}
+#fg-utilities {
+    position: fixed;
+    z-index: 1;
+    top: 5vh;
+    left: calc(150px + 1vw);
+    margin: 10px 0 0 30px;
+    pointer-events: none;
+}
+#fg-buttons {
+    border-radius: 10px;
+    margin: 15px 0 0 15px;
+    padding: 0;
+    display: flex;
+    justify-items: flex-start;
+    pointer-events: auto;
+}
+#fg-buttons button {
+    height: 50px;
+    width: 100px;
+    margin-right: 20px;
+    background-color: rgb(121, 10, 62);
+    border: 1px solid lavender;
+    border-radius: 5px;
+    color: rgb(253, 174, 211);
+    font-family: 'Montserrat', sans-serif;
+    transition-timing-function: cubic-bezier(0.560, 1.650, 0.570, 0.790);
+    transition: .25s ease color, .25s ease background-color, .2s transform, .2s box-shadow;
+}
+#fg-buttons button.pressed {
+    color: lavender;
+    background-color: rgb(189, 57, 118);
+}
+#fg-buttons button:hover {
+    color: lavender;
+    background-color: rgb(146, 34, 86);
+}
+#issue-loader {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    justify-items: flex-start; 
+    background: none;
+    color: lavender;
+    transition: left .5s ease, opacity .3s ease-out;
+    pointer-events: none;
+}
+#issue-loader * {
+    margin: 15px;
+    opacity: 1;
+}
+#issue-loader input {
+    background: none;
+    border: none;
+    border-bottom: 3px solid lavender;
+    height: 1.5rem;
+    color: lavender;
+    font-family: 'Poppins', sans-serif;
+    pointer-events: auto;
+}
+#issue-loader input::placeholder {
+    color: rgb(255, 185, 102);
+    opacity: .9;
+    font-family: 'Montserrat', sans-serif;
+}
+#issue-loader input:focus{
+    outline: none;
+    caret-color: rgb(255, 185, 102);
+}
+#loaded-issues {
+    background-color: rgb(141, 141, 241);
+    border-radius: 10px;
+    z-index: 3;
+    min-height: 100px;
+    max-height: 500px;
+    width: 200px;
+    display: flex;
+    flex-flow: column nowrap;
+    overflow-y: scroll;
+    pointer-events: auto;
+    scrollbar-color: rgb(141, 141, 241);
+}
+.result {
+    z-index: 5;
+	width: 90%;
+    text-align: center;
+	background-color: #c898ed;
+	border: none;
+	border-radius: 6px;
+    margin: 15px;
+}
+#issue-searchbar {
+    position: fixed;
+    display: flexbox;
+    min-height: 100px;
+    max-height: 500px;
+    width: 200px;
+    right: 6vw;
+    top: 8vh;
+    justify-content: space-around;
+    font-size: 15px;
+    background-color: rgb(141, 141, 241);
+    border-radius: 10px;
+    z-index: 3;
+    transform-origin: top right;
+    transition: transform .5s ease;
+}
+#issue-searchbar > div {
+    background-color: rgb(168, 168, 241);
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+}
+#issue-searchbar input {
+    width: 80%;
+    margin: 10px auto;
+}
+#issue-searchbar button {
+    font-size: 18px;
+    height: 1.5em;
+    width: 80%;
+    margin: 10px auto 20px auto;
+}
+#found-issues {
+    width: 90%;
+    overflow-y: scroll;
+}
+#found-issues div.result {
+    background-color: rgb(190, 190, 245);
+    padding: 10px;
+    margin: 10px;
+    border-radius: 3px;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+.test {
+    position: fixed;
+    text-align: center;
+    left: 50vw;
+    top: 50vh;
+    animation: 2s test forwards;
+}
+@keyframes test {
+    from {
+        opacity: 1;
+        transform: scale(2);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0);
+    }
+}
+
+  /* ========================== */
+ /* Small screen style changes */
+/* ========================== */
+@media screen and (max-width: 900px){
+    #issue-searchbar {
+        transform: scale(.8);
+    }
+    /* .node-text div, .tool-text {
+        font-size: 13.6px;  
+    } */
+}
+@media screen and (max-width: 650px){
+    #force-graph {
+        left: 90px;
+        width: calc(94vw - 90px);
+        margin: 5vh 5vw 5vh 1vw;
+    }
+    #issue-loader {
+        left: 90px;
+    }
+    /* .node-text div, .tool-text {
+        font-size: 10.2px;
+    } */
+}

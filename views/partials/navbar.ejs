@@ -1,0 +1,24 @@
+<button id="sidebar-toggler" href="javascript:void(0);" onmouseenter="squeezeSidebar();" onmouseup="toggleSidebar();" onmouseleave="unsqueezeSidebar()">Menu</button>
+<nav id="sidebar" class="collapsed">
+	<ul>
+		<li><a href="/nexus">Nexus</a></li>
+		<li><a href="/wiki">Wiki</a></li>
+		<li><a href="/about">About</a></li>
+		<li><a href="https://www.patreon.com/magnova">Donate</a></li>
+	</ul>
+</nav>
+<div id="user-bar">
+	<% if(currentUser){ %>
+		<div id="logged-in">
+			<img id="user-avatar"></img>
+			<a id="username" href=<%= `/users/${currentUser.username}` %> ><%= currentUser.username %></a>
+			<a id="logout" href="/auth/logout">Logout</a>
+		</div>
+	<% } else { %>
+		<div id="logged-out">
+			<a id="register" href="/auth/register">Register</a>
+			<a id="login" href="/auth/login">Login</a>
+		</div>
+	<% } %>
+	
+</div>

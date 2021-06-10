@@ -1,0 +1,59 @@
+<%- include('../partials/regiHeader'); %>
+<h1>
+	Create an account on Magnova!
+</h1>
+<h3>
+	Tired of waiting on the world to change?
+</h3>
+<p>
+	Magnova provides a number of ways to work together to build social capital, help the community, and combat global issues.
+</p>
+<ul>
+	<li>Learn about issues that matter to you with the wiki</li>
+	<li>Share what you know by editing the wiki and adding links to existing non-profits.</li>
+	<li>Use the nexus to better understand how different problems are interconnected.</li>
+	<li>Find projects in the nexus to realize your activist goals.</li>
+	<li>Help the community figure out what works by evaluating past and present projects.</li>
+	<li>Complete project tasks</li>
+	<li>Donate to the projects you deem valuable.</li>
+</ul>
+<p><em>Magnova will always be free to use.</em></p>
+
+<div id="registration-form">
+	<form action="/auth/register" method="post">
+		<div>
+			<h5>
+				Username
+			</h5>
+			<input type="text" name="username" id="user-field">
+			<div id="username-checker" style="height: 40px">
+				<div id="username-free" class="nodisplay">That username is free!</div>
+				<div id="username-taken" class="nodisplay">Sorry, that username is taken.</div>
+			</div>
+		</div>
+		<div>
+			<h5>
+				Password
+			</h5>
+			<input type="password" name="password">
+        </div>
+		<div>
+			<h5>
+				Email
+			</h5>
+			<input type="email" name="email" id="email-field">
+			<div id="email-checker" style="height: 40px">
+				<div id="email-free" class="nodisplay">That email can still be registered!</div>
+				<div id="email-taken" class="nodisplay">Sorry, that email is registered on Magnova already.</div>
+				<div id="email-invalid" class="nodisplay">Not a valid email address</div>
+			</div>
+		</div>
+        
+		<button type="submit">
+			Submit
+		</button>
+	</form>
+</div>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="scripts/registration.js"></script>
+<%- include('../partials/footer'); %>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/magnova.css">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/forceGraph.css">
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Poppins:wght@500&display=swap" rel="stylesheet">
+	<base href="/">
+	<title>Force Directed Graph</title>
+</head>
+<body>
+<%- include("./partials/navbar") %>
+<div id="allContent" class="expanded">
+	<div id="fg-utilities">
+		<div id="fg-buttons" class="">
+			<button id="load-button">Load</button>
+			<button id="clear-button">Clear</button>
+			<!-- <button id="create-button">Create</button> -->
+		</div>
+		<div id="issue-loader" class="hidden">
+			<input type="text" id="issue-to-load" placeholder="Load an issue"></span>
+			<div id="loaded-issues" class="hidden"></div>
+		</div>
+	</div>
+	<div id="issue-searchbar" class="hidden">
+		<div>Add link from <span id="link-source"></span> to:</div>
+		<input type="text">
+		<div id="found-link-issues"></div>
+	</div>
+	<svg id="force-graph" xmlns="http://www.w3.org/1999/xhtml">
+		<g id="links"></g>
+		<g id="nodes"></g>
+		<g id="tools" transform-origin="center"></g>
+		<g id="link-buttons" class="hidden" transform-origin="center">
+			<circle id="link-upvote" class="link-vote" r="20" cx="-30" cy="0"></circle>
+			<foreignObject pointer-events="none" width="0" height="0" x="-37" y="-15">
+				<div class="link-tool-text" xmlns="http://www.w3.org/1999/xhtml" pointer-events="none">+</div>
+			</foreignObject>
+			<circle id="link-downvote" class="link-vote" r="20" cx="30" cy="0"></circle>
+			<foreignObject pointer-events="none" width="0" height="0" x="23" y="-15">
+				<div class="link-tool-text" xmlns="http://www.w3.org/1999/xhtml" pointer-events="none">-</div>
+			</foreignObject>
+			
+    </svg>
+</div>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="scripts/forceGraph.js"></script>
+<script src="scripts/nav.js"></script>
+</body></html>

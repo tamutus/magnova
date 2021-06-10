@@ -1,0 +1,12 @@
+<%- include("../partials/header") %>
+<h1><%= shownUser.username %></h1>
+<ul>
+    <% for(issue of shownUser.issues){ %>
+        <li><a href=<%= `wiki/${issue._id}` %>><%= issue.name %></a></li>
+    <% } %>
+</ul>
+<% if(currentUser && String(shownUser._id) === String(currentUser._id)){ %>
+    <a href= <%= `auth/delete-user/${shownUser._id}` %> ><button>Delete account</button></a>
+<% } %>
+
+<%- include("../partials/footer") %>

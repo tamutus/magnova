@@ -1,0 +1,7 @@
+<%- include('../partials/header'); %>
+<ul>
+    <% for (userListing of allUsers){ %>
+        <li><%= userListing.username %></li>
+    <% } %>
+</ul>
+<%- include('../partials/footer'); %>

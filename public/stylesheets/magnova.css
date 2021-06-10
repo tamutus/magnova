@@ -1,0 +1,453 @@
+/*   google fonts declarations
+====================================
+font-family: 'Caveat', cursive;
+font-weight: 400;
+font-weight: 700;
+font-family: 'Orbitron', sans-serif;
+font-weight: 500;
+font-weight: 900;
+font-family: 'Oxygen', sans-serif;
+font-weight: 400;
+font-weight: 700;
+==================================== */
+
+
+  /* ========================= */
+ /* general component styling */
+/* ========================= */
+
+* {
+	margin: 0;
+	padding: 0;
+	/* transition: all .5s; */
+	font-size: 20px;
+}
+body {
+	background-color: rgb(51, 39, 61);
+    font-family: 'Poppins', sans-serif;
+	color: lavender;
+	font-weight: 400;
+}
+#allContent {
+	text-align: center;
+	margin-right: 210px;
+	margin-left: 50px;
+	padding: 50px 20px 20px 250px;
+	transition: all 1s;
+}
+#allContent.expanded {
+	margin-right: 260px;
+	margin-left: 0px;
+	/* margin-left: 0px; */
+}
+#bio-links {
+	align-content: center;
+	height: 70px;
+	width: 50%;
+	margin: 0 auto 50px auto;
+	border-radius: 1.5% / 40%;
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: space-around;
+	align-content: center;
+	align-items: center;
+	transition: background-color .3s
+}
+#bio-links:hover {
+	background-color: rgb(129, 107, 167);
+}
+.bio-link {
+	height: 40px;
+	flex: 0 1 150px;
+	font-style: italic;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	border-radius: 3px;
+	background-color: rgb(83, 68, 104);
+	transition: background-color .2s;
+}
+.bio-link:hover {
+	background-color: rgb(51, 39, 61);
+}
+section {
+	display: flex;
+	justify-content: flex-start;
+	flex-flow: column wrap;
+}
+button:focus {
+	outline: none;
+}
+a {
+	color: rgb(174, 247, 225);
+	text-decoration: none;
+}
+a:visited {
+	color: rgb(96, 202, 170);
+}
+h1, h2, h3, h4, h5, h6, p {
+	display: block;
+}
+h1 {
+	font-size: 50px;
+	padding: 20px;
+	transition: all 1s ease-out;
+}
+h2 {
+	text-align: left;
+	font-size: 40px;
+	padding: 10px;
+	margin: 15px 0;
+}
+h2 em {
+	font-size: 40px;
+}
+h3 {
+	margin: 30px auto 30px auto;
+}
+ul {
+	list-style: none;
+	text-align: left;
+	margin: 15px auto;
+}
+ol {
+	text-align: left;
+	margin: 15px auto;
+	padding: 0 10% 0 10%;
+}
+section ul {
+	margin-left: 80px;
+}
+p {
+	text-align: left;
+	transition: width 0s;
+	text-indent: 50px;
+}
+li {
+	margin-bottom: 20px;
+}
+input, textarea, button{
+	font-family: 'Poppins', sans-serif;
+	padding: 5px;
+}
+input::placeholder, textarea::placeholder {
+	font-family: 'Montserrat', sans-serif;
+}
+.hidden {
+    visibility: hidden;
+}
+.nodisplay {
+	display: none;
+}
+button {
+	/* z-index: 5; */
+	/* width: 100px; */
+	/* height: 100px; */
+	background-color: #c898ed;
+	border: none;
+	border-radius: 6px;
+	box-shadow: 0px 6px #8865a3;
+	/* font-size: 25px; */
+	transition: border-radius .2s, box-shadow .2s, top .2s, left .2s, font-size .5s, transform .2s;
+	transition-timing-function: cubic-bezier(0.560, 1.650, 0.570, 0.790);
+	transform: none;
+	transform-origin: bottom;
+}
+button:hover {
+	box-shadow: 0px 4px #8865a3;
+	transform: translateY(2px);
+}
+button:active {
+	transform: translateY(6px);
+	box-shadow: none;
+}
+
+  /* ============= */
+ /* style classes */
+/* ============= */
+
+.cyber {
+	font-family: 'Orbitron', sans-serif;
+	font-weight: 500;
+	color: #87e386;
+	background-color: #290252;
+	border: 5px solid white;
+	border-radius: 0 40px;
+}
+.cyber strong {
+	font-weight: 900;
+}
+.cyber h1 {
+	background-image: url(https://images3.alphacoders.com/186/186199.jpg);
+	-webkit-background-clip: text;
+	background-clip: text;
+	background-size: contain;
+	color: rgba(135, 227, 134, .5);
+}
+.notebook {
+	font-family: 'Caveat', cursive;
+	font-weight: 400;
+}
+.notebook strong {
+	font-weight: 700;
+}
+
+  /* ============= */
+ /* sidebar stuff */
+/* ============= */
+
+#sidebar {
+	z-index: 4;
+	background-color: rgb(166, 79, 120);
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 150px;
+	height: 100vh;
+	border-radius: 0 10px 10px 0;
+	animation-duration: 1s;
+	transform-origin: left;
+	transition: 1s all ease-out, .5s height cubic-bezier(0.560, 1.650, 0.570, 0.790);
+}
+#sidebar.squeezed {
+	transform: scaleX(1.1);
+}
+#sidebar.collapsed {
+	opacity: 0;
+	transform: scaleX(0);
+}
+#sidebar.peeking {
+	opacity: 1;
+	transform: scaleX(.15);
+}
+#sidebar ul {
+	opacity: 1;
+	text-align: center;
+	margin-top: 130px;
+	margin-bottom: 40px;
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	flex-direction: column;
+	height: calc(100% - 160px);
+	transition: opacity 1s, margin-top .5s;
+}
+#sidebar.collapsed ul {
+	opacity: 0;
+}
+#sidebar ul li {
+	width: 150px;
+	transition: .5s all;
+	transition-timing-function: cubic-bezier(0.560, 1.650, 0.570, 0.790);
+}
+#sidebar ul li a {
+	display: block;
+	font-size: 1.5rem;
+	font-family: 'Montserrat', sans-serif;
+	width: 100%;
+	height: 40px;
+	color: white; 
+	transition: .5s all;
+	transition-timing-function: cubic-bezier(0.560, 1.650, 0.570, 0.790);
+}
+#sidebar a:visited {
+	color: white;
+}
+#sidebar-toggler {
+	position: fixed;
+	left: 30px;
+	top: 30px;
+	margin: none;
+	z-index: 5;
+	width: 100px;
+	height: 100px;
+	background-color: rgb(139, 17, 74);
+	border: none;
+	border-radius: 6px;
+	box-shadow: -6px -6px rgb(97, 12, 52);
+	font-size: 25px;
+	font-family: 'Montserrat', sans-serif;
+	color: white;
+	/* transition-timing-function: cubic-bezier(0.560, 1.650, 0.570, 0.790); */
+	transition: border-radius .2s, box-shadow .2s, top .2s, left .2s, font-size .5s, transform .5s;
+	transform-origin: top left;
+}
+#sidebar-toggler:hover {
+	box-shadow: -4px -4px rgb(97, 12, 52);
+	left: 28px;
+	top: 28px;
+	/* animation-name: jiggle;
+	animation-duration: 2.5s;
+	animation-iteration-count: 5; */
+}
+#sidebar-toggler:active {
+	left: 24px;
+	top: 24px;
+	box-shadow: none;
+}
+
+@keyframes reveal-toggler {
+	0% {
+		opacity: 0;
+		transform: scale(0, 0);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1, 1);
+	}
+}
+@keyframes open-nav {
+	0% {
+		transform: scaleX(0);
+	}
+	100% {
+		transform: scaleX(1);
+	}
+}
+@keyframes jiggle {
+	0%, 20%, 75% {
+		transform: rotate(0) scale(1);
+	}
+	35% {
+		transform: scale(.95);
+	}
+	50% {
+		transform: scale(1.05);
+	}
+}
+  /* ====================== */
+ /* User info/auth styling */
+/* ====================== */
+
+#user-bar {
+	position: absolute;
+	z-index: 8;
+	top: 10px;
+	right: 15px;
+	height: 1.8rem;
+	background-color: rgb(46, 71, 155);
+	border-radius: 0 5px 0 5px;
+	display: flex;
+	align-items: center;
+	transition: .5s ease transform;
+	transform-origin: top right;
+}
+#user-bar div * {
+	margin: 0 10px;
+	font-size: 1.1rem;
+	font-family: 'Montserrat', sans-serif;
+}
+
+#user-bar div a, #user-bar div a:visited {
+	color: rgb(238, 203, 247);
+}
+
+  /* ================ */
+ /* Flash formatting */
+/* ================ */
+
+.flash {
+	z-index: 10;
+	position: absolute;
+	min-height: 100px;
+	width: 30%;
+	margin: 45px 30%;
+	border-radius: 10px;
+	animation: fade-pop 3s 1s ease-in backwards;
+	transform: scale(0);
+}
+
+.flash.success {
+	background-color: seagreen;
+}
+.flash.failure {
+	background-color: mediumorchid;
+}
+
+@keyframes fade-pop {
+	0% {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	80% {
+		opacity: 0.4;
+		transform: scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(0);
+	}
+}
+
+  /* ========================== */
+ /* Small screen style changes */
+/* ========================== */
+
+@media screen and (max-height: 450px){
+	#sidebar-toggler {
+		transform: scale(.7);
+	}
+	#sidebar ul {
+		margin-top: 140px;
+	}
+}
+@media screen and (max-height: 300px){
+	#sidebar-toggler {
+		transform: scale(.5) translateY(-42px);
+	}
+	
+	#sidebar ul {
+		margin-top: 100px;
+		margin-bottom: 0;
+	}
+}
+@media screen and (max-width: 650px){
+	#allContent, #allContent.expanded {
+		padding-left: 130px;
+	}
+	#allContent h1, #allContent.expanded h1 {
+		font-size: 35px;
+		/* margin-left: 0px; */
+	}
+	#sidebar {
+		animation: none;
+		width: 80px;
+		height: 70%;
+	}
+	#sidebar-toggler {
+		transform: scale(.5) translate(-15px, -15px);
+		font-size: 30px;
+	}
+	#user-bar {
+		transform: scale(.8);
+	}
+	#conrols {
+		transform: scale(.4);
+	}
+	#sidebar ul li a {
+		font-size: 1rem;
+		width: 100%;
+		height: 27px;
+		color: white; 
+	}
+}
+@media screen and (max-height: 400px){
+	#sidebar {
+		height: 100%;
+	}
+}
+@media screen and (max-height: 450px){
+	#sidebar ul li a {
+		font-size: 1rem;
+		width: 100%;
+		height: 27px;
+		color: white; 
+	}
+}
+@media screen and (max-height: 300px){
+	
+	#sidebar ul li {
+		margin-bottom: 5px;
+	}
+}

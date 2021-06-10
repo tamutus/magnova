@@ -1,0 +1,47 @@
+{
+  "name": "magnova",
+  "version": "1.0.0",
+  "description": "Global issue explorer, network builder, and crowdsourced task-planner",
+  "main": "app.js",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "express-mongo-sanitize": "^2.0.2",
+    "express-session": "^1.17.1",
+    "method-override": "^3.0.0",
+    "mongoose": "^5.11.13",
+    "nodemon": "^2.0.7",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "passport-local-mongoose": "^6.1.0",
+    "path": "^0.12.7",
+    "serve-favicon": "^2.5.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "keybase://team/magnova/magnova"
+  },
+  "keywords": [
+    "civic",
+    "direct",
+    "crowdsourced",
+    "action",
+    "planning",
+    "global",
+    "issues",
+    "anarchism",
+    "communism",
+    "resistance",
+    "grassroots",
+    "participatory",
+    "democracy"
+  ],
+  "author": "Lavra Tamutus",
+  "license": "GPL-3.0-or-later"
+}

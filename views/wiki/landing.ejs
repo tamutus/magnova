@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/magnova.css">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/wiki.css">
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Poppins:wght@500&display=swap" rel="stylesheet">
+	<base href="/">
+	<title><%= title %></title>
+</head>
+<body>
+<%- include("../partials/navbar") %>
+<div id="allContent" class="expanded">
+    <div id="issue-browse">
+		<% topIssues.forEach(function(issue){ %>
+			<div class="issue-snapshot">
+				<a href="wiki/<%=issue._id%>">
+					<div class="issue-thumbnail"><img src="<%=issue.image%>"></div>
+					<h4 class=""><%=issue.name%></h4>
+				</a>
+			</div>
+		<% }); %>
+	</div>
+	
+	<div id="issue-submitter">
+		<h2 class="">
+			Identify an issue
+		</h2>	
+		<div id="issue-forms">
+			<form action="/issue" method="post">
+				<div class="form-group">
+					<input type="text" placeholder="Issue name" name="issue[name]">
+				</div>
+				<div class="form-group">
+					<input type="text" placeholder="Image URL" name="issue[image]">
+				</div>
+				<div class="form-group">
+					<textarea placeholder="Description" name="issue[info]"></textarea>
+				</div>
+				<button type="submit">
+					Submit
+				</button>
+			</form>
+		</div>
+	</div>
+</div>
+<script src="https://d3js.org/d3.v4.js"></script>
+<!-- <script src="scripts/wiki.js"></script> -->
+<script src="scripts/nav.js"></script>
+</body></html>

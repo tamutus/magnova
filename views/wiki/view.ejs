@@ -1,0 +1,50 @@
+<%- include("../partials/wikiHeader") %>
+
+    <div>
+        <h1><%= issue.name %></h1>
+        <img class="portrait" src=<%= `${issue.image}` %>>
+        <ul>
+        <li>
+            <h2>About</h2>
+            <%= issue.info %>
+        </li>
+        <% if(issue.creator){ %>
+            <li>Identified by <a href="<%= `users/${issue.creator.username}` %>"><%= issue.creator.username %></a></li>
+        <% } %>
+        <% if(currentUser) { %>
+            
+        <% } %>
+        <% if(issue.issues && issue.issues.edges.length > 0 ) { %>
+            <div id="connections">
+                <p>This issue breaks down into the following sub-issues.
+                <% if(currentUser) { %>
+                    If you agree that <%= issue.name %> is caused by a given issue below, press the "Sub-issue" button next to it. If you think they are not actually related, click the "Unrelated" button.
+                <% } else { %>
+                    (Registered users can upvote/downvote these connections.)
+                <% } %>
+                </p>
+                <% for(link of issue.issues.edges){ %>
+                    <div class="connection" id="issue-<%= link.vertex._id %>">
+                        <div class="link-info">
+                            <a href="<%= `wiki/${link.vertex._id}` %>"><%= link.vertex.name %></a>: <%= link.score %>
+                        </div>
+                        <% if(currentUser) { %>
+                            <div class="link-votes">
+                            </div>
+                        <% } %>
+                    </div>
+                <% } %>
+            </div>
+        <% } %>
+        <% let keys = ["name", "image", "info", "active", "path", "creationDate", "origin", "locations", "cost", "budget", "costNeeded", "talkPage", "issues", "projects", "tasks"]; %>
+        <% for(key of keys){ %>
+            <li><%= key %> : <%= issue[key] %></li>
+        <% } %>
+        </ul>
+    </div>
+    <a href=<%= `issue/delete/${issue._id}` %>><button>Delete issue</button></a>
+
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="scripts/wiki.js"></script>
+<%- include("../partials/footer") %>

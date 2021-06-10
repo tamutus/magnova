@@ -1,0 +1,97 @@
+#issue-submitter {
+    width: 500px;
+    margin: auto;
+}
+#issue-submitter h2 {
+    text-align: center;
+    margin: auto;
+}
+#issue-forms form {
+    width: 300px;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    align-content: center;
+    margin: auto;
+}
+#issue-submitter * .form-group{
+    width: 100%;
+}
+#issue-submitter * input, #issue-submitter * textarea {
+    width: 85%;
+    padding: 5px;
+    margin: 5px;
+    border-radius: 5px;
+}
+#issue-submitter * button {
+    width: 200px;
+}
+.issue-snapshot {
+    width: 200px;
+    height: 200px;
+    text-align: left;
+}
+.issue-thumbnail {
+    width: 200px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    align-content: center;
+    margin-bottom: 10px;
+}
+.issue-thumbnail img {
+    max-width: 200px;
+    max-height: 150px;
+    margin: auto;
+    border-radius: 10px;
+}
+.issue-snapshot a h4 {
+    margin: auto;
+    text-align: center;
+}
+#issue-browse {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    flex-flow: row wrap;
+    overflow: auto;
+}
+.portrait {
+    max-height: 500px;
+    max-width: 500px;
+}
+
+  /********************/
+ /* Wiki page styles */
+/********************/
+
+#connections {
+    display: flex;
+    max-height: 400px;
+    flex-flow: column nowrap;
+    align-items: center;
+    overflow-y: auto;
+    margin: 20px auto 30px auto;
+}
+.connection {
+    width: 500px;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-end;
+    margin: 8px auto;
+}
+.link-votes{
+    margin-left: 25px;
+}
+.link-votes button {
+    height: 35px;
+    padding: 0px 10px;
+}
+.upvote.up {
+    background-color: green;
+}
+.downvote.down {
+    background-color: red;
+}
