@@ -9,9 +9,9 @@
 //===========================//
 
 // Local testing
-const baseURL = "http://localhost:3000/";
+// const baseURL = "http://localhost:3000/";
 // Deployment
-// const baseURL = "https://magnova.herokuapp.com/"
+const baseURL = "https://magnova.herokuapp.com/"
 
 // Fetch all issues                 //* This will need to be refactored, obviously, to do specific searches on a fetch performed during 
 let nodes = [];
