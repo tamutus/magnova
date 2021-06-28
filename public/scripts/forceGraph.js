@@ -8,7 +8,10 @@
  // Establish base parameters //
 //===========================//
 
-const baseURL = "https://magnova.herokuapp.com/"
+// Local testing
+const baseURL = "http://localhost:3000/";
+// Deployment
+// const baseURL = "https://magnova.herokuapp.com/"
 
 // Fetch all issues                 //* This will need to be refactored, obviously, to do specific searches on a fetch performed during 
 let nodes = [];
@@ -89,6 +92,11 @@ loadButton.on("click", () => {
     loadButton.classed("pressed", !loadButton.classed("pressed"));
 });
 clearButton.on("click", () => {
+    issueSearchbar.classed("hidden", true);
+    linkButtons.classed("hidden", true);
+    toolwheel.classed("hidden", true);
+    activeNode = null;
+    activeLink = null;
     nodes = [];
     links = [];
     updateLinks();
@@ -143,7 +151,7 @@ function updateLinks(){
 
 function updateLinkSelections(){
     linkSelection = d3.select("#links").selectAll(".link") 
-        .data(links);                                               // ** Need to code identifiers for links
+        .data(links, d => `${d.source._id}*${d.target._id}`);                                               // ** Need to code identifiers for links
     linkBoxes = linkSelection.selectAll(".link-box");
     linkPaths = linkSelection.selectAll(".link-path");
 }
@@ -406,7 +414,7 @@ window.addEventListener('resize', updateSimDimensions);
 
 function dragStart(d) {
     // console.log("Start");
-    sim.alphaTarget(.5).restart();
+    sim.alphaTarget(.01).restart();
     d.fx = d.x;
     d.fy = d.y;
     issueSearchbar.classed("hidden",true);
@@ -559,6 +567,9 @@ async function tryLoad(issueID){
                 });
         }
         // Set the spawn point on the forcegraph here
+        if(activeNode){
+            console.log(d3.select(activeNode).attr("cx"));
+        }
         addedIssue.x = parseInt(svg.style("width"))/3;
         addedIssue.y = parseInt(svg.style("height"))/3;
         nodes.push(addedIssue); // transition this to a call to the API.
@@ -702,11 +713,9 @@ function displayTest(str){
 function saveLinksToCookie(){
     let linksString = "";
     for(link of links){
-        console.log(link);
         linksString += `#${link.source._id}@${link.target._id}`
     }
     document.cookie = `links=${linksString}`;
-    console.log(document.cookie);
 }
 function saveNodesToCookie(){
     let nodesString = "";
@@ -736,8 +745,6 @@ async function loadGraphFromCookie(){
         for(nodeID of nodeIDArray){
             await tryLoad(nodeID);
         }
-        console.log(cookieString);
-        console.log(nodesString);
     } 
     // Parse links from cookies
     let linksIndexInCookies = cookieString.indexOf("links=");
@@ -750,7 +757,6 @@ async function loadGraphFromCookie(){
             linksStaging = [];
         if(linksString.length > 0){
             linksString = linksString.slice(1);
-            console.log(linksString);
             linksStaging = linksString.split("#");
             for(link of linksStaging){
                 let newLink = link.split("@");
@@ -762,5 +768,4 @@ async function loadGraphFromCookie(){
         }
         
     }   
-    console.log(links);
 }

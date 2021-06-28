@@ -206,21 +206,22 @@ circle.link-vote {
     z-index: 3;
     min-height: 100px;
     max-height: 500px;
-    width: 200px;
+    min-width: 200px;
     display: flex;
     flex-flow: column nowrap;
-    overflow-y: scroll;
+    justify-content: start;
+    align-items: center;
+    overflow-y: auto;
     pointer-events: auto;
-    scrollbar-color: rgb(141, 141, 241);
 }
 .result {
     z-index: 5;
-	width: 90%;
+	width: 80%;
     text-align: center;
 	background-color: #c898ed;
 	border: none;
 	border-radius: 6px;
-    margin: 15px;
+    margin: 5px;
 }
 #issue-searchbar {
     position: fixed;

@@ -1,3 +1,7 @@
+:root {
+	--editorHeight: 0px;
+}
+
 #issue-submitter {
     width: 500px;
     margin: auto;
@@ -66,7 +70,45 @@
   /********************/
  /* Wiki page styles */
 /********************/
-
+#name-container {
+    display: flex;
+    width: 80%;
+    margin: 20px auto;
+    flex-flow: row nowrap;
+    justify-content: center;
+}
+.issue-name {
+    width: 100%;
+    display: inline-block;   
+    padding: 20px;
+    font-size: 50px;
+}
+input.issue-name {
+    width: 700px;
+}
+#image-container {
+    margin: 40px auto 20px auto;
+}
+#description {
+    display: flex;
+    flex-flow: row nowrap;
+    overflow: hidden;
+}
+#description-text-container {
+    width: 70vw;
+    margin-right: 10%;
+    margin-bottom: 30px;
+}
+#description-text {
+    width: 70vw;
+    white-space: pre-wrap;
+    text-align: justify;
+}
+#description-editor-container {
+    width: 1400px;
+    height: var(--editorHeight);
+    display: inline-block;
+}
 #connections {
     display: flex;
     max-height: 400px;
@@ -75,23 +117,126 @@
     overflow-y: auto;
     margin: 20px auto 30px auto;
 }
+#connections p {
+    margin-bottom: 30px;
+}
 .connection {
-    width: 500px;
+    width: 600px;
     display: flex;
     flex-flow: row nowrap;
     justify-content: flex-end;
     margin: 8px auto;
 }
+.link-info {
+    width: 275px;
+} 
 .link-votes{
     margin-left: 25px;
+    width: 300px;
+    display: flex;
+    flex-flow: row nowrap;
 }
 .link-votes button {
     height: 35px;
+    width: 130px;
     padding: 0px 10px;
+    margin: 5px 10px;
 }
 .upvote.up {
     background-color: green;
 }
 .downvote.down {
     background-color: red;
+}
+
+
+  /******************/
+ /* Editor styling */
+/******************/
+
+#image-input {
+    display: block;
+    width: 700px;
+    margin: 10px auto;
+    height: 1rem;
+}
+.mutable {
+    white-space: nowrap;
+    overflow: hidden;
+}
+.mutable, #description-editor-container, #description-text-container, #image-input {
+    transition: width .5s ease-in-out, border .5s ease-in-out, padding .5s ease-in-out, flex .5s ease-in-out, margin .5s ease-in-out, height .5s ease-in-out;
+}
+
+.mutable.hidden, #description-text-container.hidden, #cancel-button.hidden {
+    visibility: visible;
+    width: 0;
+    border-left: 0;
+    border-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+    overflow: hidden;
+}
+#description-editor-container {
+    transition: width .5s ease-in-out, height .5s ease-in-out;
+}
+#description-editor-container.hidden {
+    width: 0;
+    height: 0;
+}
+#image-input.hidden {
+    width: 0;
+}
+#issue-image {
+    transform-origin: top center;
+    transform: scale(1);
+    transition: transform .5s ease-in-out;
+}
+#issue-image.shrunk {
+    transform: scale(.9);
+}
+#editing-block {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-end;
+    justify-items: flex-end;
+    align-items: baseline;
+    margin-bottom: 30px;
+}
+#editing-block > * {
+    margin-right: 30px;
+}
+#return-message {
+    transform: scaleX(0);
+    border-radius: 4px;
+    background-color: rgb(49, 92, 47);
+    padding: 10px;
+}
+#return-message.revealed {
+    animation: flashMessage 10s;
+}
+@keyframes flashMessage {
+    0%, 100% {
+        transform: scale(0, 0);
+    }
+    5%, 95% {
+        transform: scale(.8, .8);
+    }
+    10%, 90% {
+        transform: scale(1, 1);
+    }
+}
+#edit-button, #cancel-button {
+    display: inline-block;
+    width: 125px;
+    transition: width .5s ease;
+    overflow: hidden;
+}
+#edit-button button, #cancel-button button {
+    width: 115px;
+}
+#cancel-button.hidden {
+    width: 0px;
 }

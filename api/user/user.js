@@ -13,6 +13,8 @@ var userSchema = new mongoose.Schema({
 		required: true,
 		unique: true
 	},
+	pfpLink: String,
+	bio: String,
 	issues: [{type: Schema.Types.ObjectId, ref: "Issue"}],
 	edgeVotes: [{ 
 		source: {type: Schema.Types.ObjectId, ref: "Issue"}, 
@@ -20,7 +22,9 @@ var userSchema = new mongoose.Schema({
 			target: {type: Schema.Types.ObjectId, ref: "Issue"},
 			vote: Boolean
 		}] 
-	}]
+	}],
+	badges: [{type: Schema.Types.ObjectId, ref: "Badge"}],
+	watching: [{type: Schema.Types.ObjectId, ref: "Issue"}]
 });
 userSchema.plugin(passportLocalMongoose);
 module.exports = mongoose.model("User", userSchema);
