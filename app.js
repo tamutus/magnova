@@ -64,9 +64,11 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use(function(req, res, next){
 	res.locals.currentUser = req.user;
+	res.locals.clientIP = req.headers["x-forwarded-for"]?.split(',').shift() || req.socket?.remoteAddress;
 	next();
 });
 app.use(function(req, res, next){
+	
 	if(String(req.path) != "/auth/login" && req.path != "/auth/register"){
 		req.session.returnTo = req.originalUrl;
 	}

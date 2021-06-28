@@ -28,7 +28,6 @@ router.get("/unpopulated/:name", (req, res) => {
                 res.status(404).end();
             }
             if(user && user.edgeVotes){
-                console.log(user);
                 res.send(user);
             }
             else{
@@ -45,7 +44,6 @@ router.get("/:name", (req, res) => {
                 res.status(404).redirect("/users/nobody");
             }
             if(user){
-                console.log(user);
                 res.render("users/viewUser", {
                     title: `${user.username}'s Profile`,
                     shownUser: user

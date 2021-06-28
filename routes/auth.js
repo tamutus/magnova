@@ -57,6 +57,46 @@ router.get("/register", (req, res) => {
         title: "Magnova User Registration"
     });
 });
+router.get("/my_data", (req, res) => {
+    User.findById(req.user._id, (err, user) => {
+        if(err){
+            res.send(`Couldn't find your data... ${err}`);
+        }
+        else {
+            res.send(user);
+        }
+    });
+    
+});
+router.put("/my_data", async (req, res) => {
+    const {preferredName, email, bio, pfpLink} = req.body;
+    // if(username.length == 0){
+    //     res.send("You sent in a blank username!");
+    // }
+    User.findById(req.user._id, async (err, user) => {
+        if(err){
+            console.log(err);
+        }
+        // else if(req.user.username != username){
+        //     User.find({username: username}, (err, otherUser) => {
+        //         if (otherUser.length > 0){
+        //             res.send("Sorry, that username has been taken");
+        //         }
+        //     });
+        // }
+        else{
+            // user.username = username; implementing username changes will require some modification of the middleware for serializing users
+            user.preferredName = preferredName;
+            user.bio = bio;
+            user.email = email;
+            user.pfpLink = pfpLink;
+            user.save();
+            let returnMessage = `Update successful!`;
+            console.log(returnMessage);
+            res.send(returnMessage);
+        }
+    });
+});
 router.post("/register", async (req, res) => {
     const {username, password, email} = req.body;
     lowercaseUsername = username.slice(0).toLowerCase();
@@ -87,7 +127,7 @@ router.post("/register", async (req, res) => {
             })
         }
     });
-})
+});
 router.get("/delete-user/:id", isLoggedIn, async (req, res) => {
     const user = await User.findById(req.params.id);
     if(!user.equals(req.user._id)){

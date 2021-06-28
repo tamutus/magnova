@@ -1,45 +1,68 @@
 <%- include("../partials/wikiHeader") %>
 
     <div>
-        <h1><%= issue.name %></h1>
-        <img class="portrait" src=<%= `${issue.image}` %>>
-        <ul>
-        <li>
-            <h2>About</h2>
-            <%= issue.info %>
-        </li>
-        <% if(issue.creator){ %>
-            <li>Identified by <a href="<%= `users/${issue.creator.username}` %>"><%= issue.creator.username %></a></li>
-        <% } %>
-        <% if(currentUser) { %>
-            
-        <% } %>
-        <% if(issue.issues && issue.issues.edges.length > 0 ) { %>
-            <div id="connections">
-                <p>This issue breaks down into the following sub-issues.
-                <% if(currentUser) { %>
-                    If you agree that <%= issue.name %> is caused by a given issue below, press the "Sub-issue" button next to it. If you think they are not actually related, click the "Unrelated" button.
-                <% } else { %>
-                    (Registered users can upvote/downvote these connections.)
-                <% } %>
-                </p>
-                <% for(link of issue.issues.edges){ %>
-                    <div class="connection" id="issue-<%= link.vertex._id %>">
-                        <div class="link-info">
-                            <a href="<%= `wiki/${link.vertex._id}` %>"><%= link.vertex.name %></a>: <%= link.score %>
-                        </div>
-                        <% if(currentUser) { %>
-                            <div class="link-votes">
-                            </div>
-                        <% } %>
-                    </div>
-                <% } %>
+        <div id="name-container">
+            <h1 class="issue-name mutable data"><%= issue.name %></h1>
+        </div>
+        <div id="image-container">
+            <img id="issue-image" class="portrait" src=<%= `${issue.image}` %>>
+        </div>
+        <% if(currentUser){ %>
+            <div id="editing-block">
+                <span id="return-message"></span>
+                <a id="edit-button" onclick="toggleEditing();"><button>Edit page</button></a>
+                <a id="cancel-button" onclick="stopEditing();" class="hidden"><button>Cancel</button></a>
             </div>
         <% } %>
+        <ul>
+        <li id="about">
+            <h2>About</h2>
+            <div id="description">
+                <div id="description-text-container" class="mutable data">
+                    <div id="description-text"><%- issue.info %></div>
+                </div>
+                <% if(currentUser){ %>
+                    <form id="description-editor-container" name="description-form" class="hidden mutable">
+                        <input type="text" id="description-editor" name="description-html"></input>
+                    </form>
+                <% } %>
+            </div>
+        </li>
+        <li id="issues">
+            <h2>Related Issues</h2>
+            <% if(issue.creator){ %>
+                <li>Identified by <a href="<%= `users/${issue.creator.username}` %>"><%= issue.creator.username %></a></li>
+            <% } %>
+            <% if(currentUser) { %>
+                
+            <% } %>
+            <% if(issue.issues && issue.issues.edges.length > 0 ) { %>
+                <div id="connections">
+                    <p>The Magnova community says this issue breaks down into the following sub-issues.
+                    <% if(currentUser) { %>
+                        If you agree that <%= issue.name %> is caused by a given issue below, press the "Sub-issue" button next to it. If you think they are not actually related, click the "Unrelated" button.
+                    <% } else { %>
+                        (Registered users can upvote/downvote these connections.)
+                    <% } %>
+                    </p>
+                    <% for(link of issue.issues.edges){ %>
+                        <div class="connection" id="issue-<%= link.vertex._id %>">
+                            <div class="link-info">
+                                <a href="<%= `wiki/${link.vertex._id}` %>"><%= link.vertex.name %></a>: <%= link.score %>
+                            </div>
+                            <% if(currentUser) { %>
+                                <div class="link-votes">
+                                </div>
+                            <% } %>
+                        </div>
+                    <% } %>
+                </div>
+            <% } %>
         <% let keys = ["name", "image", "info", "active", "path", "creationDate", "origin", "locations", "cost", "budget", "costNeeded", "talkPage", "issues", "projects", "tasks"]; %>
         <% for(key of keys){ %>
             <li><%= key %> : <%= issue[key] %></li>
         <% } %>
+        <p class="hidden issueID"><%= issue._id %></p>
         </ul>
     </div>
     <a href=<%= `issue/delete/${issue._id}` %>><button>Delete issue</button></a>
@@ -47,4 +70,6 @@
 
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="scripts/wiki.js"></script>
+<script src="https://cdn.tiny.cloud/1/f7o04qadc9hhjre2my3ep3ae1qdzax2od04t9ncrm7wold54/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="scripts/wikiEditor.js"></script>
 <%- include("../partials/footer") %>

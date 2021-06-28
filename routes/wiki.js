@@ -46,5 +46,26 @@ router.get('/:id', (req, res) => {
 			});
 		});
 });
+router.put("/:id", (req, res) => {
+	const {name, info, image} = req.body;
+    // if(username.length == 0){
+    //     res.send("You sent in a blank username!");
+    // }
+    Issue.findById(req.params.id, async (err, issue) => {
+        if(err){
+            console.log(err);
+        }
+        else{
+            // user.username = username; implementing username changes will require some modification of the middleware for serializing users
+            issue.name = name;
+            issue.info = info;
+            issue.image = image;
+            issue.save();
+            let returnMessage = `Update successful!`;
+            console.log(returnMessage);
+            res.send(returnMessage);
+        }
+    });
+})
 
 module.exports = router;
