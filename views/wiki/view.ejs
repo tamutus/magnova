@@ -27,15 +27,12 @@
                     </form>
                 <% } %>
             </div>
-        </li>
-        <li id="issues">
-            <h2>Related Issues</h2>
             <% if(issue.creator){ %>
                 <li>Identified by <a href="<%= `users/${issue.creator.username}` %>"><%= issue.creator.username %></a></li>
             <% } %>
-            <% if(currentUser) { %>
-                
-            <% } %>
+        </li>
+        <li id="issues">
+            <h2>Related Issues</h2>
             <% if(issue.issues && issue.issues.edges.length > 0 ) { %>
                 <div id="connections">
                     <p>The Magnova community says this issue breaks down into the following sub-issues.

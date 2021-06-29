@@ -304,31 +304,33 @@ function initializeSim(){
                                 .strength(.01)
             )
         .force('collision', d3.forceCollide().radius(nodeSize + 10))
-        .on("tick", () => {
-            nodeSelection
-                .attr("cx", d => d.x)
-                .attr("cy", d => d.y);
-            nodeTextSelection
-                .attr("x", d => d.x - nodeSize)
-                .attr("y", d => d.y - nodeSize);
-            linkBoxes
-                .attr("x1", d => d.source.x)
-                .attr("y1", d => d.source.y)
-                .attr("x2", d => d.target.x)
-                .attr("y2", d => d.target.y);
-            linkPaths
-                .attr("x1", d => d.source.x)
-                .attr("y1", d => d.source.y)
-                .attr("x2", d => d.target.x)
-                .attr("y2", d => d.target.y);
-            if(activeLink){
-                activeLinkCoords.x = (activeLink.source.x + activeLink.target.x) / 2;
-                activeLinkCoords.y = (activeLink.source.y + activeLink.target.y) / 2;
-                linkButtons
-                    .attr("transform", `translate(${activeLinkCoords.x}, ${activeLinkCoords.y})`);
-            }
-        });
+        .on("tick", ticked);
 }
+function ticked(){
+    nodeSelection
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y);
+    nodeTextSelection
+        .attr("x", d => d.x - nodeSize)
+        .attr("y", d => d.y - nodeSize);
+    linkBoxes
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+    linkPaths
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+    if(activeLink){
+        activeLinkCoords.x = (activeLink.source.x + activeLink.target.x) / 2;
+        activeLinkCoords.y = (activeLink.source.y + activeLink.target.y) / 2;
+        linkButtons
+            .attr("transform", `translate(${activeLinkCoords.x}, ${activeLinkCoords.y})`);
+    }
+}
+
 function updateSimData(){
     sim.nodes(nodes, d => d.name);
     // sim.on("tick", () => {
@@ -407,6 +409,7 @@ async function loadLastGraph(){
     updateNodes();
     updateLinks();
     updateSimData();
+    sim.on("tick", ticked);
 }
 
 
@@ -764,6 +767,7 @@ async function loadGraphFromCookie(){
                     source: newLink[0],
                     target: newLink[1]
                 });
+                updateSimData();
             }
         }
         
