@@ -6,7 +6,9 @@ const baseURL = "http://localhost:3000/"
 
 let connections = d3.select("#connections").selectAll(".connection"),
     loggedIn = document.querySelector("#username"),
-    currentIssueID = window.location.pathname.slice(6);
+    issueSearchbar = d3.select("#issue-searchbar"),
+    issueToLink = issueSearchbar.select("input");
+const currentIssueID = window.location.pathname.slice(6);
 
 // console.log(connections, votes, upvotes);
 let currentUser, edgeVotes;
@@ -61,25 +63,79 @@ async function loadVotes(){
         // Get the current user's edgevotes for this issue
         
         let edgeVotes = currentUser.edgeVotes.find(edgeSet => edgeSet.source == currentIssueID);
-        for(edge of edgeVotes.targets){
-            let t = "#issue-" + edge.target;
-            let toColor = d3.select(t);
-            let upvote = toColor.select(".link-votes").select(".upvote"),
-                downvote = toColor.select(".link-votes").select(".downvote");
-            if(edge.vote){
-                upvote.classed("up", true);
-                downvote.classed("down", false);
-            } else {
-                upvote.classed("up", false);
-                downvote.classed("down", true);
+        if(edgeVotes){
+            for(edge of edgeVotes.targets){
+                let t = "#issue-" + edge.target;
+                let toColor = d3.select(t);
+                let upvote = toColor.select(".link-votes").select(".upvote"),
+                    downvote = toColor.select(".link-votes").select(".downvote");
+                if(edge.vote){
+                    upvote.classed("up", true);
+                    downvote.classed("down", false);
+                } else {
+                    upvote.classed("up", false);
+                    downvote.classed("down", true);
+                }
             }
         }
-
     }
     
 }
+let issues = [];
+getIssues();
+function getIssues(){
+    fetch(baseURL + "issue/all")
+        .then(res => handleErrors(res))
+        .then(res => res.json())
+        .then(res => issues = res)
+        .catch(err => {
+            console.log(err)
+        });
+}
+    
 
+// Issue linker stuff
 
+issueToLink.on("input", issueLinkSearch);
+document.querySelector("#issue-searchbar input").addEventListener("keyup", event => {
+    if(event.code === "Enter"){
+        tryLink();
+    }
+});
+let issueSearchResults;
+
+function issueLinkSearch(){
+    let input = String(issueSearchbar.select("input").property("value"));
+    let results = issueSearch(input);
+    issueSearchResults = d3.select("#found-link-issues").selectAll(".result")
+        .data(results, issue => issue.name);
+    issueSearchResults
+        .exit()
+            .remove();
+    issueSearchResults
+        .enter()
+        .append("div")
+            .classed("result", true)
+            .text(issue => issue.name)
+            .on("click", issue => setLink(d3.select(activeNode).datum()._id, issue._id));
+}
+
+function issueSearch(input){
+    if(input){
+        return issues.filter(issue => {
+            return issue.name.toLowerCase().includes(input.toLowerCase());
+        });
+    }
+    else return [];
+}
+
+function toggleIssueSearchbar(){
+    issueSearchbar.classed("hidden", !issueSearchbar.classed("hidden"));
+}
+
+// document.querySelector("#issue-searchbar input").focus();
+
+// General functions
 
 async function upvoteLink(sourceID, targetID) {
     await fetch(`${baseURL}issue/link/${sourceID}/${targetID}`, {

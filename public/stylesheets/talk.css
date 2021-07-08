@@ -1,0 +1,126 @@
+:root {
+    --editorHeight: 0px;
+}
+
+#new-thread-zone {
+    margin: 40px auto;
+}
+#threads {
+    
+}
+.threader {
+
+}
+.thread {
+    display: flex;
+    flex-flow: row wrap;
+    text-align: left;
+    width: 80%;
+    height: 150px;
+    margin: 20px auto;
+    padding: 30px;
+    background-color: rgb(97, 63, 124);
+    border-radius: 30px;
+    cursor: zoom-in;
+}
+#thread-title {
+    margin-left: 50px;
+}
+.comment{
+    background-color:rgb(24, 100, 201);
+    width: 90%;
+    margin: 15px auto;
+    padding: 30px;
+    border-radius: 20px;
+    display: flex;
+    flex-flow: row nowrap;
+}
+.first-comment {
+    background-color:rgb(225, 199, 247);
+    flex-basis: 1 1 30%;
+    margin: 1%;
+    height: 90%;
+}
+.last-comment{
+    background-color:rgb(225, 199, 247);
+    flex: 1 1 30%;
+    margin: 1%;
+    height: 90%;
+}
+.comment-author {
+    width: 300px;
+    background-color: rgb(18, 18, 114);
+    border-radius: 5px;
+    padding: 20px;
+}
+.comment-text {
+    flex-basis: 6 1 80%;
+    text-align: left;
+    margin-left: 50px;
+}
+.pfp {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+#comment-container {
+    margin: 50px 50px 0px 50px;
+    display: flex;
+    flex-flow: row wrap;
+}
+#comment-box {
+    flex: 7 1 70%;
+    height: var(--editorHeight);
+    margin-right: 50px;
+}
+div.tox.tox-tinymce {
+    width: 100%;
+    border-radius: 10px;
+}
+#tinymce {
+    cursor: text;
+}
+#comment-submitter {
+    flex: 1 1 250px;
+    height: 150px;
+}
+.thread:nth-child(even) {
+    background-color:rgb(71, 42, 95)
+}
+#thread-viewer {
+    display: block;
+    position: absolute;
+    top: 150px;
+    left: 5%;
+    width: 90%;
+    min-height: 500px;
+    background-color: rgb(58, 128, 219);
+    border-radius: 20px;
+    transform: scale(1);
+    transition: transform .4s ease;
+}
+#thread-viewer.hidden {
+    transform: scale(0);
+}
+#thread-contents {
+    transition: height .5s ease;
+    padding-bottom: 50px;
+}
+.viewer-backdrop {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    content: ' ';
+    background-color: rgba(213, 104, 235, 0.5);
+    opacity: 1;
+    transition: opacity .7s ease;
+    cursor: zoom-out;
+  }
+.viewer-backdrop.hidden {
+    opacity: 0;
+    pointer-events: none;
+}

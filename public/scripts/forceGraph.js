@@ -8,10 +8,7 @@
  // Establish base parameters //
 //===========================//
 
-// Local testing
-// const baseURL = "http://localhost:3000/";
-// Deployment
-const baseURL = "https://magnova.herokuapp.com/"
+const baseURL = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/";
 
 // Fetch all issues                 //* This will need to be refactored, obviously, to do specific searches on a fetch performed during 
 let nodes = [];
@@ -772,4 +769,15 @@ async function loadGraphFromCookie(){
         }
         
     }   
+}
+  //=====================//
+ // Sub-window handling //
+//=====================//
+
+function showcase(div){
+    d3.select(div).classed("showcased", true)
+
+}
+function deShowcase(div){
+    d3.select(div).classed("showcased", false)
 }

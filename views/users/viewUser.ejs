@@ -67,7 +67,7 @@
 <h2>
     Issues <%= shownUser.preferredName %> has identified:
 </h2>    
-<ul>
+<ul id="identified-issues">
     <% for(issue of shownUser.issues){ %>
         <li><a href=<%= `wiki/${issue._id}` %>><%= issue.name %></a></li>
     <% } %>
@@ -79,4 +79,10 @@
     
 <% } %>
 
+<h2>
+    Recent forum activity
+</h2>
+    <% for(let i = 0; i < 3 && i < shownUser.comments.length; i++) { %>
+        <div class="comment"><%= shownUser.comments[shownUser.comments.length - i -1 ].text %></div>
+    <% } %>
 <%- include("../partials/footer") %>

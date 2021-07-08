@@ -8,14 +8,21 @@ const express = require('express'),
 
 // Mongoose model imports
 const 	User = require('../api/user/user'),
-		Issue = require('../api/issue/issue.model'),
-		Issuegraph = require("../api/issuegraph/issuegraph.model");
+		Issue = require('../api/issue/issue.template'),
+		Issuegraph = require("../api/issue/issue.graph"),
+        Project = require("../api/project/project.template"),
+        Projectgraph = require("../api/project/project.graph"),
+        Taskgraph = require("../api/task/task.graph"),
+        Harm = require("../api/issue/harm.model"),
+        Resource = require("../api/resources/resource.model"),
+        Tag = require("../api/tags/tag.model"),
+        Talkpage = require("../api/comments/talkpage.model"),
+        Location = require("../api/maps/location.model");
 
 router.post("/", isLoggedIn, (req, res) => {
 	const newIssue = req.body.issue;
-	newIssue.creator = req.user._id;
+	newIssue.identifier = req.user._id;
     newIssue.path = encodeURIComponent(newIssue.name);
-    console.log(encodeURIComponent(newIssue.name));
 	Issue.findOne({name: newIssue.name}, (err, existing) => {
 		if(err){
 			console.log(err);
@@ -27,54 +34,91 @@ router.post("/", isLoggedIn, (req, res) => {
 					console.log(err);
 					return res.redirect("back");
 				}
-				Issue.create(newIssue, async (err, issue)=>{
-					if(err){
-						console.log(err);
-						return res.redirect("back");
-					}
-					user.issues.push(issue._id);
-					await user.save();
-					Issuegraph.create({root: issue._id}, async (err, issuegraph) => {
-						if(err){
-							console.log(err);
-						}
-						issue.issues = issuegraph._id;
-						await issue.save();
-						return res.redirect(`/wiki/${issue._id}`);
-					});
-				});
+                else{
+                    Issue.create(newIssue, async (err, issue)=>{
+                        if(err){
+                            console.log(err);
+                            return res.redirect("back");
+                        }
+                        else {
+                            user.issues.push(issue._id);
+                            await user.save();
+                            Issuegraph.create({root: issue._id, rootType: "Issue"}, (err, issuegraph) => {
+                                if(err){
+                                    console.log(err);
+                                }
+                                else{
+                                    issue.issues = issuegraph._id;
+                                    Projectgraph.create({ root: issue._id, rootType: "IssueTemplate"}, (err, projectgraph) => {
+                                        if(err) {
+                                            console.log(`Trouble creating projectgraph for an issue: ${err}`);
+                                        }
+                                        else {
+                                            issue.projects = projectgraph._id;
+                                            Talkpage.create({root: issue._id, rootType: "IssueTemplate"}, (err, talkpage) => {
+                                                if(err){
+                                                    console.log(`Trouble creating talkpage for issue: ${err}`);
+                                                }
+                                                else{
+                                                    issue.talkpage = talkpage._id;
+                                                    issue.save();
+                                                    return res.redirect(`/wiki/${issue._id}`);
+                                                }
+                                            });   
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
 			});
 		}
-		return res.redirect("back");
+		else{ return res.redirect("back");}
 	});
 });
 
-router.delete("/resetlinks", async (req, res) => {
-	await Issuegraph.find({}, (err, graphs) => {
-		if(err){
-			console.log(err);
-			return res.send(err);
-		}
-		for(graph of graphs){
-			graph.edges = [];
-			graph.save();
-		}
-		console.log(graphs);
-	});
-	User.find({}, (err, users) => {
-		if(err){
-			console.log(err);
-			return res.send(err);
-		}
-		for(user of users){
-			user.edgeVotes = [];
-			user.save();
-		}
-		console.log(users);
-		res.send("Done");
-	});
-});
-
+// router.delete("/resetlinks", async (req, res) => {
+// 	await Issuegraph.find({}, (err, graphs) => {
+// 		if(err){
+// 			console.log(err);
+// 			return res.send(err);
+// 		}
+// 		for(graph of graphs){
+// 			graph.edges = [];
+// 			graph.save();
+// 		}
+// 		console.log(graphs);
+// 	});
+// 	User.find({}, (err, users) => {
+// 		if(err){
+// 			console.log(err);
+// 			return res.send(err);
+// 		}
+// 		for(user of users){
+// 			user.edgeVotes = [];
+// 			user.save();
+// 		}
+// 		console.log(users);
+// 		res.send("Done");
+// 	});
+// });
+// router.put("/updateissuegraphs", async (req, res) => {
+//     require('mongoose').model('Issuegraph').schema.add({rootType: String});
+//     await Issuegraph.find({}, async (err, issuegraphs) => {
+//         if(err){
+//             console.log(err);
+//             return res.send("Error finding all issuegraphs to update: " + err);
+//         }
+//         for(issuegraph of issuegraphs){
+//             if(!issuegraph.rootType){ 
+//                 issuegraph.rootType = "Issue"; 
+//                 await issuegraph.save();
+//             }
+//             console.log(issuegraph.rootType);
+//         }
+//     });
+// });
 router.put("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
 	// First, make sure the issues are in the database.
 	Issue.findById(req.params.rootid)

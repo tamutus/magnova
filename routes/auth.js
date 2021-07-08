@@ -37,11 +37,18 @@ router.get("/emailtaken/:email", (req, res) => {
 });
 router.get("/login", (req, res) => {
     res.render("auth/login", {
-        title: "Magnova — Log in"
+        title: "Magnova — Log in",
+        referer: req.headers.referer
     });
 });
 router.post("/login", usernameToLowerCase, passport.authenticate("local", {failureRedirect: "/auth/login"}), (req, res) => {
-    res.redirect(req.session.returnTo || '/nexus');     //this variable, req.sesson.returnTo, is captured for every visited page in app.js middleware
+    if (req.body.referer && (req.body.referer !== undefined && req.body.referer.slice(-11) !== "/auth/login" && req.body.referer.slice(-14) !== "/auth/register")) {
+        res.redirect(req.body.referer);
+    }
+    else{
+        res.redirect("/nexus");
+    }
+    // res.redirect(req.session.returnTo || '/nexus');     //this variable, req.sesson.returnTo, is captured for every visited page in app.js middleware
 })
 router.get("/loggedin", (req, res) => {
     res.render("auth/loggedin", {

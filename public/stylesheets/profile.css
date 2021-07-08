@@ -328,3 +328,30 @@ h2 {
         margin-top: -225px;
     }
 }
+#identified-issues {
+    max-height: 600px;
+    overflow: auto;
+    max-width: 40%;
+    margin-left: 100px;
+    background-color: rgb(80, 56, 99);
+    padding: 40px 20px 40px 70px;
+    border-radius: 40px;
+}
+#comments {
+    background-color:rgb(24, 100, 201);
+    width: 90%;
+    margin: 15px auto;
+    padding: 30px;
+    border-radius: 20px;
+    display: flex;
+    flex-flow: row wrap;
+}
+.comment {
+    background-color:rgb(24, 100, 201);
+    flex-basis: 30%;
+    margin: 15px auto;
+    padding: 30px;
+    border-radius: 20px;
+    display: flex;
+    flex-flow: row nowrap;
+}

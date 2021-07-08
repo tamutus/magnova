@@ -14,38 +14,49 @@
 <body>
 <%- include("../partials/navbar") %>
 <div id="allContent" class="expanded">
-    <div id="issue-browse">
-		<% topIssues.forEach(function(issue){ %>
-			<div class="issue-snapshot">
-				<a href="wiki/<%=issue._id%>">
-					<div class="issue-thumbnail"><img src="<%=issue.image%>"></div>
-					<h4 class=""><%=issue.name%></h4>
-				</a>
-			</div>
-		<% }); %>
-	</div>
-	
-	<div id="issue-submitter">
-		<h2 class="">
-			Identify an issue
-		</h2>	
-		<div id="issue-forms">
-			<form action="/issue" method="post">
-				<div class="form-group">
-					<input type="text" placeholder="Issue name" name="issue[name]">
+    <section id="issues">
+		<h2>Issues</h2>
+		<p></p>
+		<div id="issue-browse">
+			<% topIssues.forEach(function(issue){ %>
+				<div class="issue-snapshot">
+					<a href="wiki/<%=issue._id%>">
+						<div class="issue-thumbnail"><img src="<%=issue.image%>"></div>
+						<h4 class=""><%=issue.name%></h4>
+					</a>
 				</div>
-				<div class="form-group">
-					<input type="text" placeholder="Image URL" name="issue[image]">
-				</div>
-				<div class="form-group">
-					<textarea placeholder="Description" name="issue[info]"></textarea>
-				</div>
-				<button type="submit">
-					Submit
-				</button>
-			</form>
+			<% }); %>
 		</div>
-	</div>
+		
+		<div id="issue-submitter">
+			<h2>
+				Identify an issue
+			</h2>	
+			<div id="issue-forms">
+				<form action="/issue" method="post">
+					<div class="form-group">
+						<input type="text" placeholder="Issue name" name="issue[name]">
+					</div>
+					<div class="form-group">
+						<input type="text" placeholder="Image URL" name="issue[image]">
+					</div>
+					<div class="form-group">
+						<textarea placeholder="Description" name="issue[info]"></textarea>
+					</div>
+					<button type="submit">
+						Submit
+					</button>
+				</form>
+			</div>
+		</div>
+	</section>
+	<section id="projects">
+		<h2>Projects</h2>
+		<p></p>
+	</section>
+	<section id="actions">
+		<h2>Actions</h2>
+	</section>
 </div>
 <script src="https://d3js.org/d3.v4.js"></script>
 <!-- <script src="scripts/wiki.js"></script> -->

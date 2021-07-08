@@ -1,23 +1,32 @@
-'use strict';
+const mongoose = require("mongoose"),
+      Schema = mongoose.Schema;
 
-var mongoose = require('mongoose'),
-    Schema = mongoose.Schema;
-
-var ProjectSchema = new Schema({
-  name: String,
-  info: String,
-  active: Boolean,
-  path: String,
-  creator: String,
-  creationDate: {type: Date, default: Date.now},
-  template: {type: Schema.Types.ObjectId, ref: "Template"},
-  location: {type: Schema.Types.ObjectId, ref: "Location"},
-  budget: Number,
-  costNeeded: Number,
-  talkPage: {type: Schema.Types.ObjectId, ref: 'Talkpage'},
-  issues: {type: Schema.Types.ObjectId, ref: 'Issuegraph' },
-  tasks: {type: Schema.Types.ObjectId, ref: 'Taskgraph' },
-  deadline: Date
+const LocalProjectSchema = new Schema({
+    template: {type: Schema.Types.ObjectId, ref: "ProjectTemplate"},
+    localInfo: String,
+    image: String,
+    location: {type: Schema.Types.ObjectId, ref: "Location"},
+    localizer: {type: Schema.Types.ObjectId, ref: "User"},
+    localizationDate: {type: Date, default: Date.now},
+    editors: [{type: Schema.Types.ObjectId, ref: "User"}],
+    talkpage: {type: Schema.Types.ObjectId, ref: "Talkpage"},
+    volunteers: [{
+        user: {type: Schema.Types.ObjectId, ref: "User"}, 
+        signupDate: {type: Date, default: Date.now},
+        hoursVolunteered: Number
+    }],
+    harms: [{
+        form: {type: Schema.Types.ObjectId, ref: "Harm"},
+        degree: Number
+    }],
+    resources: [{
+        form: {type: Schema.Types.ObjectId, ref: "Resource"}, 
+        needed: Number,
+        received: {type: Number, default: 0},
+    }],
+    localTasks: [{type: Schema.Types.ObjectId, ref: "LocalTask"}],
+    deadline: Date,
+    isComplete: {type: Boolean, default: false}
 });
 
-module.exports = mongoose.model('Project', ProjectSchema);
+module.exports = mongoose.model("LocalProject", LocalProjectSchema);

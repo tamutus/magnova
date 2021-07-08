@@ -1,3 +1,9 @@
+// TO DO
+// Change serialize and deserialize user functions so username can be changed
+//      https://stackoverflow.com/questions/24023443/passport-local-mongoose-when-i-update-a-records-username-im-logged-out-why
+
+
+
 let editing = false,
     styleVars = document.documentElement;
 

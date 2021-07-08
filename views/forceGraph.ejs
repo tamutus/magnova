@@ -30,6 +30,27 @@
 		<input type="text">
 		<div id="found-link-issues"></div>
 	</div>
+	<div id="issue-submitter" class="hidden">
+		<h2>
+			Identify an issue
+		</h2>	
+		<div id="issue-forms">
+			<form action="/issue" method="post">
+				<div class="form-group">
+					<input type="text" placeholder="Issue name" name="issue[name]">
+				</div>
+				<div class="form-group">
+					<input type="text" placeholder="Image URL" name="issue[image]">
+				</div>
+				<div class="form-group">
+					<textarea placeholder="Description" name="issue[info]"></textarea>
+				</div>
+				<button type="submit">
+					Submit
+				</button>
+			</form>
+		</div>
+	</div>
 	<svg id="force-graph" xmlns="http://www.w3.org/1999/xhtml">
 		<g id="links"></g>
 		<g id="nodes"></g>

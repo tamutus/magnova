@@ -2,6 +2,9 @@
 	--editorHeight: 0px;
 }
 
+#hidden-issue-id {
+    display: none;
+}
 #issue-submitter {
     width: 500px;
     margin: auto;
@@ -58,8 +61,9 @@
     height: 200px;
     display: flex;
     align-items: flex-start;
+    align-content: flex-end;
     justify-content: flex-start;
-    flex-flow: row wrap;
+    flex-flow: row wrap-reverse;
     overflow: auto;
 }
 .portrait {
@@ -102,20 +106,99 @@ input.issue-name {
 #description-text {
     width: 70vw;
     white-space: pre-wrap;
-    text-align: justify;
+    text-align: left;
 }
 #description-editor-container {
     width: 1400px;
     height: var(--editorHeight);
     display: inline-block;
 }
+#connections-container {
+    width: 90%;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    margin: 30px auto;
+}
+.result {
+    z-index: 5;
+	width: 80%;
+    text-align: center;
+	background-color: #c898ed;
+	border: none;
+	border-radius: 6px;
+    margin: 5px;
+}
+#issue-searchbar {
+    /* position: fixed; */
+    flex-basis: 4 1 40%;
+    display: flexbox;
+    min-height: 100px;
+    max-height: 500px;
+    right: 6vw;
+    top: 8vh;
+    justify-content: space-around;
+    align-items: center;
+    font-size: 15px;
+    text-align: center;
+    background-color: rgb(141, 141, 241);
+    border-radius: 10px;
+    z-index: 3;
+    transform-origin: top right;
+    transition: transform .5s ease;
+}
+#issue-searchbar.hidden {
+    width: 0;
+    overflow: hidden;
+}
+.searchbar-heading {
+    min-height: 40px;
+    max-height: 80px;
+}
+#issue-searchbar > div {
+    background-color: rgb(168, 168, 241);
+    margin: 5px auto;
+    padding: 5px;
+    border-radius: 5px;
+}
+#issue-searchbar input {
+    width: 80%;
+    height: 40px;
+    margin: 10px auto;
+}
+#issue-searchbar button {
+    font-size: 18px;
+    height: 1.5em;
+    width: 80%;
+    margin: 10px auto 20px auto;
+}
+#found-link-issues {
+    height: 320px;
+    width: 90%;
+    overflow-y: scroll;
+    background-color:rgb(33, 33, 143);
+}
+#found-link-issues div.result {
+    /* background-color: rgb(190, 190, 245); */
+    padding: 7px;
+    margin: 10px auto;
+    border-radius: 3px;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
 #connections {
+    flex-basis: 6 1 60%;
     display: flex;
     max-height: 400px;
     flex-flow: column nowrap;
     align-items: center;
     overflow-y: auto;
-    margin: 20px auto 30px auto;
+    /* margin: 20px auto 30px auto; */
 }
 #connections p {
     margin-bottom: 30px;
@@ -239,4 +322,12 @@ input.issue-name {
 }
 #cancel-button.hidden {
     width: 0px;
+}
+#discussion-block {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-end;
+    justify-items: flex-end;
+    align-items: baseline;
+    margin-bottom: 30px;
 }

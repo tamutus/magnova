@@ -1,5 +1,5 @@
 <%- include("../partials/wikiHeader") %>
-
+<span id="hidden-issue-id"><%= issue._id %></span>
     <div>
         <div id="name-container">
             <h1 class="issue-name mutable data"><%= issue.name %></h1>
@@ -12,6 +12,9 @@
                 <span id="return-message"></span>
                 <a id="edit-button" onclick="toggleEditing();"><button>Edit page</button></a>
                 <a id="cancel-button" onclick="stopEditing();" class="hidden"><button>Cancel</button></a>
+            </div>
+            <div id="discussion-block">
+                <a href="<%= `/talk/${issue.talkpage}` %>"><button>Discuss this issue</button></a>
             </div>
         <% } %>
         <ul>
@@ -27,21 +30,22 @@
                     </form>
                 <% } %>
             </div>
-            <% if(issue.creator){ %>
-                <li>Identified by <a href="<%= `users/${issue.creator.username}` %>"><%= issue.creator.username %></a></li>
-            <% } %>
         </li>
+        <% if(issue.identifier){ %>
+            <li id="identification">This issue was first identified by <a href="<%= `users/${issue.identifier.username}` %>"><%= issue.identifier.username %></a> on <%= new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric'}).format(issue.identificationDate) %></li>
+        <% } %>
         <li id="issues">
             <h2>Related Issues</h2>
             <% if(issue.issues && issue.issues.edges.length > 0 ) { %>
-                <div id="connections">
-                    <p>The Magnova community says this issue breaks down into the following sub-issues.
-                    <% if(currentUser) { %>
-                        If you agree that <%= issue.name %> is caused by a given issue below, press the "Sub-issue" button next to it. If you think they are not actually related, click the "Unrelated" button.
-                    <% } else { %>
-                        (Registered users can upvote/downvote these connections.)
-                    <% } %>
-                    </p>
+                <p>The Magnova community says this issue breaks down into the following sub-issues.
+                <% if(currentUser) { %>
+                    If you agree that <%= issue.name %> is caused by a given issue below, press the "Sub-issue" button next to it. If you think they are not actually related, click the "Unrelated" button.
+                <% } else { %>
+                    (Registered users can upvote/downvote these connections.)
+                <% } %>
+                </p>
+                <div id="connections-container">
+                    <div id="connections">
                     <% for(link of issue.issues.edges){ %>
                         <div class="connection" id="issue-<%= link.vertex._id %>">
                             <div class="link-info">
@@ -53,16 +57,25 @@
                             <% } %>
                         </div>
                     <% } %>
+                    </div>
+                    <% if(currentUser) { %>
+                        <div id="issue-searchbar">
+                            <div class="searchbar-heading">Add link from <span id="link-source"><%= issue.name %></span> to:</div>
+                            <input type="text">
+                            <div id="found-link-issues"></div>
+                        </div>
+                    <% } %>
                 </div>
             <% } %>
-        <% let keys = ["name", "image", "info", "active", "path", "creationDate", "origin", "locations", "cost", "budget", "costNeeded", "talkPage", "issues", "projects", "tasks"]; %>
+        <h2>Backend Data</h2>
+        <% let keys = ["name", "image", "info", "active", "identifier", "identificationDate", "editors", "talkpage", "harms", "resources", "instances", "issues", "projects"]; %>
         <% for(key of keys){ %>
             <li><%= key %> : <%= issue[key] %></li>
         <% } %>
         <p class="hidden issueID"><%= issue._id %></p>
         </ul>
     </div>
-    <a href=<%= `issue/delete/${issue._id}` %>><button>Delete issue</button></a>
+    <a href=<%= `issue/report/${issue._id}` %>><button>Report issue</button></a>
 
 
 <script src="https://d3js.org/d3.v4.js"></script>

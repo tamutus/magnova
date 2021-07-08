@@ -67,13 +67,6 @@ app.use(function(req, res, next){
 	res.locals.clientIP = req.headers["x-forwarded-for"]?.split(',').shift() || req.socket?.remoteAddress;
 	next();
 });
-app.use(function(req, res, next){
-	
-	if(String(req.path) != "/auth/login" && req.path != "/auth/register"){
-		req.session.returnTo = req.originalUrl;
-	}
-	next();
-})
 
 // Change Views directory dynamically (for if I want to add in the kanban stuff) (i don't understand how this works yet)
 app.use(function(req, res, next){
@@ -90,7 +83,8 @@ const indexRoutes   = require('./routes/index'),
 	  wikiRoutes	= require('./routes/wiki'),
 	  issueRoutes	= require('./routes/issue'),
 	  authRoutes	= require('./routes/auth'),
-	  userRoutes	= require("./routes/users");
+	  userRoutes	= require("./routes/users"),
+      talkRoutes    = require("./routes/talk");
 
 
 app.use('/', indexRoutes);
@@ -98,12 +92,14 @@ app.use('/wiki', wikiRoutes);
 app.use('/issue', issueRoutes);
 app.use('/auth', authRoutes),
 app.use("/users", userRoutes);
+app.use("/talk", talkRoutes);
 
 // wild card route: 
 app.all('*', (req, res, next) => {
 	res.status(404).send(`Can't find ${req.originalUrl} on this Server!`);
 	next();
 });
+
 
 
 let port = process.env.PORT || 3000;

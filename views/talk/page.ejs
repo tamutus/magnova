@@ -1,0 +1,41 @@
+<%- include("../partials/talkHeader") %>
+<h1>
+    <%= title %> Talk Page
+</h1>
+<a href="<%= rootLink %>"><button>Go to wiki</button></a>
+<% if(page.threads.length > 0){ %>
+    <div class="viewer-backdrop hidden" onclick="closeThread();"></div>
+    <div id="thread-viewer" class="hidden">
+        <div id="thread-contents">
+            <span class="hidden" id="thread-index"></span>
+            <h2 id="thread-title"></h2>
+            <div id="comments"></div>
+            <div id="comment-container">
+                <div id="comment-box">
+                    <input type="text" placeholder="Post your comment here" id="new-comment">
+                </div>
+                <button id="comment-submitter" onclick="postComment();"><h3>Submit your comment</h3></button>
+            </div>
+        </div>
+    </div>
+    <div id="threads">
+        <% let threadSort = []; for(let i = 0; i < page.threads.length; i++){ %>
+            <% let j = 0; %>
+            <% for(j = 0; j < threadSort.length; j++){ if(page.threads[i].lastActivity.getTime() > threadSort[j].lastActivity.getTime()){break;}} %>
+            <% threadSort.splice(j, 0, page.threads[i]); %>
+        <% } for(let i = 0; i < threadSort.length; i++){ let thread = threadSort[i]; %>
+            <div class="thread" onclick="openThread(this);" id="<%= `thread_${page.threads.indexOf(thread)}` %>">
+                <div class="threader"><%= thread.subject %><br><%= new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", timeZoneName: 'short'}).format(thread.lastActivity) %></div>
+                <% if(thread.comments.length > 0){ %>
+                    <div class="first-comment"></div>
+                <% } if(thread.comments.length > 1) { %>
+                    <div class="last-comment"></div>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+<% } %>
+<form id="new-thread-zone" action="/talk/newthread/<%= page._id %>" method="post">
+    <input type="text" placeholder="Thread Topic" name="subject"><button id="thread-adder" type="submit"><h2>Submit a new thread</h2></button>
+</form>
+<%- include("../partials/talkFooter") %>
