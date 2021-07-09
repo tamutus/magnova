@@ -246,7 +246,7 @@ router.put("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
 											}
 										});
 									}
-									console.log(`${rootFound} has the following edges: ${rootFound.issues.edges}`);
+									// console.log(`${rootFound} has the following edges: ${rootFound.issues.edges}`);
 									return res.send("Transmission of upvote complete.");
 								});
 						}
@@ -254,7 +254,7 @@ router.put("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
 			}
 		});
 });
-router.delete("/link/:rootid/:targetid", async (req, res) => {
+router.delete("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
 	// Mostly same logic as in PUT route above, with numbers inverted
 	// First, make sure the issues are in the database.
 	Issue.findById(req.params.rootid)
@@ -357,23 +357,29 @@ router.delete("/link/:rootid/:targetid", async (req, res) => {
 									// If needed, change the value of the edge in the issue's issuegraph
 									if(scoreChange < 0){
 										Issuegraph.findById(rootFound.issues._id, (err, rootGraph) => {
-											let found = false;
+											if(err){
+                                                console.log(err);
+                                                return res.send("Couldn't find the issuegraph");
+                                            }
+                                            let found = false;
 											for(edge of rootGraph.edges){
 												if(edge.vertex == req.params.targetid){
 													found = true;
-													edge.score += scoreChange;
-													for(let i = rootGraph.edges.indexOf(edge) + 1; i < rootGraph.edges.length; i++){
-														if(edge.score < rootGraph.edges[i].score){
-															[ rootGraph.edges[i], rootGraph.edges[i-1] ] = [ rootGraph.edges[i-1], rootGraph.edges[i] ];
-														}
-														else {
-															break;
-														}
-													}
-													rootGraph.save();
 												}
 											}
-											if(!found){
+                                            
+											if(found){
+                                                edge.score += scoreChange;
+                                                for(let i = rootGraph.edges.indexOf(edge) + 1; i < rootGraph.edges.length; i++){
+                                                    if(edge.score < rootGraph.edges[i].score){
+                                                        [ rootGraph.edges[i], rootGraph.edges[i-1] ] = [ rootGraph.edges[i-1], rootGraph.edges[i] ];
+                                                    }
+                                                    else {
+                                                        break;
+                                                    }
+                                                }
+                                                rootGraph.save();
+                                            } else {
 												rootGraph.edges.push({
 													score: scoreChange,
 													vertex: req.params.targetid
@@ -382,7 +388,7 @@ router.delete("/link/:rootid/:targetid", async (req, res) => {
 											}
 										});
 									}
-									console.log(`${rootFound} has the following edges: ${rootFound.issues.edges}`);
+									// console.log(`${rootFound} has the following edges: ${rootFound.issues.edges}`);
 									return res.send("Transmission of downvote complete.");
 								});
 						}
@@ -422,7 +428,7 @@ router.get("/toplinks/:number/:id/", async (req, res) => {
 			if(err){
 				console.log(err);
 			}
-			console.log("GET/toplinks for issue" + issue);
+			// console.log("GET/toplinks for issue" + issue);
 			return res.send(issue.issues.edges.slice(0, req.params.number));
 		});
 });

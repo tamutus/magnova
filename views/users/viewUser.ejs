@@ -82,7 +82,9 @@
 <h2>
     Recent forum activity
 </h2>
-    <% for(let i = 0; i < 3 && i < shownUser.comments.length; i++) { %>
-        <div class="comment"><%= shownUser.comments[shownUser.comments.length - i -1 ].text %></div>
+    <% for(let i = 0; i < 10 && i < shownUser.comments.length; i++) { let thisComment = shownUser.comments[shownUser.comments.length - i -1 ]; %>
+        <a href=<%= `/talk/${thisComment.topic._id}?thread=${thisComment.threadIndex}&comment=${thisComment.topic.threads[thisComment.threadIndex].comments.indexOf(thisComment)}` %>>
+            <div class="comment"><%= thisComment.text %></div>
+        </a>
     <% } %>
 <%- include("../partials/footer") %>

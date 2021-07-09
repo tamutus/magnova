@@ -11,8 +11,11 @@
 const baseURL = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/";
 
 // Fetch all issues                 //* This will need to be refactored, obviously, to do specific searches on a fetch performed during 
-let nodes = [];
-let issues = [];
+let nodes = [],
+    issues = [],
+    loggedIn = document.querySelector("#username"),
+    currentUser,
+    userEdgevotes = [];
 
 fetch(baseURL + "issue/all")
     .then(res => handleErrors(res))
@@ -27,9 +30,10 @@ let links = [];
 
 //     { source: "Climate Change", target: "Poverty"}
 
-// Set node size
+// Set node and arrow size
 let nodeSize = 50,
-    nodeFontSize = 20;
+    nodeFontSize = 20,
+    arrowSize = 25;
 
 let backupNodes = [
     { name: "red", color: "red", size: 50},
@@ -123,7 +127,7 @@ document.querySelector("#issue-to-load").addEventListener("keyup", event => {
 //==============================//
 
 // SVG elements have no z-index, so links are drawn first to appear behind the nodes, and tools are drawn last. 
-let linkSelection, linkBoxes, linkPaths;
+let linkSelection, linkBoxes, linkPaths, linkArrows;
 
 updateLinks();
 function updateLinks(){
@@ -140,6 +144,9 @@ function updateLinks(){
     linkEnter
         .append("line")
             .classed("link-path", true);
+    linkEnter
+        .append("polyline")
+            .classed("link-arrow", true);
     linkSelection
         .exit()
         .remove();
@@ -151,6 +158,7 @@ function updateLinkSelections(){
         .data(links, d => `${d.source._id}*${d.target._id}`);                                               // ** Need to code identifiers for links
     linkBoxes = linkSelection.selectAll(".link-box");
     linkPaths = linkSelection.selectAll(".link-path");
+    linkArrows = linkSelection.selectAll(".link-arrow");
 }
 
 let nodeGroupSelection, nodeSelection, nodeTextSelection;
@@ -305,21 +313,23 @@ function initializeSim(){
 }
 function ticked(){
     nodeSelection
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y);
+        .attr("cx", d => constrain(d.x, 0, width))
+        .attr("cy", d => constrain(d.y, 0, height));
     nodeTextSelection
-        .attr("x", d => d.x - nodeSize)
-        .attr("y", d => d.y - nodeSize);
+        .attr("x", d => constrain(d.x - nodeSize, 0 - nodeSize, width - nodeSize))
+        .attr("y", d => constrain(d.y - nodeSize, 0 - nodeSize, height - nodeSize));
     linkBoxes
-        .attr("x1", d => d.source.x)
-        .attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x)
-        .attr("y2", d => d.target.y);
+        .attr("x1", d => constrain(d.source.x, 0, width))
+        .attr("y1", d => constrain(d.source.y, 0, height))
+        .attr("x2", d => constrain(d.target.x, 0, width))
+        .attr("y2", d => constrain(d.target.y, 0, height));
     linkPaths
-        .attr("x1", d => d.source.x)
-        .attr("y1", d => d.source.y)
-        .attr("x2", d => d.target.x)
-        .attr("y2", d => d.target.y);
+        .attr("x1", d => constrain(d.source.x, 0, width))
+        .attr("y1", d => constrain(d.source.y, 0, height))
+        .attr("x2", d => constrain(d.target.x, 0, width))
+        .attr("y2", d => constrain(d.target.y, 0, height));
+    linkArrows
+        .attr("points", d => placeArrow(d));
     if(activeLink){
         activeLinkCoords.x = (activeLink.source.x + activeLink.target.x) / 2;
         activeLinkCoords.y = (activeLink.source.y + activeLink.target.y) / 2;
@@ -327,7 +337,37 @@ function ticked(){
             .attr("transform", `translate(${activeLinkCoords.x}, ${activeLinkCoords.y})`);
     }
 }
-
+function constrain(value, min, max){
+    if(value < min){
+        return min;
+    } else if(value > max){
+        return max;
+    }
+    else {
+        return value;
+    }
+}
+function placeArrow(linkDatum){
+    let px1 = linkDatum.source.x,
+        py1 = linkDatum.source.y,
+        px2 = linkDatum.target.x,
+        py2 = linkDatum.target.y,
+        dx = px2 - px1,
+        dy = py2 - py1,
+        linkLength = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2)),
+        // angle = Math.PI/2 - Math.atan((py2 - py1), (px2 - px1)),
+        xBase = (px1 + px2)/2,
+        yBase = (py1 + py2)/2,
+        xAdjust = arrowSize * dx / linkLength,
+        yAdjust = arrowSize * dy / linkLength;
+    let x1 = xBase + arrowSize * dy / linkLength - xAdjust,
+        y1 = yBase - arrowSize * dx / linkLength - yAdjust,
+        x2 = xBase,
+        y2 = yBase,
+        x3 = xBase -arrowSize * dy / linkLength - xAdjust,
+        y3 = yBase + arrowSize * dx / linkLength - yAdjust;
+    return `${x1}, ${y1} ${x2}, ${y2} ${x3}, ${y3}`
+}
 function updateSimData(){
     sim.nodes(nodes, d => d.name);
     // sim.on("tick", () => {
@@ -514,7 +554,10 @@ function toggleLinkTools(link){
     }
     else {
         activeLink = link;
+        colorVote();
         linkButtons.classed("hidden", false);
+        linkUpvoter.on("click", d => upvoteLink(activeLink.source._id, activeLink.target._id));
+        linkDownvoter.on("click", d => downvoteLink(activeLink.source._id, activeLink.target._id));
         activeLinkCoords.x = (activeLink.source.x + activeLink.target.x) / 2;
         activeLinkCoords.y = (activeLink.source.y + activeLink.target.y) / 2;
         linkButtons.attr("transform", `translate(${activeLinkCoords.x}, ${activeLinkCoords.y})`);
@@ -567,9 +610,9 @@ async function tryLoad(issueID){
                 });
         }
         // Set the spawn point on the forcegraph here
-        if(activeNode){
-            console.log(d3.select(activeNode).attr("cx"));
-        }
+        // if(activeNode){
+        //     console.log(d3.select(activeNode).attr("cx"));
+        // }
         addedIssue.x = parseInt(svg.style("width"))/3;
         addedIssue.y = parseInt(svg.style("height"))/3;
         nodes.push(addedIssue); // transition this to a call to the API.
@@ -624,13 +667,108 @@ async function setLink(sourceID, targetID) {
     })
     .then(res => handleErrors(res))
     .then(res => res.text())
-    .then(res => console.log(res))
+    .then(res => handleVoteResponse(res))
     .catch(err => {
         return console.log(err);
     });
     showLink(sourceID, targetID);
+    loadVotes();
 }
+loadVotes();
+async function loadVotes(){
+    if(loggedIn){
+        if(!currentUser){
+            currentUsername = loggedIn.textContent;
+        }
+        await fetch(`users/unpopulated/${currentUsername}`, {
+            method: "GET"
+        })
+        .then(res => handleErrors(res))
+        .then(res => res.json())
+        .then(res => currentUser = res)
+        .catch(err => {
+            console.log(err);
+        });
+        // Get the current user's edgevotes for this issue
+        
+        userEdgevotes = currentUser.edgeVotes;
+    }
+    
+}
+function colorVote(){
+    if(activeLink && userEdgevotes.length > 0){
+        let votesFromSource = userEdgevotes.find(voteSet => voteSet.source == activeLink.source._id);
+        if(votesFromSource){
+            let voteToTarget = votesFromSource.targets.find(v => v.target == activeLink.target._id);
+            if(voteToTarget){
+                if(voteToTarget.vote){
+                    linkUpvoter.classed("upvoted", true);
+                    linkDownvoter.classed("downvoted", false);
+                    return;
+                }
+                else{
+                    linkDownvoter.classed("downvoted", true);
+                    linkUpvoter.classed("upvoted", false);
+                    return;
+                }
+            }
+        }
+    }
+    linkUpvoter.classed("upvoted", false);
+    linkDownvoter.classed("downvoted", false);
+}
+async function upvoteLink(sourceID, targetID) {
+    await fetch(`${baseURL}issue/link/${sourceID}/${targetID}`, {
+        method: "PUT"
+    })
+    .then(res => handleErrors(res))
+    .then(res => res.text())
+    .then(res => console.log(res))
+    .catch(err => {
+        return console.log(err);
+    });
+    await loadVotes();
+    colorVote();
+    if(!links.find(link => {
+        return (link.source._id == sourceID && link.target._id == targetID);
+    })){
+        let toAddBack = {
+            source: sourceID,
+            target: targetID
+        };
+        links.push(toAddBack);
+        updateLinks();
+        updateSimData();
+        saveLinksToCookie(); // in "cookie handling"
+    }
+}
+async function downvoteLink(sourceID, targetID){
+    await fetch(`${baseURL}issue/link/${sourceID}/${targetID}`, {
+        method: "DELETE"
+    })
+    .then(res => handleErrors(res))
+    .then(res => res.text())
+    .then(res => console.log(res))
+    .catch(err => {
+        return console.log(err);
+    });
+    await loadVotes();
+    colorVote();
+    console.log(`${sourceID}, ${targetID}`);
+    let toRemove = links.findIndex(link => link.source._id == sourceID && link.target._id == targetID);
+    if(toRemove != -1){    
+        links.splice(toRemove, 1);
+        updateLinks();
+        updateSimData();
+        saveLinksToCookie(); // in "cookie handling"
+    } else {
+        console.log("Couldn't find that link in the links array for some reason");
+    }
 
+}
+function handleVoteResponse(response){
+    console.log(response);
+}
 function showLink(sourceID, targetID){
     if(sourceID === targetID){
         return;
@@ -645,11 +783,12 @@ function showLink(sourceID, targetID){
         return ((link.source._id === newLink.source && link.target._id === newLink.target) || (link.source._id === newLink.target && link.target._id === newLink.source));
     })){
         links.push(newLink);
+        updateLinks();
+        updateSimData();
+        saveLinksToCookie(); // in "cookie handling"
+    } else {
+        console.log("Those two are already linked!");
     }
-    updateNodes();
-    updateLinks();
-    updateSimData();
-    saveLinksToCookie(); // in "cookie handling"
 }
 function showProjects(){
     displayTest("PROJECTS");

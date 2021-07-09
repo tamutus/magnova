@@ -68,10 +68,27 @@ router.post("/comment/:talkpageid/:threadindex", isLoggedIn, (req, res) => {
         }
     });
 });
-router.delete("/comment/:id", (req, res) => {
+router.get("/comment/:id", (req, res) => {
     Comment.findById(req.params.id, (err))
 });
-router.get("/thread/:talkpageid/:threadindex", (req, res) => {
+router.delete("/comment/:id", isLoggedIn, (req, res) => {
+    Comment.findById(req.params.id)
+        .populate("author")
+        .populate("topic")
+        .exec((err, comment) => {
+        if(err){
+            console.log(err);
+            res.send("Couldn't find comment to delete");
+        } else {
+            if(comment.author == req.user._id){
+                let userCommentsIndex = comment.author.comments.indexOf(comment);
+                let threadCommentsIndex = comment.topic.threads.comments.indexOf(comment);
+                res.send(`You'll be deleting comment ${comment._id}, made by ${comment.author.username}. Index in the user's comments is ${userCommentsIndex}, and index in thread comments is ${threadCommentsIndex}`);
+            }
+        }
+    });
+});
+router.get("/threaddata/:talkpageid/:threadindex", (req, res) => {
     Talkpage.findById(req.params.talkpageid)
         .populate({
             path: "threads.comments",
@@ -88,7 +105,6 @@ router.get("/thread/:talkpageid/:threadindex", (req, res) => {
                 res.send(page.threads[req.params.threadindex]);
             }
         });
-    
 });
 router.get("/:id", async (req, res) => {
     Talkpage.findById(req.params.id, async (err, page) => {
@@ -107,10 +123,20 @@ router.get("/:id", async (req, res) => {
                 else{
                     title = issue.name;
                     rootLink = `/wiki/${issue._id}`;
+                    let startScript = "<script>";
+                    if(req.query.thread){
+                        startScript += `openThreadAtIndex(${req.query.thread}`
+                        if(req.query.comment){
+                            startScript += `, ${req.query.comment}`
+                        }
+                        startScript += ");"
+                    }
+                    startScript += "</script>"
                     return res.render("talk/page", {
                         title: title,
                         rootLink: rootLink,
-                        page: page
+                        page: page,
+                        startScript: startScript
                     });
                 }
             });
@@ -127,7 +153,8 @@ router.get("/:id", async (req, res) => {
                     return res.render("talk/page", {
                         title: title,
                         rootLink: rootLink,
-                        page: page
+                        page: page,
+                        startScript: ""
                     });
                 }
             });

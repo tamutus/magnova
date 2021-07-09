@@ -38,7 +38,12 @@ router.get("/unpopulated/:name", (req, res) => {
 router.get("/:name", (req, res) => {
     User.findOne({username: req.params.name})
         .populate("issues")
-        .populate("comments")
+        .populate({
+            path: "comments",
+            populate: {
+                path: "topic"
+            }
+        })
         .exec((err, user) => {
             if(err){
                 console.log(err);

@@ -7,15 +7,20 @@ let comments = [],
     currentThread = {},
     commentSelection = d3.select("#comments").selectAll("div.comment"),
     scrollReturn,
+    currentUserID = "",
     styleVars = document.documentElement;
 
-const   threadViewer = d3.select("#thread-viewer"),
+const   currentUserIdDiv = d3.select("#hidden-user-id"),
+        threadViewer = d3.select("#thread-viewer"),
         viewerBackdrop = d3.select(".viewer-backdrop"),
         threadContents = threadViewer.select("#thread-contents"),
         threadIndex = threadContents.select("#thread-index"),
         threadTitle = threadContents.select("#thread-title"),
         commentBox = threadContents.select("#comment-container"),
         newCommentInput = threadContents.select("#new-comment");
+if(!currentUserIdDiv.empty()){
+    currentUserID = currentUserIdDiv.text();
+}
 
 let tinyInput, tinyAppBox;
 tinymce.init({
@@ -35,11 +40,25 @@ tinymce.init({
         });
     }
 });
+
 async function openThread(div){
     let threadToOpen = d3.select(div);
     let index = threadToOpen.attr("id").slice(7);
+    openThreadAtIndex(index);
+}
+function loadCommentAtIndex(index){
+    if(comments.length > index){
+        document.getElementById(`comment_${index}`).scrollIntoView({
+            behavior: "smooth"
+        });
+    }
+    else {
+        console.log("Not enough comments to scroll to that index");
+    }
+}
+async function openThreadAtIndex(index, commentIndex){
     threadIndex.text(index);
-    await fetch(`${baseURL}talk/thread/${pageID}/${index}`)
+    await fetch(`${baseURL}talk/threaddata/${pageID}/${index}`)
         .then(res => handleErrors(res))
         .then(res => res.json())
         .then(res => showComments(res))
@@ -49,13 +68,18 @@ async function openThread(div){
     threadViewer.classed("hidden", false);
     viewerBackdrop.classed("hidden", false);
     scrollReturn = window.scrollY;
-    window.scrollTo({
-        top: 0,
-        left: 0,
-        behavior: "smooth"
-    });
+    if(commentIndex){
+        loadCommentAtIndex(commentIndex);
+    } else {
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "smooth"
+        });
+    }
 }
 function closeThread(){
+    threadIndex.text("");
     threadViewer.classed("hidden", true);
     viewerBackdrop.classed("hidden", true);
     window.scrollTo({
@@ -97,9 +121,20 @@ function updateComments(){
         .append("div")
             .classed("comment-text", true)
             .text(c => c.text);
+    let yourCommentSelection = commentEnter.filter(c => c.author._id == currentUserID);
+    yourCommentSelection
+        .classed("your-comment", "true")
+        .append("div")
+            .classed("delete-button", true)
+            .text("DELETE COMMENT")
+            .on("click", c => {
+                deleteComment(c);
+            })
     commentSelection
         .exit()
             .remove();
+    commentSelection = commentSelection.merge(commentEnter);
+    
 }
 async function postComment(){
     let newComment = newCommentInput.property("value");
@@ -122,4 +157,7 @@ function addComment(comment){
     if(comment != {}){
         comments.push(comment);
     }
+}
+async function deleteComment(comment){
+    
 }

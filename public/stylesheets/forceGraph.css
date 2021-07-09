@@ -36,6 +36,11 @@ circle {
     opacity: .3;
     filter: blur(10px);
 }
+.link-arrow {
+    stroke-width: 5px;
+    stroke: rgb(253, 222, 174);
+    fill: none;
+}
 circle {
     transition: r .5s ease;
 }
@@ -104,10 +109,10 @@ circle.link-vote {
     stroke: rgb(197, 197, 243);
     fill: rgb(190, 190, 245);
 }
-#link-upvote.up {
+#link-upvote.upvoted {
     fill: rgb(72, 216, 72);
 }
-#link-downvote.down {
+#link-downvote.downvoted {
     fill: rgb(189, 71, 126);
 }
 .link-tool-text {

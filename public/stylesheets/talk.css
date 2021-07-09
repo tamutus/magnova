@@ -35,6 +35,9 @@
     display: flex;
     flex-flow: row nowrap;
 }
+.your-comment {
+    background-color: rgb(19, 138, 58);
+}
 .first-comment {
     background-color:rgb(225, 199, 247);
     flex-basis: 1 1 30%;
@@ -52,6 +55,9 @@
     background-color: rgb(18, 18, 114);
     border-radius: 5px;
     padding: 20px;
+}
+.your-comment .comment-author {
+    background-color: rgb(13, 100, 42);
 }
 .comment-text {
     flex-basis: 6 1 80%;
@@ -84,6 +90,14 @@ div.tox.tox-tinymce {
 #comment-submitter {
     flex: 1 1 250px;
     height: 150px;
+}
+.delete-button {
+    width: 180px;
+    height: 60px;
+    border-radius: 3px;
+    background-color: rgb(148, 12, 12);
+    padding: 10px;
+    cursor: no-drop;
 }
 .thread:nth-child(even) {
     background-color:rgb(71, 42, 95)

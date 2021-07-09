@@ -10,7 +10,8 @@
 <div id="user-bar">
 	<% if(currentUser){ %>
 		<div id="logged-in">
-			<img id="user-avatar"></img>
+			<span style="display: none;" id="hidden-user-id"><%= currentUser._id %></span>
+            <img id="user-avatar" ></img>
 			<a id="username" href=<%= `/users/${currentUser.username}` %> ><%= currentUser.username %></a>
 			<a id="logout" href="/auth/logout">Logout</a>
 		</div>
