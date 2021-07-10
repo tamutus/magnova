@@ -8,6 +8,7 @@ let comments = [],
     commentSelection = d3.select("#comments").selectAll("div.comment"),
     scrollReturn,
     currentUserID = "",
+    currentUser,
     styleVars = document.documentElement;
 
 const   currentUserIdDiv = d3.select("#hidden-user-id"),
@@ -25,7 +26,7 @@ if(!currentUserIdDiv.empty()){
 let tinyInput, tinyAppBox;
 tinymce.init({
     selector: '#new-comment',
-    plugins: 'autosave emoticons autoresize fullscreen',
+    plugins: 'autosave emoticons autoresize',
     toolbar: 'fullscreen',
     max_height: 600,
     setup: editor => {
@@ -120,16 +121,20 @@ function updateComments(){
     commentEnter
         .append("div")
             .classed("comment-text", true)
-            .text(c => c.text);
+            .html(c => c.text);
+    commentEnter
+        .append("div")
+            .classed("comment-buttons", true);
     let yourCommentSelection = commentEnter.filter(c => c.author._id == currentUserID);
     yourCommentSelection
         .classed("your-comment", "true")
-        .append("div")
-            .classed("delete-button", true)
-            .text("DELETE COMMENT")
-            .on("click", c => {
-                deleteComment(c);
-            })
+            .select(".comment-buttons")
+            .append("div")
+                .classed("delete-button", true)
+                .text("DELETE COMMENT")
+                .on("click", c => {
+                    deleteComment(c);
+                })
     commentSelection
         .exit()
             .remove();
@@ -137,9 +142,10 @@ function updateComments(){
     
 }
 async function postComment(){
-    let newComment = newCommentInput.property("value");
+    let newComment = tinymce.activeEditor.getContent();
+    console.log(newComment);
     if(newComment.length > 0){
-        
+        console.log(`${baseURL}talk/comment/${pageID}/${threadIndex.text()}`);
         await fetch(`${baseURL}talk/comment/${pageID}/${threadIndex.text()}`, {
             method: "POST",
             headers: {
@@ -151,13 +157,20 @@ async function postComment(){
         .then(res => res.json())
         .then(commentResponse => addComment(commentResponse))
     }
-    updateComments();
 }
 function addComment(comment){
     if(comment != {}){
+
         comments.push(comment);
+        updateComments();
     }
 }
 async function deleteComment(comment){
-    
+    console.log(`${baseURL}talk/comment/${comment._id}`);
+    fetch(`${baseURL}talk/comment/${comment._id}`, {
+        method: "DELETE"
+    })
+    .then(res => handleErrors(res))
+    .then(res => res.text())
+    .then(res => console.log(res));
 }

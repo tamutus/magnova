@@ -114,13 +114,15 @@ router.put("/:id", (req, res) => {
                 issue.name = name;
                 issue.info = info;
                 issue.image = image;
-                if(!issue.editors.find(req.user._id)){
+                if(!issue.editors){
+                    issue.editors = [];
+                }
+                if(!issue.editors.find(e => String(e) == String(req.user._id))){
                     issue.editors.push(req.user._id);
                 }
                 issue.save();
                 returnMessage = `Update successful!`;
             }
-            console.log(returnMessage);
             res.send(returnMessage);
         }
     });

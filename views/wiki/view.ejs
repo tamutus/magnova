@@ -44,19 +44,22 @@
                     (Registered users can upvote/downvote these connections.)
                 <% } %>
                 </p>
+            <% } %>
                 <div id="connections-container">
                     <div id="connections">
-                    <% for(link of issue.issues.edges){ %>
-                        <div class="connection" id="issue-<%= link.vertex._id %>">
-                            <div class="link-info">
-                                <a href="<%= `wiki/${link.vertex._id}` %>"><%= link.vertex.name %></a>: <%= link.score %>
-                            </div>
-                            <% if(currentUser) { %>
-                                <div class="link-votes">
+                        <% if(issue.issues && issue.issues.edges.length > 0 ) { %>
+                            <% for(link of issue.issues.edges){ %>
+                                <div class="connection" id="issue-<%= link.vertex._id %>">
+                                    <div class="link-info">
+                                        <a href="<%= `wiki/${link.vertex._id}` %>"><%= link.vertex.name %></a>: <%= link.score %>
+                                    </div>
+                                    <% if(currentUser) { %>
+                                        <div class="link-votes">
+                                        </div>
+                                    <% } %>
                                 </div>
                             <% } %>
-                        </div>
-                    <% } %>
+                        <% } %>
                     </div>
                     <% if(currentUser) { %>
                         <div id="issue-searchbar">
@@ -66,7 +69,6 @@
                         </div>
                     <% } %>
                 </div>
-            <% } %>
         <h2>Backend Data</h2>
         <% let keys = ["name", "image", "info", "active", "identifier", "identificationDate", "editors", "talkpage", "harms", "resources", "instances", "issues", "projects"]; %>
         <% for(key of keys){ %>

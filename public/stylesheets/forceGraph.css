@@ -37,9 +37,10 @@ circle {
     filter: blur(10px);
 }
 .link-arrow {
-    stroke-width: 5px;
+    stroke-width: 7px;
     stroke: rgb(253, 222, 174);
     fill: none;
+    stroke-linecap: round;
 }
 circle {
     transition: r .5s ease;

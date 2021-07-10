@@ -33,7 +33,7 @@ let links = [];
 // Set node and arrow size
 let nodeSize = 50,
     nodeFontSize = 20,
-    arrowSize = 25;
+    arrowSize = 20;
 
 let backupNodes = [
     { name: "red", color: "red", size: 50},

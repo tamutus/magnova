@@ -41,7 +41,7 @@ router.post("/comment/:talkpageid/:threadindex", isLoggedIn, (req, res) => {
                     console.log(err);
                     return res.send({});
                 }
-                else{
+                else if(user){
                     Comment.create({
                         text: req.body.comment,
                         author: user._id,
@@ -58,33 +58,52 @@ router.post("/comment/:talkpageid/:threadindex", isLoggedIn, (req, res) => {
                             page.threads[req.params.threadindex].comments.push(comment);
                             page.threads[req.params.threadindex].lastActivity = Date.now();
                             page.save();
-                            res.send(comment);
+                            comment = comment.populate("author", c => res.send(comment));
                         }
                     });
                     
                     // console.log(`Reached the post comment route successfully! User ID is ${user._id}, and talkpage ID is ${page._id}. You are inserting ${req.body.comment}`);
+                } else {
+                    res.send({});
                 }
             })
         }
     });
 });
 router.get("/comment/:id", (req, res) => {
-    Comment.findById(req.params.id, (err))
+    Comment.findById(req.params.id)
+        .populate("topic")
+        .exec((err, comment) => {
+            if(err){
+                console.log(err);
+                res.send("Error finding that comment: " + err);
+            }
+            else if(comment){
+                res.redirect(`/talk/${comment.topic._id}?thread=${comment.threadIndex}&comment=${comment.topic.threads[comment.threadIndex].comments.findIndex(c => String(comment._id) == String(c))}`)
+            } else {
+                res.send("Didn't find that comment");
+            }
+        });
 });
 router.delete("/comment/:id", isLoggedIn, (req, res) => {
+    console.log(`Reached the delete comment route with id ${req.params.id}`);
     Comment.findById(req.params.id)
         .populate("author")
         .populate("topic")
         .exec((err, comment) => {
         if(err){
             console.log(err);
-            res.send("Couldn't find comment to delete");
-        } else {
-            if(comment.author == req.user._id){
-                let userCommentsIndex = comment.author.comments.indexOf(comment);
-                let threadCommentsIndex = comment.topic.threads.comments.indexOf(comment);
-                res.send(`You'll be deleting comment ${comment._id}, made by ${comment.author.username}. Index in the user's comments is ${userCommentsIndex}, and index in thread comments is ${threadCommentsIndex}`);
+            res.send(`Error finding comment to delete: ${err}`);
+        } else if(comment){
+            if(String(comment.author._id) == String(req.user._id)){
+                let userCommentsIndex = comment.author.comments.findIndex(c => String(comment._id) == String(c));
+                let threadCommentsIndex = comment.topic.threads[comment.threadIndex].comments.findIndex(c => String(comment._id) == String(c));
+                let stringResponse = `You'll be deleting comment ${comment._id}, made by ${comment.author.username}. Index in the user's comments is ${userCommentsIndex}, and index in thread comments is ${threadCommentsIndex}`;
+                res.send(stringResponse);
+                console.log(stringResponse);
             }
+        } else {
+            res.send("Couldn't find comment to delete");
         }
     });
 });

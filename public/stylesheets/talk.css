@@ -63,6 +63,9 @@
     flex-basis: 6 1 80%;
     text-align: left;
     margin-left: 50px;
+    padding: 20px;
+    border: 2px solid rgba(0, 0, 128, 0.233);
+    border-radius: 5px;
 }
 .pfp {
     width: 100px;
@@ -90,6 +93,14 @@ div.tox.tox-tinymce {
 #comment-submitter {
     flex: 1 1 250px;
     height: 150px;
+}
+.comment-buttons {
+    flex: 0 1 200px;
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: flex-start;
+    align-items: flex-end;
+    margin-left: 20px;
 }
 .delete-button {
     width: 180px;

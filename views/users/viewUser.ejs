@@ -83,8 +83,14 @@
     Recent forum activity
 </h2>
     <% for(let i = 0; i < 10 && i < shownUser.comments.length; i++) { let thisComment = shownUser.comments[shownUser.comments.length - i -1 ]; %>
-        <a href=<%= `/talk/${thisComment.topic._id}?thread=${thisComment.threadIndex}&comment=${thisComment.topic.threads[thisComment.threadIndex].comments.indexOf(thisComment)}` %>>
-            <div class="comment"><%= thisComment.text %></div>
+        <a href=<%= `/talk/comment/${thisComment._id}` %>>
+            <div class="comment"><div class="comment-text">
+                <% if(thisComment.text.length <= 300) { %>
+                    <%- thisComment.text %>
+                <% } else { %>
+                    <%- thisComment.text.slice(0, 298) + "..." %>
+                <% } %>
+            </div></div>
         </a>
     <% } %>
 <%- include("../partials/footer") %>
