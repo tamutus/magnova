@@ -7,16 +7,66 @@ const	express = require('express'),
 		User = require("../api/user/user");
 
 router.get('/', (req, res) => {
-	Issue.find({}, (err, allIssues) => {
+	let currentDate = new Date();
+    let weekAgo = new Date(currentDate.setDate(currentDate.getDate() - 7)).toISOString();
+    Issue.find({identificationDate: {$gte: weekAgo} }, (err, recentIssues) => {
 		if(err){
 			console.log(err);
 			res.redirect("back");
 		}
 		res.render('wiki/landing', {
 			title: "Wiki view",
-			topIssues: allIssues
+			topIssues: recentIssues
 		});
 	});
+});
+
+// Useful for creating an index for a given model. 
+router.get("/createIndex", async (req, res) => {
+    User.find({}, async (err, users) => {
+        if(err){console.log(err)}else {
+            for(user of users){
+                if(err){console.log(err)}else{
+                    const username = user.username;
+                    user.username = username;
+                    console.log(username);
+                    user.markModified("username");
+                    await user.save();
+                    // await Issue.findByIdAndUpdate(issue._id, {name: name}, {strict: false});
+                }
+            }
+        }
+    });
+    return res.send("done");
+});
+
+router.get("/search", async (req, res) => {
+    let searchTerm = "";
+    let results = {};
+    if(req.query.target){
+        searchTerm = decodeURIComponent(req.query.target.replace(/\+/g, ' '));
+    }
+    if(req.query.issues === "true"){
+        await Issue.fuzzySearch(searchTerm, (err, issues)=> {
+            if(err){
+                console.log(err);
+                return res.send("Error fuzzy searching: " + err);
+            } else {
+                results["issues"] = issues;
+            }
+        });
+    }
+    if(req.query.users === "true"){
+        await User.fuzzySearch(searchTerm, (err, users)=> {
+            if(err){
+                console.log(err);
+                return res.send("Error fuzzy searching: " + err);
+            } else {
+                results["users"] = users;
+            }
+        });
+    }
+    return res.send(results);
 });
 
 router.get('/:id', (req, res) => {
@@ -79,8 +129,14 @@ router.get('/:id', (req, res) => {
             if(!issue.identifier){
                 User.findOne({issues: issue._id}, (err, person)=> {
                     if(err){console.log(err)}
-                    else{
-                        Issue.findByIdAndUpdate(issue._id, {identifier: person._id}, {strict: false}, (err, updatedIssue) => {
+                    else {
+                        let idToAdd;
+                        if(person){
+                            idToAdd = person._id;
+                        } else {
+                            idToAdd = "6064d749949511722c878e26";
+                        }
+                        Issue.findByIdAndUpdate(issue._id, {identifier: idToAdd}, {strict: false}, (err, updatedIssue) => {
                             if(err) {console.log(err); }
                             else{ issue.identifier = updatedIssue.identifier }
                         });
@@ -127,4 +183,5 @@ router.put("/:id", (req, res) => {
         }
     });
 })
+
 module.exports = router;

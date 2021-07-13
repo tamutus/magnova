@@ -43,12 +43,20 @@ circle {
     stroke-linecap: round;
 }
 circle {
-    transition: r .5s ease;
+    transition: r .5s ease, transform .3s ease, fill .3s ease;
 }
 circle.node {
-    stroke: rgb(175, 150, 194);
-    fill: rgb(255, 185, 102);
+    stroke: rgb(253, 144, 80);
+    stroke-width: 5px;
+    fill: rgb(255, 158, 102);
     cursor: all-scroll;
+    /* transition: fill .3s ease-out; */
+}
+circle.node:hover {
+    fill: rgb(255, 190, 152);
+}
+circle.node:active {
+    fill: rgb(252, 211, 201);
 }
 /* circle.node:active {
     cursor: grabbing;
@@ -71,7 +79,7 @@ circle.node {
     text-align: center;
     margin: 0;
     padding: 0;
-    transition: font-size .5s ease;
+    transition: font-size .5s ease, transform .3s ease;
 }
 .node-text div {
     color:black;
@@ -87,7 +95,8 @@ circle.node {
     user-select: none;
 }
 .tool circle {
-    stroke: rgb(197, 197, 243);
+    stroke: rgb(241, 175, 247);
+    fill: rgb(241, 175, 247);
     transition: cx .5s ease, cy .5s ease, r .5s ease;
 }
 .tool foreignObject {
@@ -142,9 +151,11 @@ circle.link-vote {
     position: fixed;
     z-index: 1;
     top: 5vh;
-    left: calc(150px + 1vw);
+    left: calc(140px + 1vw);
     margin: 10px 0 0 30px;
     pointer-events: none;
+    transform-origin: top left;
+    transition: transform .5s ease, left .3s ease, top .3s ease;
 }
 #fg-buttons {
     border-radius: 10px;
@@ -303,9 +314,19 @@ circle.link-vote {
     #issue-searchbar {
         transform: scale(.8);
     }
-    /* .node-text div, .tool-text {
-        font-size: 13.6px;  
-    } */
+    #fg-utilities {
+        transform: scale(.8);
+        left: 130px;
+    }
+    .tool-text {
+        transform: scale(.75);
+    }
+}
+@media screen and (max-height: 500px){
+    #fg-utilities {
+        transform: scale(.8);
+        top: 3vh;
+    }
 }
 @media screen and (max-width: 650px){
     #force-graph {
@@ -313,10 +334,20 @@ circle.link-vote {
         width: calc(94vw - 90px);
         margin: 5vh 5vw 5vh 1vw;
     }
-    #issue-loader {
-        left: 90px;
+    
+    #fg-utilities {
+        transform: scale(.6);
+        left: 70px;
+    }
+    .tool-text {
+        transform: scale(.55);
     }
     /* .node-text div, .tool-text {
         font-size: 10.2px;
     } */
+}
+@media screen and (max-height: 300px){
+    #fg-utilities {
+        transform: scale(.6);
+    }
 }

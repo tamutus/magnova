@@ -398,16 +398,19 @@ function updateSimDimensions(){
         toolSize = 35;
         toolLength = 90;
         nodeSize = 40;
+        sim.force("collision", d3.forceCollide().radius(nodeSize + 6));
     }
     else if(window.innerWidth < 650){
         toolSize = 25;
         toolLength = 70;
         nodeSize = 30;
+        sim.force("collision", d3.forceCollide().radius(nodeSize + 3));
     }
     else {
         toolSize = 45;
         toolLength = 110;
         nodeSize = 50;
+        sim.force("collision", d3.forceCollide().radius(nodeSize + 10));
     }
     if(activeNode){
         let d = d3.select(activeNode).datum();

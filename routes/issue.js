@@ -325,7 +325,6 @@ router.delete("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
                                         // }
                                         // If no votes from source exist, push and save a new edgeVote object with a new nested array that has one entry: an edge to the target issue in question.
                                         if(sourceIndex === -1){
-                                            console.log("Didn't find a vote from source");
                                             scoreChange = -1;
                                             currentUser.edgeVotes.push({
                                                 source: rootFound._id,
@@ -344,7 +343,6 @@ router.delete("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
                                             });
                                             if(targetIndex === -1){
                                                 // No votes to the target from the given source exist, so add one and save.
-                                                console.log("Didn't find a vote to target");
                                                 scoreChange = -1;
                                                 currentUser.edgeVotes[sourceIndex].targets.push({
                                                     target: targetFound._id,
@@ -363,7 +361,6 @@ router.delete("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
                                                     currentUser.edgeVotes[sourceIndex].targets[targetIndex].vote = false;
                                                     scoreChange = -2;
                                                     await currentUser.save();
-                                                    console.log("Gonna change the score by two");
                                                 }
                                             }
                                         }
@@ -411,15 +408,11 @@ router.delete("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
                                                     return res.send("Couldn't find the issuegraph");
                                                 }
                                                 else{
-                                                    console.log("found rootgraph...");
                                                     let found = false;
                                                     for(edge of rootGraph.edges){
                                                         if(String(edge.vertex) == String(req.params.targetid)){
-                                                            console.log("found the edge")
                                                             found = true;
-                                                            console.log("edge score is " + edge.score);
                                                             edge.score += scoreChange;
-                                                            console.log("Now it's " + edge.score);
                                                             let startIndex = rootGraph.edges.findIndex(e => String(e._id) == String(edge._id));
                                                             for(let i = startIndex + 1; i < rootGraph.edges.length; i++){
                                                                 if(edge.score < rootGraph.edges[i].score){
@@ -505,6 +498,67 @@ router.get("/data/:id", async (req, res) => {
 			return res.send(issue);
 		});
 })
+// If anything messes up with an issuegraph's score, you can rebuild those scores with this function, which queries all users for their edgevotes and corrects all issues' issuegraphs.
+// Not deployed because it will become a server-intensive task that regular users shouldn't be performing.
+// router.get("/updatelinks", async (req, res) => {
+//     let allVotes = {};
+//     await User.find({}, async (err, users) => {
+//         if(err){
+//             console.log(`Trouble finding all users: ${err}`);
+//             return res.send("Couldn't find users");
+//         }
+//         else{
+//             for(user of users){
+//                 for(edgeSet of user.edgeVotes){
+//                     let sourceVotes = allVotes[edgeSet.source];
+//                     if(!sourceVotes){
+//                         allVotes[edgeSet.source] = {};
+//                     }
+//                     for(edge of edgeSet.targets){
+//                         let scoreChange = edge.vote ? 1 : -1 ;
+//                         if(!allVotes[edgeSet.source][edge.target]){
+//                             allVotes[edgeSet.source][edge.target] = 0;
+//                         }
+//                         allVotes[edgeSet.source][edge.target] += scoreChange;
+//                     }
+//                 }
+//             }
+//         }
+//     });
+//     Issue.find({})
+//         .populate("issues")
+//         .exec(async(err, foundIssues) => {
+//             if(err){
+//                 console.log(`Error finding issues: ${err}`);
+//             }
+//             else{
+//                 let changed = [];
+//                 for(issue of foundIssues){
+//                     for(edge of issue.issues.edges){
+//                         let scoreChange = allVotes[issue._id][edge.vertex] - edge.score;
+//                         if(scoreChange != 0){
+//                             console.log(`Need to change score from ${issue.name} to ${edge.vertex} by ${scoreChange}`);
+//                             edge.score += scoreChange;
+//                             issue.issues.markModified("edges");
+//                             await issue.issues.save();
+//                             changed.push(issue.name);
+//                         }
+//                     }
+//                 }
+//                 if(changed.length > 0){
+//                     console.log("Changed scores of links from ");
+//                     for(let i = 0; i < changed.length - 1; i++){
+//                         console.log(`${changed[i]}, `);
+//                     }
+//                     console.log(`and ${changed[changed.length - 1]}.`)
+//                 }
+//                 else{
+//                     console.log("nothing had to be changed!");
+//                 }
+//             }
+//         });
+// });
+
 
 // Need sub-edit routes for mods, which do verification of role:
 // https://developerhandbook.com/passport.js/passport-role-based-authorisation-authentication/

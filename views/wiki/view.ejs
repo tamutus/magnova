@@ -34,10 +34,23 @@
         <% if(issue.identifier){ %>
             <li id="identification">This issue was first identified by <a href="<%= `users/${issue.identifier.username}` %>"><%= issue.identifier.username %></a> on <%= new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric'}).format(issue.identificationDate) %></li>
         <% } %>
+        <li id="editors">
+            Editors: 
+            <% for(let i = 1; i < issue.editors.length -1; i++){ %>
+                <a href="<%= `/users/${issue.editors[i].username}` %>"><%= issue.editors[i].username %></a>, 
+            <% } %>
+            <% if(issue.editors.length > 1){ %>
+                and 
+            <% } if(issue.editors.length > 0){ %>
+            <a href="<%= `/users/${issue.editors[issue.editors.length-1].username}` %>"><%= issue.editors[issue.editors.length-1].username %></a>.
+            <% } else { %>
+                none.
+            <% } %>
+        </li>
         <li id="issues">
-            <h2>Related Issues</h2>
+            <h2>Issues that lead to <%= issue.name %></h2>
             <% if(issue.issues && issue.issues.edges.length > 0 ) { %>
-                <p>The Magnova community says this issue breaks down into the following sub-issues.
+                <p>The Magnova community says the following issues give rise to <%= issue.name %>. Addressing this issue could be accomplished by dealing with the following sub-issues.
                 <% if(currentUser) { %>
                     If you agree that <%= issue.name %> is caused by a given issue below, press the "Sub-issue" button next to it. If you think they are not actually related, click the "Unrelated" button.
                 <% } else { %>
@@ -51,7 +64,7 @@
                             <% for(link of issue.issues.edges){ %>
                                 <div class="connection" id="issue-<%= link.vertex._id %>">
                                     <div class="link-info">
-                                        <a href="<%= `wiki/${link.vertex._id}` %>"><%= link.vertex.name %></a>: <%= link.score %>
+                                        <a href="<%= `wiki/${link.vertex._id}` %>"><%= link.vertex.name %></a>: <span class="link-score"><%= link.score %></span>
                                     </div>
                                     <% if(currentUser) { %>
                                         <div class="link-votes">

@@ -14,51 +14,103 @@
 <body>
 <%- include("../partials/navbar") %>
 <div id="allContent" class="expanded">
+    <section id="intro">
+        <h1>Magnova Wiki</h1>
+        <h3><em>Exchange valuable information with other activists on the issues you care about. </em></h3>
+        <p>Magnova's core is a map of what's wrong with the world—a map of "issues". We believe that humanity is more than possible of creating ingenious solutions to large-scale problems, and the problem is the lack of coordination and organization. Magnova transforms broad, conceptual challenges such as "Lack of Clean Drinking Water" or "Homelessness" from austere monoliths into beacons for activism. By recursively breaking these issues down to their causes and components, Magnova creates a map from large-scale to small-scale, from effect to cause.</p>
+        <p>Every problem is unique, and each way of framing the issues sets the stage for different kinds of discourse. Thus, every issue has its own wiki page, a place for sharing data, explanations of why the world is a certain way, why we should do something about it, and anything else you think is relevant. For broad, controversial, or friendly discussion about a topic, go to its page and click the Discuss button to reach the talk page.</p>
+    </section>
+    <div id="search">
+        <form>
+            <h2>Search for: <input type="checkbox" name="issues" value="true" checked="true">Issues <input type="checkbox" name="users" value="true">Users</h2>
+            <div class="search-bar"><input name="target" type="text" id="search-query"><button type="submit">Search Magnova</button><button type="button" onclick="clearSearch();">Clear results</button></div>
+            
+        </form>
+        <div id="search-results">
+            <h2 class="hidden" id="issue-results-header">Issues</h2>
+            <div id="issue-results"></div>
+            <h2 class="hidden" id="user-results-header">Users</h2>
+            <div id="user-results"></div>
+        </div>
+    </div>
+    <div id="issue-submission">
+        <h2>
+            Identify a new issue
+        </h2>	
+        <div id="issue-submitter">
+            <form action="/issue" method="post">
+                <div class="form-group">
+                    <input type="text" placeholder="Issue name" name="issue[name]">
+                </div>
+                <div class="form-group">
+                    <input type="text" placeholder="Image URL" name="issue[image]">
+                </div>
+                <div class="form-group">
+                    <textarea placeholder="Description" name="issue[info]"></textarea>
+                </div>
+                <button type="submit">
+                    Submit
+                </button>
+            </form>
+        </div>
+    </div>
     <section id="issues">
-		<h2>Issues</h2>
-		<p></p>
-		<div id="issue-browse">
-			<% topIssues.forEach(function(issue){ %>
-				<div class="issue-snapshot">
-					<a href="wiki/<%=issue._id%>">
-						<div class="issue-thumbnail"><img src="<%=issue.image%>"></div>
-						<h4 class=""><%=issue.name%></h4>
-					</a>
-				</div>
-			<% }); %>
-		</div>
-		
-		<div id="issue-submitter">
-			<h2>
-				Identify an issue
-			</h2>	
-			<div id="issue-forms">
-				<form action="/issue" method="post">
-					<div class="form-group">
-						<input type="text" placeholder="Issue name" name="issue[name]">
-					</div>
-					<div class="form-group">
-						<input type="text" placeholder="Image URL" name="issue[image]">
-					</div>
-					<div class="form-group">
-						<textarea placeholder="Description" name="issue[info]"></textarea>
-					</div>
-					<button type="submit">
-						Submit
-					</button>
-				</form>
-			</div>
-		</div>
+		<% if(topIssues?.length > 0){%>
+            <h2>Recently Identified Issues</h2>
+            <p></p>
+            <div id="issue-browse">
+                <% topIssues.forEach(function(issue){ %>
+                    <div class="issue-snapshot" title="<%= issue.name %>">
+                        <a href="wiki/<%=issue._id%>">
+                            <div class="issue-thumbnail"><img src="<%=issue.image%>"></div>
+                            <h4>
+                                <% if(issue.name.length <= 30){ %>
+                                    <%= issue.name %>
+                                <% } else { %>
+                                    <%= `${issue.name.slice(0, 26)}...` %>
+                                <% } %>
+                            </h4>
+                        </a>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
 	</section>
 	<section id="projects">
 		<h2>Projects</h2>
-		<p></p>
+		<p>At each level of complexity, people have a variety of ideas for how to solve these problems, and so on any issue you will be able to crowdsource projects to create change with volunteer opportunities for the Magnova community.</p>
+        <br>
+        <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
+        <p></p>
 	</section>
 	<section id="actions">
 		<h2>Actions</h2>
+        <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
+	</section>
+    <section id="maps">
+        <h2>Maps</h2>
+        <p>Issues and projects will need to adapt to their locations, and so we plan to integrate an open-source map system with the existing issue-navigation framework. You will be able to split issues and projects into local instances to ensure that large-scale issues get taken care of around the world. Local communities will be able to discuss the unique characteristics of how an issue plays out in their area, as well as how a project demands a different set of tasks.</p>
+        <p>Our tentative plan is to integrate the <a href="https://leafletjs.com/">Leaflet</a> API.</p>
+        <br><p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
+    </section>
+    <section id="resources">
+		<h2>Resources</h2>
+        <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
+	</section>
+    <section id="formulas">
+		<h2>Formulas</h2>
+        <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
+	</section>
+    <section id="tags">
+		<h2>Tags</h2>
+        <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
+	</section>
+    <section id="harms">
+		<h2>Harms</h2>
+        <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
 </div>
 <script src="https://d3js.org/d3.v4.js"></script>
-<!-- <script src="scripts/wiki.js"></script> -->
+<script src="scripts/wiki.js"></script>
 <script src="scripts/nav.js"></script>
 </body></html>

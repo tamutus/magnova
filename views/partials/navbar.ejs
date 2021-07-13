@@ -11,8 +11,10 @@
 	<% if(currentUser){ %>
 		<div id="logged-in">
 			<span style="display: none;" id="hidden-user-id"><%= currentUser._id %></span>
-            <img id="user-avatar" ></img>
-			<a id="username" href=<%= `/users/${currentUser.username}` %> ><%= currentUser.username %></a>
+			<a href=<%= `/users/${currentUser.username}` %> >
+                <img id="user-avatar" src="<%=currentUser.pfpLink %>"></img>
+                <span id="username"><%= currentUser.username %></span>
+            </a>
 			<a id="logout" href="/auth/logout">Logout</a>
 		</div>
 	<% } else { %>

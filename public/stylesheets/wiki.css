@@ -5,9 +5,88 @@
 #hidden-issue-id {
     display: none;
 }
-#issue-submitter {
-    width: 500px;
-    margin: auto;
+#search form {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    width: 800px;
+}
+.search-bar {
+    display: flex;
+    flex-flow: row nowrap;
+    align-content: space-around;
+    align-items: center;
+}
+#search-query {
+    max-width: 70%;
+    margin-left: 50px;
+    display: inline-block;
+    font-size: 30px;
+    height: 45px;
+}
+.search-bar button {
+    padding: 10px 20px;
+}
+.testdiv {
+    display: inline-block;
+    width: 50px;
+}
+#search {
+    display: inline-block;
+    width: 800px;
+    margin-right: 100px;
+}
+#issue-results {
+    display: flex;
+    flex-flow: column nowrap;
+}
+.search-result {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-items: flex-start;
+    border: 3px solid rgb(253, 144, 80);
+    border-radius: 10px;
+    margin: 10px;
+    padding: 15px;
+    color: rgb(54, 1, 97);
+}
+#issue-results .search-result {
+    background: linear-gradient(-30deg, rgb(255, 158, 102), rgb(252, 211, 201));
+}
+#user-results .search-result {
+    background: linear-gradient(-30deg, rgb(92, 95, 255), rgb(166, 104, 207));
+}
+.result-name-link {
+    flex: 0 3 200px;
+}
+.result-name {
+    color: rgb(54, 1, 97);
+}
+p.issue-info {
+    flex: 0 1 400px;
+    vertical-align: top;
+    border: 2px solid rgba(253, 144, 80, .9);
+    border-radius: 4px;
+    padding: 15px;
+}
+.result-thumbnail {
+    object-fit: cover;
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+}
+h4.result-name {
+    display: inline-block;
+    margin: 5px 15px 3px 10px;
+}
+#issue-submission {
+    display: inline-block;
+    width: 300px;
+    margin: 20px auto;
+    vertical-align: top;
+    border-left: 4px solid rgb(184, 182, 182);
+    border-radius: 30px;
+    padding-left: 20px;
 }
 #issue-submitter h2 {
     text-align: center;

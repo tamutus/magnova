@@ -27,15 +27,18 @@ font-weight: 700;
 	/* transition: all .5s; */
 	font-size: 20px;
 }
+
 body {
-	background-color: rgb(51, 39, 61);
+	background: linear-gradient(-10deg, rgb(209, 105, 2), rgba(94, 49, 105, 1) 40%, rgba(44, 23, 136, 1) 80%, rgba(46, 8, 77, 1));
+    background-color: rgb(46, 8, 77);
     font-family: 'Poppins', sans-serif;
 	color: lavender;
 	font-weight: 400;
+    height: 100%;
 }
 #allContent {
 	text-align: center;
-	/* margin-right: 210px; */
+	margin-right: 50px;
 	margin-left: 50px;
     margin-bottom: 250px;
 	padding: 50px 20px 20px 150px;
@@ -80,6 +83,8 @@ section {
 	display: flex;
 	justify-content: flex-start;
 	flex-flow: column wrap;
+    margin-top: 20px;
+    margin-bottom: 40px;
 }
 button {
 	margin: 10px;
@@ -140,6 +145,11 @@ input, textarea, button{
 	padding: 5px;
 	transition: outline .5s ease-out;
 }
+input[type=checkbox]{
+    width: 40px;
+    height: 40px;
+    margin: 0 10px 0 40px;
+}
 input::placeholder, textarea::placeholder {
 	font-family: 'Montserrat', sans-serif;
 }
@@ -164,6 +174,7 @@ button {
 	transition-timing-function: cubic-bezier(0.560, 1.650, 0.570, 0.790);
 	transform: none;
 	transform-origin: bottom;
+    cursor: pointer;
 }
 button:hover {
 	box-shadow: 0px 4px #8865a3;
@@ -267,8 +278,8 @@ button:active {
 }
 #sidebar-toggler {
 	position: fixed;
-	left: 30px;
-	top: 30px;
+	left: 15px;
+	top: 15px;
 	margin: none;
 	z-index: 5;
 	width: 100px;
@@ -286,15 +297,15 @@ button:active {
 }
 #sidebar-toggler:hover {
 	box-shadow: -4px -4px rgb(97, 12, 52);
-	left: 28px;
-	top: 28px;
+	left: 13px;
+	top: 13px;
 	/* animation-name: jiggle;
 	animation-duration: 2.5s;
 	animation-iteration-count: 5; */
 }
 #sidebar-toggler:active {
-	left: 24px;
-	top: 24px;
+	left: 9px;
+	top: 9px;
 	box-shadow: none;
 }
 
@@ -337,24 +348,55 @@ button:active {
 	z-index: 8;
 	top: 10px;
 	right: 15px;
-	height: 1.8rem;
-	background-color: rgb(46, 71, 155);
-	border-radius: 0 5px 0 5px;
+	height: 50px;
+	background-color: rgb(139, 17, 74);
+	border-radius: 0 8px 0 8px;
 	display: flex;
+    flex-flow: row nowrap;
 	align-items: center;
+    align-content: center;
 	transition: .5s ease transform;
 	transform-origin: top right;
+}
+#user-bar div {
+    display: flex;
+    flex-flow: row nowrap;
+	align-items: center;
 }
 #user-bar div * {
 	margin: 0 10px;
 	font-size: 1.1rem;
 	font-family: 'Montserrat', sans-serif;
+    vertical-align: middle;
 }
 
 #user-bar div a, #user-bar div a:visited {
-	color: rgb(238, 203, 247);
+    color: rgb(238, 203, 247);
+}
+#user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
+#header-links {
+    position: absolute;
+    top: 40px;
+    left: 200px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+}
+#header-links * {
+    background-color: rgba(169, 126, 204, .5);
+    box-shadow: 0px 0px 7px 7px rgba(169, 126, 204, .5);
+    transition: box-shadow .5s ease;
+    padding: 8px;
+    border-radius: 8px;
+}
+#header-links *:hover {
+    box-shadow: 0px 0px 3px 3px rgba(169, 126, 204, .5);
+}
   /* ================ */
  /* Flash formatting */
 /* ================ */
@@ -429,7 +471,7 @@ button:active {
 		width: 100px;
 	}
 	#sidebar-toggler {
-		transform: scale(.5) translate(-15px, -15px);
+		transform: scale(.5) translate(-25px, -25px);
 		font-size: 30px;
 	}
 	#user-bar {
@@ -459,7 +501,7 @@ button:active {
 }
 @media screen and (max-height: 300px){
 	#sidebar-toggler {
-		transform: scale(.5) translate(-15px, -40px);
+		transform: scale(.5) translate(-25px, -25px);
 	}
 	#sidebar {
 		width: 150px;

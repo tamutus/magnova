@@ -3,7 +3,6 @@ let editing = false,
 
 // Capture issue id
 const issueID = d3.select("p.hidden.issueID").text();
-console.log(issueID);
 
 // Capture display fields
 const nameBox = d3.select("#name-container"),
@@ -32,13 +31,6 @@ const nameInput = d3.select("#name-container")
         .classed("issue-name", true)
         .classed("mutable", true)
         .classed("hidden", true);
-// const emailInput = d3.select("#email-box")
-//     .append("input")
-//         .attr("type", "text")
-//             .property("value", emailDisplay.text())
-//         .classed("handle", true)
-//         .classed("mutable", true)
-//         .classed("hidden", true);
 const imageInput = imageBox.
     append("input")
         .attr("type", "text")

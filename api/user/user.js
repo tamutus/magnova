@@ -1,5 +1,6 @@
 const	mongoose = require("mongoose"),
 		Schema = mongoose.Schema,
+        mongoose_fuzzy_searching = require('mongoose-fuzzy-searching'),
 		passportLocalMongoose = require("passport-local-mongoose");
 
 var UserSchema = new mongoose.Schema({
@@ -61,4 +62,5 @@ var UserSchema = new mongoose.Schema({
     badges: [{type: Schema.Types.ObjectId, ref: "Badge"}]
 });
 UserSchema.plugin(passportLocalMongoose);
+UserSchema.plugin(mongoose_fuzzy_searching, { fields: ['username'] });
 module.exports = mongoose.model("User", UserSchema);
