@@ -797,7 +797,7 @@ function showProjects(){
     displayTest("PROJECTS");
 }
 function goToWiki(){
-    window.location.href = `/wiki/${d3.select(activeNode).datum()._id}`;
+    window.open(`/wiki/${d3.select(activeNode).datum()._id}`, '_blank');
 }
 function unload(){
     let toUnload = d3.select(activeNode).datum().name;

@@ -100,7 +100,6 @@ router.get("/commentdata/:id", (req, res) => {
         });
 })
 router.delete("/comment/:id", isLoggedIn, (req, res) => {
-    console.log(`Reached the delete comment route with id ${req.params.id}`);
     Comment.findById(req.params.id)
         .populate("author")
         .populate("topic")
