@@ -151,7 +151,6 @@ async function searchAll(){
     if(formInput.get("users") === "true"){
         fetchString += `&users=${encodeURIComponent(formInput.get("users"))}`;
     }
-    console.log(baseURL + fetchString);
     await fetch(baseURL + fetchString)
         .then(res => handleErrors(res))
         .then(res => res.json())

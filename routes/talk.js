@@ -99,11 +99,26 @@ router.delete("/comment/:id", isLoggedIn, (req, res) => {
                 let userCommentsIndex = comment.author.comments.findIndex(c => String(comment._id) == String(c));
                 let threadCommentsIndex = comment.topic.threads[comment.threadIndex].comments.findIndex(c => String(comment._id) == String(c));
                 let stringResponse = `You'll be deleting comment ${comment._id}, made by ${comment.author.username}. Index in the user's comments is ${userCommentsIndex}, and index in thread comments is ${threadCommentsIndex}`;
-                res.send(stringResponse);
-                console.log(stringResponse);
+                comment.author.comments.splice(userCommentsIndex, 1);
+                comment.topic.threads[comment.threadIndex].comments.splice(threadCommentsIndex, 1);
+                comment.author.markModified("comments");
+                comment.author.save();
+                comment.topic.markModified("threads");
+                comment.topic.save();
+                Comment.findByIdAndDelete(comment._id, (err, deadComment) => {
+                    if(err){
+                        console.log(err);
+                        stringResponse = `Error deleting the comment... ${err}`;
+                    } else if(deadComment){
+                        stringResponse = "Success";
+                    } else {
+                        stringResponse = "Couldn't find a comment to delete...";
+                    }
+                    res.send(stringResponse);
+                });
             }
         } else {
-            res.send("Couldn't find comment to delete");
+            res.send("Couldn't find comment of yours to delete");
         }
     });
 });

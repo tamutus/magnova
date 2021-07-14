@@ -136,6 +136,7 @@ p {
 	text-align: left;
 	transition: width 0s;
 	text-indent: 50px;
+    max-width: 1500px;
 }
 li {
 	margin-bottom: 20px;
@@ -460,7 +461,9 @@ button:active {
 }
 @media screen and (max-width: 650px){
 	#allContent, #allContent.expanded {
-		padding-left: 130px;
+		padding-left: 15px;
+        margin-left: 20px;
+        margin-right: 20px;
 	}
 	#allContent h1, #allContent.expanded h1 {
 		font-size: 35px;

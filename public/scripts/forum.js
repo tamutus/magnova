@@ -1,6 +1,7 @@
 const baseURL = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/";
 
 const pageID = window.location.pathname.slice(6);
+console.log(pageID);
 
 // Fetch all issues                 //* This will need to be refactored, obviously, to do specific searches on a fetch performed during 
 let comments = [],
@@ -45,6 +46,12 @@ tinymce.init({
 async function openThread(div){
     let threadToOpen = d3.select(div);
     let index = threadToOpen.attr("id").slice(7);
+    
+    // To have the URL reflect what you've opened, a URLSearchParams object is constructed and pushed with the window.history interface.
+    const params = new URLSearchParams(window.location.search);
+    params.set("thread", index);
+    window.history.pushState({}, '', window.location.pathname + "?" + params.toString());
+    
     openThreadAtIndex(index);
 }
 function loadCommentAtIndex(index){
@@ -57,8 +64,29 @@ function loadCommentAtIndex(index){
         console.log("Not enough comments to scroll to that index");
     }
 }
+window.addEventListener("popstate", event => {
+    const params = new URLSearchParams(window.location.search);
+    if(!params.has("thread")){
+        threadIndex.text("");
+        threadViewer.classed("hidden", true);
+        viewerBackdrop.classed("hidden", true);
+        window.scrollTo({
+            top: scrollReturn,
+            left: 0,
+            behavior: "smooth"
+        });
+    } else {
+        if(params.has("comment")){
+            openThreadAtIndex(params.get("thread"), params.get("comment"))
+        } else{
+            openThreadAtIndex(params.get("thread"));
+        }
+    }
+    
+});
 async function openThreadAtIndex(index, commentIndex){
     threadIndex.text(index);
+
     await fetch(`${baseURL}talk/threaddata/${pageID}/${index}`)
         .then(res => handleErrors(res))
         .then(res => res.json())
@@ -69,6 +97,7 @@ async function openThreadAtIndex(index, commentIndex){
     threadViewer.classed("hidden", false);
     viewerBackdrop.classed("hidden", false);
     scrollReturn = window.scrollY;
+    
     if(commentIndex){
         loadCommentAtIndex(commentIndex);
     } else {
@@ -78,6 +107,7 @@ async function openThreadAtIndex(index, commentIndex){
             behavior: "smooth"
         });
     }
+    
 }
 function closeThread(){
     threadIndex.text("");
@@ -88,6 +118,7 @@ function closeThread(){
         left: 0,
         behavior: "smooth"
     });
+    window.history.pushState({}, '', window.location.pathname);
 }
 function handleErrors(res){
     if(!res.ok){
@@ -160,9 +191,13 @@ async function postComment(){
 }
 function addComment(comment){
     if(comment != {}){
-
         comments.push(comment);
         updateComments();
+        loadCommentAtIndex(comments.length-1);
+        const params = new URLSearchParams(window.location.search);
+        params.set("comment", comments.length-1);
+        window.history.pushState({}, '', window.location.pathname + "?" + params.toString());
+        tinymce.activeEditor.setContent("");
     }
 }
 async function deleteComment(comment){
@@ -172,5 +207,16 @@ async function deleteComment(comment){
     })
     .then(res => handleErrors(res))
     .then(res => res.text())
-    .then(res => console.log(res));
+    .then(res => {
+        if(res == "Success"){
+            comments.splice(comments.indexOf(comment), 1);
+            updateComments();
+            const params = new URLSearchParams(window.location.search);
+            params.delete("comment");
+            window.history.pushState({}, '', window.location.pathname + "?" + params.toString());
+        } else {
+            console.log(res);
+        }
+    });
+
 }
