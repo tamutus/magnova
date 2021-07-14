@@ -1,10 +1,12 @@
+// const { populate } = require("../../api/user/user");
+
 const baseURL = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/";
 
 const pageID = window.location.pathname.slice(6);
-console.log(pageID);
 
-// Fetch all issues                 //* This will need to be refactored, obviously, to do specific searches on a fetch performed during 
-let comments = [],
+let pageData,
+    threadSelection = d3.select("#threads").selectAll(".thread"),
+    comments = [],
     currentThread = {},
     commentSelection = d3.select("#comments").selectAll("div.comment"),
     scrollReturn,
@@ -15,13 +17,70 @@ let comments = [],
 const   currentUserIdDiv = d3.select("#hidden-user-id"),
         threadViewer = d3.select("#thread-viewer"),
         viewerBackdrop = d3.select(".viewer-backdrop"),
+        threadArea = d3.select("#threads"),
         threadContents = threadViewer.select("#thread-contents"),
-        threadIndex = threadContents.select("#thread-index"),
+        threadIndexDiv = threadContents.select("#thread-index"),
         threadTitle = threadContents.select("#thread-title"),
         commentBox = threadContents.select("#comment-container"),
         newCommentInput = threadContents.select("#new-comment");
 if(!currentUserIdDiv.empty()){
     currentUserID = currentUserIdDiv.text();
+}
+
+updateThreads();
+async function updateThreads(){
+    await fetch(`${baseURL}talk/pagedata/${pageID}`)
+        .then(res => handleErrors(res))
+        .then(res => res.json())
+        .then(res => {
+            pageData = res;
+            threadArea.html("");
+            threadSelection = threadArea.selectAll(".thread")
+                .data(pageData.threads
+                    .slice(0)
+                    .sort(function(x, y){
+                        return d3.ascending(y.lastActivity, x.lastActivity);
+                    }), 
+                    thread => thread._id
+                );
+            let threadEnter = threadSelection.enter()
+                .append("div")
+                    .classed("thread", true)
+                    .attr("id", thread => `thread_${pageData.threads.findIndex(t => String(t._id) == thread._id)}`)
+                    .attr("onclick", "openThread(this)");
+            threadEnter.html(thread => {
+                let threadPreviewHTML = `<div class="threader">
+                    ${thread.subject}<br>
+                    ${new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", timeZoneName: 'short'}).format(Date.parse(thread.lastActivity))}
+                    </div>
+                    `;
+                if(thread.comments.length > 0){
+                    const threadIndex = pageData.threads.findIndex(t => String(t._id) == thread._id);
+                    threadPreviewHTML += `<div class="first-comment" onclick="setParams(${threadIndex}, 0); openThreadAtIndex(${threadIndex}, 0);">
+                        <div class="preview-author">
+                            <img class="mini-pfp" src="${thread.comments[0].author.pfpLink}">
+                            <h4>${thread.comments[0].author.username}</h4>
+                        </div>
+                        <div class="preview-text">${thread.comments[0].text.slice(0, 140)}...</div>
+                    </div>`;
+                }
+                if(thread.comments.length > 1){
+                    const threadIndex = pageData.threads.findIndex(t => String(t._id) == thread._id);
+                    threadPreviewHTML += `<div class="last-comment" onclick="setParams(${threadIndex}, ${thread.comments.length-1}); openThreadAtIndex(${threadIndex}, ${thread.comments.length-1});">
+                        <div class="preview-author">
+                            <img class="mini-pfp" src="${thread.comments[thread.comments.length - 1].author.pfpLink}">
+                            <h4>${thread.comments[thread.comments.length - 1].author.username}</h4>
+                        </div>
+                        <div class="preview-text">${thread.comments[thread.comments.length - 1].text.slice(0, 140)}...</div>
+                    </div>`;
+                }
+                return threadPreviewHTML;
+            });
+            
+            threadSelection.exit().remove();
+            
+        })
+        .catch(res => console.error(res));
 }
 
 let tinyInput, tinyAppBox;
@@ -48,12 +107,21 @@ async function openThread(div){
     let index = threadToOpen.attr("id").slice(7);
     
     // To have the URL reflect what you've opened, a URLSearchParams object is constructed and pushed with the window.history interface.
-    const params = new URLSearchParams(window.location.search);
-    params.set("thread", index);
-    window.history.pushState({}, '', window.location.pathname + "?" + params.toString());
-    
+    setParams(index);
     openThreadAtIndex(index);
 }
+
+function setParams(threadIndex, commentIndex){
+    const params = new URLSearchParams(window.location.search);
+    params.set("thread", threadIndex);
+    if(commentIndex){
+        params.set("comment", commentIndex);
+    } else {
+        params.delete("comment");
+    }
+    window.history.pushState({}, '', window.location.pathname + "?" + params.toString());
+}
+
 function loadCommentAtIndex(index){
     if(comments.length > index){
         document.getElementById(`comment_${index}`).scrollIntoView({
@@ -67,7 +135,7 @@ function loadCommentAtIndex(index){
 window.addEventListener("popstate", event => {
     const params = new URLSearchParams(window.location.search);
     if(!params.has("thread")){
-        threadIndex.text("");
+        threadIndexDiv.text("");
         threadViewer.classed("hidden", true);
         viewerBackdrop.classed("hidden", true);
         window.scrollTo({
@@ -82,10 +150,13 @@ window.addEventListener("popstate", event => {
             openThreadAtIndex(params.get("thread"));
         }
     }
-    
+    updateThreads();
 });
 async function openThreadAtIndex(index, commentIndex){
-    threadIndex.text(index);
+    // Stop event propagation so clicking a first/last comment in a thread preview doesn't activate openThread() on top of openThreadAtIndex().
+    window.event.stopPropagation();
+
+    threadIndexDiv.text(index);
 
     await fetch(`${baseURL}talk/threaddata/${pageID}/${index}`)
         .then(res => handleErrors(res))
@@ -110,7 +181,7 @@ async function openThreadAtIndex(index, commentIndex){
     
 }
 function closeThread(){
-    threadIndex.text("");
+    threadIndexDiv.text("");
     threadViewer.classed("hidden", true);
     viewerBackdrop.classed("hidden", true);
     window.scrollTo({
@@ -119,6 +190,7 @@ function closeThread(){
         behavior: "smooth"
     });
     window.history.pushState({}, '', window.location.pathname);
+    updateThreads();
 }
 function handleErrors(res){
     if(!res.ok){
@@ -176,8 +248,8 @@ async function postComment(){
     let newComment = tinymce.activeEditor.getContent();
     console.log(newComment);
     if(newComment.length > 0){
-        console.log(`${baseURL}talk/comment/${pageID}/${threadIndex.text()}`);
-        await fetch(`${baseURL}talk/comment/${pageID}/${threadIndex.text()}`, {
+        console.log(`${baseURL}talk/comment/${pageID}/${threadIndexDiv.text()}`);
+        await fetch(`${baseURL}talk/comment/${pageID}/${threadIndexDiv.text()}`, {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',

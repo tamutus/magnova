@@ -85,6 +85,20 @@ router.get("/comment/:id", (req, res) => {
             }
         });
 });
+router.get("/commentdata/:id", (req, res) => {
+    Comment.findById(req.params.id)
+        .populate("author")
+        .exec((err, comment) => {
+            if(err){
+                console.log(err);
+                res.send({});
+            } else if(!comment){
+                res.send({});
+            } else {
+                res.send(comment);
+            }
+        });
+})
 router.delete("/comment/:id", isLoggedIn, (req, res) => {
     console.log(`Reached the delete comment route with id ${req.params.id}`);
     Comment.findById(req.params.id)
@@ -121,6 +135,24 @@ router.delete("/comment/:id", isLoggedIn, (req, res) => {
             res.send("Couldn't find comment of yours to delete");
         }
     });
+});
+router.get("/pagedata/:talkpageid", (req, res) => {
+    Talkpage.findById(req.params.talkpageid)
+        .populate({
+            path: "threads.comments",
+            populate: { 
+                path: "author",
+                select: "username pfpLink"
+            }
+        })
+        .exec((err, page) => {
+            if(err){
+                console.log(err);
+                return res.send(err);
+            } else{
+                res.send(page);
+            }
+        });
 });
 router.get("/threaddata/:talkpageid/:threadindex", (req, res) => {
     Talkpage.findById(req.params.talkpageid)

@@ -27,9 +27,9 @@
             <div class="thread" onclick="openThread(this);" id="<%= `thread_${page.threads.indexOf(thread)}` %>">
                 <div class="threader"><%= thread.subject %><br><%= new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", timeZoneName: 'short'}).format(thread.lastActivity) %></div>
                 <% if(thread.comments.length > 0){ %>
-                    <div class="first-comment"></div>
+                    <div class="first-comment"><%= thread.comments[0] %></div>
                 <% } if(thread.comments.length > 1) { %>
-                    <div class="last-comment"></div>
+                    <div class="last-comment"><%= thread.comments[thread.comments.length-1] %></div>
                 <% } %>
             </div>
         <% } %>
