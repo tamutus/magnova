@@ -64,6 +64,8 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use(function(req, res, next){
 	res.locals.currentUser = req.user;
+    res.locals.currentURL = req.url;
+    res.locals.currentHost = req.get("host");
 	res.locals.clientIP = req.headers["x-forwarded-for"]?.split(',').shift() || req.socket?.remoteAddress;
 	next();
 });
