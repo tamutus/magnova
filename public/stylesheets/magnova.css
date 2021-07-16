@@ -79,6 +79,11 @@ body {
 .bio-link:hover {
 	background-color: rgb(51, 39, 61);
 }
+
+#qr img {
+    float: left;
+    margin-right: 30px;
+}
 section {
 	display: flex;
 	justify-content: flex-start;
