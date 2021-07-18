@@ -50,8 +50,8 @@ let tinyInput, tinyAppBox;
 
 tinymce.init({
     selector: '#description-editor',
-    plugins: 'emoticons autoresize fullscreen',
-    toolbar: 'fullscreen',
+    plugins: 'emoticons autoresize fullscreen link',
+    toolbar: 'fullscreen link',
     max_height: 1000,
     setup: editor => {
         editor.on('init', function() {

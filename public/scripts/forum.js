@@ -86,8 +86,8 @@ async function updateThreads(){
 let tinyInput, tinyAppBox;
 tinymce.init({
     selector: '#new-comment',
-    plugins: 'autosave emoticons autoresize',
-    toolbar: 'fullscreen',
+    plugins: 'autosave emoticons autoresize link',
+    toolbar: 'fullscreen link',
     max_height: 600,
     setup: editor => {
         editor.on('init', function() {

@@ -64,9 +64,9 @@ const bioEditor = d3.select("#bio").select("#bio-editor");
 let tinyInput, tinyAppBox;
 tinymce.init({
     selector: '#bio-editor',
-    plugins: 'autosave emoticons autoresize fullscreen',
+    plugins: 'autosave emoticons autoresize fullscreen link',
     // menubar: 'view',
-    toolbar: 'fullscreen',
+    toolbar: 'fullscreen link',
     max_height: 800,
     setup: editor => {
         editor.on('init', function() {
