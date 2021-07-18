@@ -489,7 +489,12 @@ router.get("/data/:id", async (req, res) => {
 	Issue.findById(req.params.id)
 		.populate({
 			path: "issues",
-			populate: { path: "edges" }
+			populate: { 
+                path: "edges",
+                populate: {
+                    path: "vertex"
+                }
+            }
 		})
 		.exec((err, issue) => {
 			if(err){

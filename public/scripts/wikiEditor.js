@@ -2,7 +2,7 @@ let editing = false,
     styleVars = document.documentElement;
 
 // Capture issue id
-const issueID = d3.select("p.hidden.issueID").text();
+const issueID = d3.select("#hidden-issue-id").text();
 
 // Capture display fields
 const nameBox = d3.select("#name-container"),

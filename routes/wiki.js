@@ -47,6 +47,7 @@ router.get("/search", async (req, res) => {
         searchTerm = decodeURIComponent(req.query.target.replace(/\+/g, ' '));
     }
     if(req.query.issues === "true"){
+        results["issues"] = [];
         await Issue.fuzzySearch(searchTerm, (err, issues)=> {
             if(err){
                 console.log(err);
@@ -57,6 +58,7 @@ router.get("/search", async (req, res) => {
         });
     }
     if(req.query.users === "true"){
+        results["users"] = [];
         await User.fuzzySearch(searchTerm, (err, users)=> {
             if(err){
                 console.log(err);
@@ -69,6 +71,7 @@ router.get("/search", async (req, res) => {
     return res.send(results);
 });
 
+// To do: check whether req.params.id is mongoose objectid by this method, https://stackoverflow.com/a/29231016/6096923 , and if it's not look up at the path. refactor to have stable paths.
 router.get('/:id', (req, res) => {
 	Issue.findById(req.params.id)
 		.populate("identifier", "username")

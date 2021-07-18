@@ -4,15 +4,14 @@
 
 const baseURL = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/";
 
-let searchForm = document.querySelector("#search form"),
-    connections = d3.select("#connections").selectAll(".connection"),
+const searchForm = document.querySelector("#search form"),
     loggedIn = document.querySelector("#username"),
     issueSearchbar = d3.select("#issue-searchbar"),
-    issueToLink = issueSearchbar.select("input");
-const currentIssueID = window.location.pathname.slice(6);
+    issueToLink = issueSearchbar.select("input"),
+    currentIssueID = window.location.pathname.slice(6);
 
-// console.log(connections, votes, upvotes);
-let currentUser, userEdgeVotes, currentIssue;
+let currentUser, userEdgeVotes, currentIssue,
+    connections = d3.select("#connections").selectAll(".connection");
 
 function handleErrors(res){
     if(!res.ok){
@@ -30,7 +29,8 @@ const   resultsArea = d3.select("#search-results"),
 
 let searchResults = {},
     issueResultSelection,
-    issueResultInfo;
+    issueResultInfo,
+    pendingSearch = "";
         
 function displayResults(){
     if(searchResults.issues){
@@ -160,20 +160,22 @@ async function searchAll(){
         });
     displayResults();
 }
-// Place buttons that run the upvote and downvote functions
-d3.selectAll(".connection").each(function(){
-    let current = d3.select(this);
-    let targetID = current.attr("id").slice(6);
-    let currentVotes = current.select(".link-votes");
-    currentVotes.append("button")
-        .classed("upvote", true)
-        .on("click", () => upvoteLink(currentIssueID, targetID))
-        .text("Sub-issue");
-    currentVotes.append("button")
-        .classed("downvote", true)
-        .on("click", () => downvoteLink(currentIssueID, targetID))
-        .text("Unrelated");
-});
+// // Place buttons that run the upvote and downvote functions
+// d3.selectAll(".connection").each(function(){
+//     let current = d3.select(this);
+//     let targetID = current.attr("id").slice(6);
+//     let currentVotes = current.select(".link-votes");
+//     currentVotes.append("button")
+//         .classed("upvote", true)
+//         .on("click", () => upvoteLink(currentIssueID, targetID))
+//         .text("Sub-issue");
+//     currentVotes.append("button")
+//         .classed("downvote", true)
+//         .on("click", () => downvoteLink(currentIssueID, targetID))
+//         .text("Unrelated");
+// });
+
+
 // let votes = connections.selectAll(".link-vote");
 // let voteButtons = votes.append("button")
 //     .classed("upvote", true)
@@ -182,14 +184,18 @@ d3.selectAll(".connection").each(function(){
 // <button class="downvote" onclick="<%= `downvoteLink(${issue._id}, ${link.vertex._id})` %>"">Unrelated</button>
 
 let upvotes = d3.selectAll(".upvote"),
-    downvotes = d3.selectAll(".downvote");
+    downvotes = d3.selectAll(".downvote"),
+    connectionSelection;
 
 if(currentIssueID){ loadVotes();}
 async function loadVotes(){
     await fetch(`issue/data/${currentIssueID}`)
     .then(res => handleErrors(res))
     .then(res => res.json())
-    .then(res => currentIssue = res)
+    .then(res => {
+        currentIssue = res;
+        updateSubissues();
+    })
     .catch(err => {
         console.log(err);
     });
@@ -224,44 +230,79 @@ async function loadVotes(){
                 }
                 let scoreSpan = toColor.select(".link-info").select(".link-score"),
                     target = currentIssue.issues.edges.find(i => {
-                        return String(i.vertex) == String(edge.target);
+                        return String(i.vertex._id) == String(edge.target);
                     });
-                console.log(`${target.score} is the score of the target ${edge.target}`);
                 scoreSpan.text(target.score);
             }
         }
     }
     
 }
-let issues = [];
-getIssues();
-function getIssues(){
-    fetch(baseURL + "issue/all")
-        .then(res => handleErrors(res))
-        .then(res => res.json())
-        .then(res => issues = res)
-        .catch(err => {
-            console.log(err)
-        });
+
+// updateSubissues();
+
+function updateSubissues(){
+    connectionSelection = d3.select("#connections").selectAll(".connection")
+        .data(currentIssue.issues.edges, edge => edge.vertex._id);
+    let connectionEnter = connectionSelection
+        .enter()
+            .append("div")
+                .classed("connection", true)
+                .attr("id", edge => `issue-${edge.vertex._id}`);
+    connectionEnter
+        .append("div")
+            .classed("link-info", true)
+            .html(edge => `<a href="wiki/${edge.vertex._id}">${edge.vertex.name}</a>: <span class="link-score">${edge.score}</span>`);
+    let connectionVoteEnter = connectionEnter
+        .append("div")
+            .classed("link-votes", true);
+    if(loggedIn){
+        connectionVoteEnter
+            .append("button")
+                .classed("upvote", true)
+                .text("Sub-issue")
+                .on("click", edge => upvoteLink(currentIssueID, edge.vertex._id));
+        connectionVoteEnter
+            .append("button")
+                .classed("downvote", true)
+                .text("Not")
+                .on("click", edge => downvoteLink(currentIssueID, edge.vertex._id));
+    }
+    connectionSelection.exit().remove();
+    connectionSelection = connectionSelection.merge(connectionEnter);
 }
+
+// let issues = [];
+// getIssues();
+// function getIssues(){
+//     fetch(baseURL + "issue/all")
+//         .then(res => handleErrors(res))
+//         .then(res => res.json())
+//         .then(res => issues = res)
+//         .catch(err => {
+//             console.log(err)
+//         });
+// }
     
 
 // Issue linker stuff
 
-issueToLink.on("input", issueLinkSearch);
+issueToLink.on("change", issueLinkSearch);
 const linksearchInput = document.querySelector("#issue-searchbar input");
 if(linksearchInput){
     linksearchInput.addEventListener("keyup", event => {
         if(event.code === "Enter"){
-            tryLink();
+            issueLinkSearch();
         }
     });
 }
+
 let issueSearchResults;
 
-function issueLinkSearch(){
+async function issueLinkSearch(){
     let input = String(issueSearchbar.select("input").property("value"));
-    let results = issueSearch(input);
+    let results = await issueSearch(input);
+    if(results === "Blocked") return;
     issueSearchResults = d3.select("#found-link-issues").selectAll(".result")
         .data(results, issue => issue._id);
     issueSearchResults
@@ -272,16 +313,44 @@ function issueLinkSearch(){
         .append("div")
             .classed("result", true)
             .text(issue => issue.name)
-            .on("click", issue => setLink(d3.select(activeNode).datum()._id, issue._id));
+            .on("click", issue => upvoteLink(currentIssueID, issue._id));
 }
 
-function issueSearch(input){
+async function issueSearch(input){
     if(input){
-        return issues.filter(issue => {
-            return issue.name.toLowerCase().includes(input.toLowerCase());
+        let fetchString = `wiki/search?target=${encodeURIComponent(input)}&issues=true`;
+        if(pendingSearch !== ""){
+            pendingSearch = fetchString.slice(0);
+            return "Blocked";
+        }
+        pendingSearch = fetchString.slice(0);
+        let results = [];
+        await fetch(baseURL + fetchString)
+            .then(res => handleErrors(res))
+            .then(res => res.json())
+            .then(res => {
+                // If at least one other search was run after your initial call, you should run a new search with the latest one.
+                if(pendingSearch !== fetchString){
+                    unblockSearch();
+                } else{
+                    pendingSearch = "";
+                }
+                results = res.issues;
+                return results;
+            })
+            .catch(err => {
+                console.log(err)
+            });
+        return results.filter(issue => {
+            return (String(issue._id) != String(currentIssueID));
         });
     }
     else return [];
+}
+
+async function unblockSearch(){
+    pendingSearch = "";
+    issueLinkSearch();
 }
 
 function toggleIssueSearchbar(){

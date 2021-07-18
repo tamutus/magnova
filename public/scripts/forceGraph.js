@@ -392,8 +392,9 @@ function updateSimData(){
     sim.alpha(1).restart();
 }
 function updateSimDimensions(){
-    width = parseInt(svg.style("width"));
-    height = parseInt(svg.style("height"));
+    // To match force graph svg styling
+    width = 0.94 * parseInt(window.innerWidth) - 150;
+    height = .90 * parseInt(window.innerHeight);
     if(window.innerWidth <= 900 && window.innerWidth > 650){
         toolSize = 35;
         toolLength = 90;

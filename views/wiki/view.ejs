@@ -52,7 +52,7 @@
             <% if(issue.issues && issue.issues.edges.length > 0 ) { %>
                 <p>The Magnova community says the following issues give rise to <%= issue.name %>. Addressing this issue could be accomplished by dealing with the following sub-issues.
                 <% if(currentUser) { %>
-                    If you agree that <%= issue.name %> is caused by a given issue below, press the "Sub-issue" button next to it. If you think they are not actually related, click the "Unrelated" button.
+                    If you agree that <%= issue.name %> is caused by a given issue below, press the "Sub-issue" button next to it. If you think they are not actually related, click the "Not" (a sub-issue) button.
                 <% } else { %>
                     (Registered users can upvote/downvote these connections.)
                 <% } %>
@@ -60,19 +60,7 @@
             <% } %>
                 <div id="connections-container">
                     <div id="connections">
-                        <% if(issue.issues && issue.issues.edges.length > 0 ) { %>
-                            <% for(link of issue.issues.edges){ %>
-                                <div class="connection" id="issue-<%= link.vertex._id %>">
-                                    <div class="link-info">
-                                        <a href="<%= `wiki/${link.vertex._id}` %>"><%= link.vertex.name %></a>: <span class="link-score"><%= link.score %></span>
-                                    </div>
-                                    <% if(currentUser) { %>
-                                        <div class="link-votes">
-                                        </div>
-                                    <% } %>
-                                </div>
-                            <% } %>
-                        <% } %>
+                       
                     </div>
                     <% if(currentUser) { %>
                         <div id="issue-searchbar">
