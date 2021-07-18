@@ -207,7 +207,7 @@ function showComments(thread){
 }
 
 function updateComments(){
-    commentSelection = d3.select("#comments").selectAll("div.comment").data(comments);
+    commentSelection = d3.select("#comments").selectAll("div.comment").data(comments, c => c._id);
     let commentEnter = commentSelection
         .enter()
         .append("div")

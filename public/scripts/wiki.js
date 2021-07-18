@@ -269,7 +269,10 @@ function updateSubissues(){
                 .on("click", edge => downvoteLink(currentIssueID, edge.vertex._id));
     }
     connectionSelection.exit().remove();
+    
     connectionSelection = connectionSelection.merge(connectionEnter);
+    d3.select("#connections-are-empty")
+        .classed("hidden", !connectionSelection.empty());
 }
 
 // let issues = [];
