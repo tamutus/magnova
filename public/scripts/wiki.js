@@ -29,8 +29,7 @@ const   resultsArea = d3.select("#search-results"),
 
 let searchResults = {},
     issueResultSelection,
-    issueResultInfo,
-    pendingSearch = "";
+    issueResultInfo;
         
 function displayResults(){
     if(searchResults.issues){
@@ -151,10 +150,9 @@ async function searchAll(){
     if(formInput.get("users") === "true"){
         fetchString += `&users=${encodeURIComponent(formInput.get("users"))}`;
     }
-    await fetch(baseURL + fetchString)
+    searchResults = await fetch(baseURL + fetchString)
         .then(res => handleErrors(res))
         .then(res => res.json())
-        .then(res => searchResults = res)
         .catch(err => {
             console.log(err)
         });
@@ -291,34 +289,37 @@ function updateSubissues(){
 // Issue linker stuff
 
 issueToLink.on("change", issueLinkSearch);
-const linksearchInput = document.querySelector("#issue-searchbar input");
-if(linksearchInput){
-    linksearchInput.addEventListener("keyup", event => {
-        if(event.code === "Enter"){
-            issueLinkSearch();
-        }
-    });
-}
+// const linksearchInput = document.querySelector("#issue-searchbar input");
+// if(linksearchInput){
+//     linksearchInput.addEventListener("keyup", event => {
+//         if(event.code === "Enter"){
+//             issueLinkSearch();
+//         }
+//     });
+// }
 
 let issueSearchResults;
 
 async function issueLinkSearch(){
-    let input = String(issueSearchbar.select("input").property("value"));
+    let input = String(issueToLink.property("value"));
     let results = await issueSearch(input);
-    if(results === "Blocked") return;
+    if(results === "Blocked") {
+        return;
+    }
     issueSearchResults = d3.select("#found-link-issues").selectAll(".result")
         .data(results, issue => issue._id);
-    issueSearchResults
-        .exit()
-            .remove();
     issueSearchResults
         .enter()
         .append("div")
             .classed("result", true)
             .text(issue => issue.name)
             .on("click", issue => upvoteLink(currentIssueID, issue._id));
+    issueSearchResults
+        .exit()
+            .remove();
 }
 
+let pendingSearch = "";
 async function issueSearch(input){
     if(input){
         let fetchString = `wiki/search?target=${encodeURIComponent(input)}&issues=true`;
@@ -327,34 +328,65 @@ async function issueSearch(input){
             return "Blocked";
         }
         pendingSearch = fetchString.slice(0);
-        let results = [];
-        await fetch(baseURL + fetchString)
-            .then(res => handleErrors(res))
-            .then(res => res.json())
-            .then(res => {
-                // If at least one other search was run after your initial call, you should run a new search with the latest one.
-                if(pendingSearch !== fetchString){
-                    unblockSearch();
-                } else{
-                    pendingSearch = "";
-                }
-                results = res.issues;
-                return results;
-            })
-            .catch(err => {
-                console.log(err)
-            });
-        return results.filter(issue => {
-            return (String(issue._id) != String(currentIssueID));
-        });
+        let results = await issueFetch(fetchString);
+        return results;
     }
     else return [];
 }
-
-async function unblockSearch(){
-    pendingSearch = "";
-    issueLinkSearch();
+async function issueFetch(fetchString){
+    let results = await fetch(baseURL + fetchString)
+        .then(res => handleErrors(res))
+        .then(res => res.json())
+        .then(res => {
+            // If at least one other search was run after your initial call, you should run a new search with the latest one.
+            if(pendingSearch !== fetchString){
+                return issueFetch(pendingSearch);
+            } else {
+                pendingSearch = "";
+                return res.issues;
+            }
+        })
+        .catch(err => {
+            console.log(err)
+        });
+    return results;
 }
+// async function issueSearch(input){
+//     if(input){
+//         let fetchString = `wiki/search?target=${encodeURIComponent(input)}&issues=true`;
+//         if(pendingSearch !== ""){
+//             pendingSearch = fetchString.slice(0);
+//             return "Blocked";
+//         }
+//         pendingSearch = fetchString.slice(0);
+//         let results = [];
+//         await fetch(baseURL + fetchString)
+//             .then(res => handleErrors(res))
+//             .then(res => res.json())
+//             .then(res => {
+//                 // If at least one other search was run after your initial call, you should run a new search with the latest one.
+//                 if(pendingSearch !== fetchString){
+//                     unblockSearch();
+//                 } else{
+//                     pendingSearch = "";
+//                 }
+//                 results = res.issues;
+//                 return results;
+//             })
+//             .catch(err => {
+//                 console.log(err)
+//             });
+//         return results.filter(issue => {
+//             return (String(issue._id) != String(currentIssueID));
+//         });
+//     }
+//     else return [];
+// }
+
+// async function unblockSearch(){
+//     pendingSearch = "";
+//     issueLinkSearch();
+// }
 
 function toggleIssueSearchbar(){
     issueSearchbar.classed("hidden", !issueSearchbar.classed("hidden"));

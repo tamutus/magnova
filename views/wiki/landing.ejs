@@ -54,9 +54,30 @@
             </form>
         </div>
     </div>
+    <!-- <div id="project-submission">
+        <h2>
+            Create a Project
+        </h2>	
+        <div id="project-submitter">
+            <form action="/project" method="post">
+                <div class="form-group">
+                    <input type="text" placeholder="Project name" name="project[name]">
+                </div>
+                <div class="form-group">
+                    <input type="text" placeholder="Image URL" name="project[image]">
+                </div>
+                <div class="form-group">
+                    <textarea placeholder="Description" name="project[info]"></textarea>
+                </div>
+                <button type="submit">
+                    Submit
+                </button>
+            </form>
+        </div>
+    </div> -->
     <section id="issues">
 		<% if(topIssues?.length > 0){%>
-            <h2>Recently Identified Issues</h2>
+            <h2>Know: Recently Identified Issues</h2>
             <p></p>
             <div id="issue-browse">
                 <% topIssues.forEach(function(issue){ %>
@@ -77,15 +98,15 @@
         <% } %>
 	</section>
 	<section id="projects">
-		<h2>Projects</h2>
-		<p>At each level of complexity, people have a variety of ideas for how to solve these problems, and so on any issue you will be able to crowdsource projects to create change with volunteer opportunities for the Magnova community.</p>
+		<h2>Organize: Projects</h2>
+		<p>At each level of complexity, people have a variety of ideas for how to solve these problems, and so on any issue you will be able to crowdsource projects to create change with volunteer opportunities for the Magnova community. A project is a coordinated gameplan, a collection of Tasks and strategic insights. Projects have templates and local instances. The template is a general outline of a plan, and includes any information that can be helpful to people in different locations. Once location handling is developed on Magnova, you will be able to create an instance of a project template at a given location. A project template has links to task templates, and when you create a local instance of a project, you will create local instances of those tasks as well.</p>
         <br>
         <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
-        <p></p>
 	</section>
-	<section id="actions">
-		<h2>Actions</h2>
-        <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
+	<section id="tasks">
+		<h2>Act: Tasks</h2>
+        <p>Magnova reenvisions human labor as not a set of 9–5 jobs that people are trapped by, but a set of fun things to do that also make society function smoothly. A Task on Magnova is a chunk of action that an individual person can do. The more accessible you make a task, the more people will want to do it. Some tasks will require special expertise or access, and that can be specified. When you complete a task, a verified user will Eventually, we will also develop a Skill and Badge system to help </p>
+        <br><p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
     <section id="maps">
         <h2>Maps</h2>
@@ -95,19 +116,24 @@
     </section>
     <section id="resources">
 		<h2>Resources</h2>
+        <p>We aspire to create a system of goods production with social profit—where people have the right to the things they make, and surplus is donated compassionately and intelligently to members of the community. Magnova will make this possible by providing a virtual library of physical goods, a catalogue of Resources and goods that our community produces and uses. Users will be able to donate tools, raw materials, parts, and the like to be shared by the Magnova community, registering those things and their location in our catalogue. Tasks and Formulas will be able to store references to Resources, paving the way for automation of dynamically allocating resources to where they're needed. Social ownership of the means of production will reduce the barrier to entry for individuals who want to create things or change in the world.</p>
+        <br>
         <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
     <section id="formulas">
 		<h2>Formulas</h2>
-        <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
+        Socializing the means of production means making it easier to get involved with producing things. And so Magnova will house a repository of guides on how to create things. Formulas will allow the community to establish best practices for transforming one set of resources to another. Knowledge about how to make things belongs to everyone!
+        <br><p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
     <section id="tags">
 		<h2>Tags</h2>
-        <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
+        <p>Magnova will employ a tag system.</p>
+        <br><p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
     <section id="harms">
 		<h2>Harms</h2>
-        <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
+        <p>Issues describe general problems with the world, whereas Harms will quantify them. When we implement Harm metrics, users will be able to plug in numbers to issues and projects for how much bad exists and how much good can be done. Quantifying problems will make it possible to bring attention to which issues are most pressing. Not everybody needs to navigate the whole issue map; some just want to do the most good they can. Harms will also provide a way of showing locational variance in issue severity.</p>
+        <br><p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
 </div>
 <script src="https://d3js.org/d3.v4.js"></script>

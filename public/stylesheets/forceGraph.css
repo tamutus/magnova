@@ -244,20 +244,20 @@ circle.link-vote {
     position: fixed;
     display: flexbox;
     min-height: 100px;
-    max-height: 500px;
-    width: 200px;
+    width: 300px;
     right: 6vw;
     top: 8vh;
+    padding: 5px;
     justify-content: space-around;
     font-size: 15px;
-    background-color: rgb(141, 141, 241);
+    background-color: rgb(71, 5, 77);
     border-radius: 10px;
     z-index: 3;
     transform-origin: top right;
     transition: transform .5s ease;
 }
 #issue-searchbar > div {
-    background-color: rgb(168, 168, 241);
+    background-color: rgb(107, 8, 116);
     margin: 5px;
     padding: 5px;
     border-radius: 5px;
@@ -271,6 +271,22 @@ circle.link-vote {
     height: 1.5em;
     width: 80%;
     margin: 10px auto 20px auto;
+}
+#found-link-issues {
+    width: 90%;
+    max-height: 500px;
+    overflow-y: auto;
+    display: flexbox;
+    flex-flow: column nowrap;
+    align-content: center;
+}
+#found-link-issues div.result{
+    color: black;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 3px;
+    background-color: rgb(255, 158, 102);
+    border: 2px solid rgb(253, 144, 80);
 }
 #found-issues {
     width: 90%;

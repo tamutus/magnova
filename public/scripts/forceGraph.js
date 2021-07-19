@@ -108,19 +108,9 @@ clearButton.on("click", () => {
 createButton.on("click", () => {
 
 });
-issueToLink.on("input", issueLinkSearch);
-document.querySelector("#issue-searchbar input").addEventListener("keyup", event => {
-    if(event.code === "Enter"){
-        tryLink();
-    }
-});
-issueToLoad.on("input", issueLoadSearch);
-document.querySelector("#issue-to-load").addEventListener("keyup", event => {
-    if(event.code === "Enter"){
-        if(loadedIssues.selectAll(".result").length !== 0)
-            tryLoad(loadedIssues.select(".result").datum()._id);
-    }
-});
+
+issueToLink.on("change", issueLinkSearch);
+issueToLoad.on("change", issueLoadSearch);
 
   //==============================//
  // Node and link handling logic //
@@ -572,29 +562,29 @@ function toggleLinkTools(link){
  // Tool functions //
 //================//
 
-function issueLoadSearch(){
+async function issueLoadSearch(){
     let input = String(issueToLoad.property("value"));
-    let results = issueSearch(input);
-    if(input !== ""){
-        results = issues.filter(issue => {
-            return issue.name.toLowerCase().includes(input.toLowerCase());
-        });
-        loadedIssues.classed("hidden", false);
+    let results = await issueSearch(input);
+    if(results === "Blocked"){
+        return;
     }
-    else{
+    if(results.length > 0){
+        loadedIssues.classed("hidden", false);
+    } else {
         loadedIssues.classed("hidden", true);
     }
     let issueSearchResults = loadedIssues.selectAll(".result")
-        .data(results, issue => issue.name);
+        .data(results, issue => issue._id);
+    issueSearchResults.sort((a, b) => d3.descending(a.confidenceScore, b.confidenceScore));
+    issueSearchResults
+        .exit()
+            .remove();
     issueSearchResults
         .enter()
         .append("div")
             .classed("result", true)
             .text(issue => issue.name)
-            .on("click", issue => tryLoad(issue._id));
-    issueSearchResults
-        .exit()
-            .remove();
+            .on("click", issue => tryLoad(issue._id));    
 }
 async function tryLoad(issueID){
     // console.log(issueID);
@@ -603,6 +593,7 @@ async function tryLoad(issueID){
     });
     if(alreadyLoaded === -1){
         // console.log(issues);
+        // refactoring to run a search
         let addedIssue = issues.find(node => node._id == issueID);
         if(!addedIssue){
             await fetch(baseURL + `issue/data/${nodeID}`)
@@ -814,18 +805,48 @@ function unload(){
     updateSimData();
     
 }
-function issueSearch(input){
+
+let pendingSearch = "";
+async function issueSearch(input){
     if(input){
-        return issues.filter(issue => {
-            return issue.name.toLowerCase().includes(input.toLowerCase());
-        });
+        let fetchString = `wiki/search?target=${encodeURIComponent(input)}&issues=true`;
+        if(pendingSearch !== ""){
+            pendingSearch = fetchString.slice(0);
+            return "Blocked";
+        }
+        pendingSearch = fetchString.slice(0);
+        let results = await issueFetch(fetchString);
+        return results;
     }
     else return [];
 }
+async function issueFetch(fetchString){
+    let results = await fetch(baseURL + fetchString)
+        .then(res => handleErrors(res))
+        .then(res => res.json())
+        .then(res => {
+            // If at least one other search was run after your initial call, you should run a new search with the latest one.
+            if(pendingSearch !== fetchString){
+                return issueFetch(pendingSearch);
+            } else {
+                pendingSearch = "";
+                return res.issues;
+            }
+        })
+        .catch(err => {
+            console.log(err)
+        });
+    return results;
+}
+
 let issueSearchResults;
-function issueLinkSearch(){
-    let input = String(d3.select("#issue-searchbar").select("input").property("value"));
-    let results = issueSearch(input);
+async function issueLinkSearch(){
+    let input = String(issueToLink.property("value"));
+    let results = await issueSearch(input);
+    if(results === "Blocked"){
+        return;
+    }
+    results = results.filter(issue => issue._id != d3.select(activeNode).datum()._id);
     issueSearchResults = d3.select("#found-link-issues").selectAll(".result")
         .data(results, issue => issue.name);
     issueSearchResults

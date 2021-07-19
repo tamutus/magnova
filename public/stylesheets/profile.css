@@ -84,6 +84,10 @@ h2 {
     /* overflow: visible; */
 }
 #names > * {
+    flex-grow: 0;
+    flex-shrink: 1;
+}
+#names .handle {
     flex: 1 1 50%;
 }
 #names > .hidden {
@@ -92,13 +96,14 @@ h2 {
 .preferred-name {
     font-family: 'Oxygen', sans-serif;
     font-weight: 700;
+    box-sizing: border-box;
 }
 .handle {
     font-family: 'Orbitron', sans-serif;
     font-weight: 900;
     font-size: 24px;
     letter-spacing: .1em;
-    width: 150px;
+    transform: translateX(20px);
 }
 #bio {
     display: flex;
