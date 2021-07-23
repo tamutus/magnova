@@ -1,8 +1,22 @@
 :root {
 	--editorHeight: 0px;
+    --bodyGradient: linear-gradient(-10deg, rgb(209, 105, 2), rgba(94, 49, 105, 1) 40%, rgba(44, 23, 136, 1) 80%, rgba(46, 8, 77, 1));
+    --linkColor: rgb(174, 247, 225);
+    --visitedLinkColor: rgb(128, 235, 203);
 }
 
-#hidden-issue-id {
+body {
+    background: var(--bodyGradient);
+}
+a {
+	color: var(--linkColor);
+	text-decoration: none;
+}
+a:visited {
+	color: var(--visitedLinkColor);
+}
+
+#hidden-issue-id, #hidden-project-id, #hidden-task-id {
     display: none;
 }
 #search form {
@@ -66,9 +80,17 @@
 }
 #issue-results .search-result {
     background: linear-gradient(-30deg, rgb(255, 158, 102), rgb(252, 211, 201));
+    border: 3px solid rgb(253, 144, 80);
 }
 #user-results .search-result {
     background: linear-gradient(-30deg, rgb(92, 95, 255), rgb(166, 104, 207));
+    border: 3px solid rgb(90, 51, 233);
+    color: rgb(255, 246, 193);
+}
+#project-results .search-result {
+    background: linear-gradient(30deg, rgb(25, 110, 96), rgb(54, 151, 62));
+    border: 3px solid rgb(12, 83, 71);
+    color: rgb(227, 234, 255);
 }
 .result-name-link {
     flex: 0 3 200px;
@@ -76,12 +98,21 @@
 .result-name {
     color: rgb(54, 1, 97);
 }
-p.issue-info {
+p.issue-info, p.user-bio, p.project-info {
     flex: 0 1 400px;
     vertical-align: top;
-    border: 2px solid rgba(253, 144, 80, .9);
     border-radius: 4px;
     padding: 15px;
+    background-color: rgba(255, 255, 255, 0.13);
+}
+p.issue-info {
+    border: 2px solid rgba(253, 144, 80, .9);
+}
+p.user-bio {
+    border: 2px solid rgba(90, 51, 233, .9);
+}
+p.project-info {
+    border: 2px solid rgba(12, 83, 71, .9);
 }
 .result-thumbnail {
     object-fit: cover;
@@ -93,7 +124,7 @@ h4.result-name {
     display: inline-block;
     margin: 5px 15px 3px 10px;
 }
-#issue-submission {
+#issue-submission, #project-submission {
     display: inline-block;
     width: 300px;
     margin: 20px auto;
@@ -102,11 +133,11 @@ h4.result-name {
     border-radius: 30px;
     padding-left: 20px;
 }
-#issue-submitter h2 {
+#issue-submitter h2, #project-submitter h2{
     text-align: center;
     margin: auto;
 }
-#issue-forms form {
+#issue-forms form, #project-forms form{
     width: 300px;
     display: flex;
     flex-flow: column nowrap;
@@ -114,25 +145,25 @@ h4.result-name {
     align-content: center;
     margin: auto;
 }
-#issue-submitter * .form-group{
+#issue-submitter * .form-group, #project-submitter * .form-group{
     width: 100%;
 }
-#issue-submitter * input, #issue-submitter * textarea {
+#issue-submitter * input, #issue-submitter * textarea, #project-submitter * input, #project-submitter * textarea {
     width: 85%;
     padding: 5px;
     margin: 5px;
     border-radius: 5px;
 }
-#issue-submitter * button {
+#issue-submitter * button, #project-submitter * button {
     width: 200px;
 }
-.issue-snapshot {
+.issue-snapshot, .project-snapshot {
     width: 200px;
     height: 200px;
     text-align: left;
     margin: 15px 10px;
 }
-.issue-thumbnail {
+.issue-thumbnail, .project-thumbnail {
     width: 200px;
     height: 150px;
     display: flex;
@@ -140,17 +171,17 @@ h4.result-name {
     align-content: center;
     margin-bottom: 10px;
 }
-.issue-thumbnail img {
+.issue-thumbnail img, .project-thumbnail img {
     max-width: 200px;
     max-height: 150px;
     margin: auto;
     border-radius: 10px;
 }
-.issue-snapshot a h4 {
+.issue-snapshot a h4, .project-snapshot a h4 {
     margin: auto;
     text-align: center;
 }
-#issue-browse {
+#issue-browse, #project-browse {
     width: 100%;
     height: 250px;
     display: flex;
@@ -207,7 +238,7 @@ input.issue-name {
     height: var(--editorHeight);
     display: inline-block;
 }
-#connections-container {
+#connections-container, #projects-container {
     width: 90%;
     display: flex;
     flex-flow: row wrap;
@@ -223,7 +254,7 @@ input.issue-name {
 	border-radius: 6px;
     margin: 5px;
 }
-#issue-searchbar {
+#issue-searchbar, #project-searchbar {
     /* position: fixed; */
     flex-basis: 4 1 40%;
     display: flexbox;
@@ -235,13 +266,18 @@ input.issue-name {
     align-items: center;
     font-size: 15px;
     text-align: center;
-    background-color: rgb(141, 141, 241);
     border-radius: 10px;
     z-index: 3;
     transform-origin: top right;
     transition: transform .5s ease;
 }
-#issue-searchbar.hidden {
+#issue-searchbar {
+    background-color: rgb(71, 5, 77);
+}
+#project-searchbar {
+    background-color:rgb(49, 92, 47)
+}
+#issue-searchbar.hidden, #project-searchbar.hidden {
     width: 0;
     overflow: hidden;
 }
@@ -249,31 +285,47 @@ input.issue-name {
     min-height: 40px;
     max-height: 80px;
 }
-#issue-searchbar > div {
-    background-color: rgb(168, 168, 241);
-    margin: 5px auto;
+#issue-searchbar > div, #project-searchbar > div {
+    margin: 5px;
     padding: 5px;
     border-radius: 5px;
 }
-#issue-searchbar input {
+#issue-searchbar > div {
+    background-color: rgb(107, 8, 116);
+}
+#project-searchbar > div {
+    background-color: rgb(18, 138, 38);
+}
+#issue-searchbar input, #project-searchbar input {
     width: 80%;
     height: 40px;
     margin: 10px auto;
 }
-#issue-searchbar button {
+#issue-searchbar button, #project-searchbar button {
     font-size: 18px;
     height: 1.5em;
     width: 80%;
     margin: 10px auto 20px auto;
 }
-#found-link-issues {
+#found-issue-links, #found-project-links {
     height: 320px;
     width: 90%;
     overflow-y: scroll;
-    background-color:rgb(33, 33, 143);
 }
-#found-link-issues div.result {
+#found-issue-links {
+    /* background-color:rgb(33, 33, 143); */
+}
+#found-project-links {
+    
+}
+#found-issue-links div.result {
     /* background-color: rgb(190, 190, 245); */
+    color: black;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 3px;
+    background-color: rgb(255, 158, 102);
+    border: 2px solid rgb(253, 144, 80);
     padding: 7px;
     margin: 10px auto;
     border-radius: 3px;
@@ -285,7 +337,7 @@ input.issue-name {
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
-#connections {
+#issue-connections, #project-connections {
     flex-basis: 6 1 60%;
     display: flex;
     max-height: 400px;
@@ -294,7 +346,7 @@ input.issue-name {
     overflow-y: auto;
     /* margin: 20px auto 30px auto; */
 }
-#connections p {
+#issue-connections p, #project-connections p {
     margin-bottom: 30px;
 }
 .connection {
@@ -304,17 +356,17 @@ input.issue-name {
     justify-content: flex-end;
     margin: 8px auto;
 }
-.link-info {
+.link-info, .project-info {
     width: 275px;
 } 
-.link-votes{
+.link-votes, .project-votes{
     margin-left: 25px;
     width: 300px;
     display: flex;
     flex-flow: row nowrap;
 }
-.link-votes button {
-    height: 35px;
+.link-votes button, .project-votes button {
+    height: 40px;
     width: 130px;
     padding: 0px 10px;
     margin: 5px 10px;
@@ -366,12 +418,12 @@ input.issue-name {
 #image-input.hidden {
     width: 0;
 }
-#issue-image {
+#topic-image {
     transform-origin: top center;
     transform: scale(1);
     transition: transform .5s ease-in-out;
 }
-#issue-image.shrunk {
+#topic-image.shrunk {
     transform: scale(.9);
 }
 #editing-block {
@@ -420,8 +472,8 @@ input.issue-name {
 #discussion-block {
     display: flex;
     flex-flow: row nowrap;
-    justify-content: flex-end;
-    justify-items: flex-end;
+    justify-content: flex-start;
+    justify-items: flex-start;
     align-items: baseline;
     margin-bottom: 30px;
 }

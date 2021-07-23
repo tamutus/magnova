@@ -8,10 +8,37 @@ const searchForm = document.querySelector("#search form"),
     loggedIn = document.querySelector("#username"),
     issueSearchbar = d3.select("#issue-searchbar"),
     issueToLink = issueSearchbar.select("input"),
-    currentIssueID = window.location.pathname.slice(6);
+    projectSearchbar = d3.select("#project-searchbar"),
+    projectToLink = projectSearchbar.select("input");
 
-let currentUser, userEdgeVotes, currentIssue,
-    connections = d3.select("#connections").selectAll(".connection");
+let currentUser, userEdgeVotes, userProjectVotes, currentTopicData, 
+    issueConnections = d3.select("#issue-connections").selectAll(".connection"),
+    projectConnections = d3.select("#project-list").selectAll(".project");
+
+// Capture topic id
+const   issueIdDiv = d3.select("#hidden-issue-id"),
+        projectIdDiv = d3.select("#hidden-project-id"),
+        taskIdDiv = d3.select("#hidden-task-id");
+let topicID,
+    routeBase;
+
+let domRoot = document.documentElement; //root is later declared in nav.js
+
+// Conditional logic to determine page type
+if(!issueIdDiv.empty()){ 
+    topicID = issueIdDiv.text(); 
+    routeBase = "wiki";
+}
+else if(!projectIdDiv.empty()){
+    topicID = projectIdDiv.text(); 
+    routeBase = "project";
+    domRoot.style.setProperty("--bodyGradient", "linear-gradient(-10deg, rgb(0, 148, 0), rgb(13, 125, 139), rgb(106, 19, 141), rgb(209, 105, 2))");
+    // domRoot.style.setProperty("--linkColor")
+}
+else if(!taskIdDiv.empty()){
+    topicID = taskIdDiv.text();
+    routeBase = "task";
+}
 
 function handleErrors(res){
     if(!res.ok){
@@ -25,26 +52,39 @@ const   resultsArea = d3.select("#search-results"),
         issueResultHeader = resultsArea.select("#issue-results-header"),
         issueResultDisplay = resultsArea.select("#issue-results"),
         userResultHeader = resultsArea.select("#user-results-header"),
-        userResultDisplay = resultsArea.select("#user-results");
+        userResultDisplay = resultsArea.select("#user-results"),
+        projectResultHeader = resultsArea.select("#project-results-header"),
+        projectResultDisplay = resultsArea.select("#project-results");
 
 let searchResults = {},
     issueResultSelection,
-    issueResultInfo;
+    issueResultInfo,
+    userResultSelection,
+    userResultInfo,
+    projectResultSelection,
+    projectResultInfo;
         
 function displayResults(){
-    if(searchResults.issues){
+    if(searchResults.issues && searchResults.issues.length > 0){
         issueResultHeader.classed("hidden", false);
     }
     else{
         issueResultHeader.classed("hidden", true);
         searchResults.issues = [];
     }
-    if(searchResults.users){
+    if(searchResults.users && searchResults.users.length > 0){
         userResultHeader.classed("hidden", false);
     }
     else{
         userResultHeader.classed("hidden", true);
         searchResults.users = [];
+    }
+    if(searchResults.projects && searchResults.projects.length > 0){
+        projectResultHeader.classed("hidden", false);
+    }
+    else{
+        projectResultHeader.classed("hidden", true);
+        searchResults.projects = [];
     }
 
     // Display issue results
@@ -126,7 +166,48 @@ function displayResults(){
             });
     userResultSelection.exit().remove();
     userResultSelection = userResultSelection.merge(userResultsEnter);
-
+    
+    // Display project results
+    projectResultSelection = projectResultDisplay.selectAll(".search-result")
+        .data(searchResults.projects, d => d._id);
+    let projectResultsEnter = projectResultSelection
+        .enter()
+        .append("div")
+            .classed("search-result", true);
+    projectResultsEnter
+        .append("a")
+        .attr("href", project => `${baseURL}project/${project._id}`)
+        .classed("result-thumbnail-link", true)
+            .append("img")
+                .classed("result-thumbnail", true)
+                // .attr("src", project => project.image || "/assets/BLM.svg");
+                .attr("src", project => "/assets/BLM.svg");
+    projectResultsEnter
+        .append("a")
+        .attr("href", project => `${baseURL}project/${project._id}`)
+        .classed("result-name-link", true)
+            .append("h4")
+                .classed("result-name", true)
+                .text(project => {
+                    if(project?.name.length > 50){
+                        return `${project.name.slice(0, 46)}...` 
+                    }
+                    else{ return project.name; }
+                });
+    projectResultsEnter
+        .append("p")
+            .classed("project-info", true)
+            .text(project => {
+                let formattedInfo = project?.info || "";
+                formattedInfo = formattedInfo.replace( /(<([^>]+)>)/ig, '');
+                if(formattedInfo.length > 100){
+                    return `${formattedInfo.slice(0, 96)}...` 
+                }
+                else{ return formattedInfo; }
+            });
+    projectResultSelection.exit().remove();
+    projectResultSelection = projectResultSelection.merge(projectResultsEnter);
+    
 }
 function clearSearch(){
     searchResults = {};
@@ -145,10 +226,13 @@ async function searchAll(){
     let formInput = new FormData(searchForm);
     let fetchString = `wiki/search?target=${encodeURIComponent(formInput.get("target"))}`;
     if(formInput.get("issues") === "true"){
-        fetchString += `&issues=${encodeURIComponent(formInput.get("issues"))}`;
+        fetchString += `&issues=true`;
     }
     if(formInput.get("users") === "true"){
-        fetchString += `&users=${encodeURIComponent(formInput.get("users"))}`;
+        fetchString += `&users=true`;
+    }
+    if(formInput.get("projects") === "true"){
+        fetchString += `&projects=true`;
     }
     searchResults = await fetch(baseURL + fetchString)
         .then(res => handleErrors(res))
@@ -183,16 +267,21 @@ async function searchAll(){
 
 let upvotes = d3.selectAll(".upvote"),
     downvotes = d3.selectAll(".downvote"),
-    connectionSelection;
+    connectionSelection, projectLinkSelection;
 
-if(currentIssueID){ loadVotes();}
+if(topicID){ loadVotes();}
 async function loadVotes(){
-    await fetch(`issue/data/${currentIssueID}`)
+    let dataRoute = routeBase;
+    if(dataRoute === "wiki"){
+        dataRoute = "issue";
+    }
+    await fetch(`${dataRoute}/data/${topicID}`)
     .then(res => handleErrors(res))
     .then(res => res.json())
     .then(res => {
-        currentIssue = res;
-        updateSubissues();
+        currentTopicData = res;
+        if(currentTopicData.issues){ updateSubissues(); }
+        if(currentTopicData.projects){ updateProjects(); }
     })
     .catch(err => {
         console.log(err);
@@ -210,38 +299,88 @@ async function loadVotes(){
         .catch(err => {
             console.log(err);
         });
-        // Get the current user's edgevotes for this issue
-        
-        let edgeVotes = currentUser.edgeVotes.find(edgeSet => edgeSet.source == currentIssueID);
+        // Get the current user's votes to issues for this topic
+        let edgeVotes = {source: topicID, targets: []};
+        if(routeBase === "wiki"){
+            edgeVotes = currentUser.edgeVotes.find(edgeSet => String(edgeSet.source) == String(topicID));
+        } else if(routeBase === "project"){
+            // Since issue-project links are stored in user model as an array of issues linking to arrays of projects, 
+            // here it reduces to a new object linking a project to an array of issues.
+            edgeVotes = currentUser.projectVotes.reduce((acc, edgeSet) => {
+                let edge = edgeSet.targets.find(e => {
+                    return String(e.project) == String(topicID)
+                })
+                if(edge){
+                    acc.targets.push({
+                        target: edgeSet.issue,
+                        vote: edge.vote
+                    });
+                }
+                return acc;
+            }, {source: topicID, targets: []} ); // Empty array is the initial value of the accumulator
+        }
         if(edgeVotes){
             for(edge of edgeVotes.targets){
-                let t = "#issue-" + edge.target;
-                let toColor = d3.select(t);
-                let upvote = toColor.select(".link-votes").select(".upvote"),
-                    downvote = toColor.select(".link-votes").select(".downvote");
-                if(edge.vote){
-                    upvote.classed("up", true);
-                    downvote.classed("down", false);
-                } else {
-                    upvote.classed("up", false);
-                    downvote.classed("down", true);
-                }
-                let scoreSpan = toColor.select(".link-info").select(".link-score"),
-                    target = currentIssue.issues.edges.find(i => {
-                        return String(i.vertex._id) == String(edge.target);
-                    });
-                scoreSpan.text(target.score);
+                reflectUserIssueVote(edge);
+            }
+        }
+        // Get the current user's votes to projects for this topic
+        let projectVotes = {source: topicID, targets: []};
+        if(routeBase === "wiki" && currentUser.projectVotes){
+            projectVotes = currentUser.projectVotes.find(edgeSet => String(edgeSet.issue) == String(topicID));
+        } else if(routeBase === "task"){
+            console.log("You still have to implement this, Lavra");
+        }
+        if(projectVotes){
+            for(edge of projectVotes.targets){
+                reflectUserProjectVote(edge);
             }
         }
     }
     
 }
+function reflectUserIssueVote(edge){
+    let t = "#issue-" + edge.target;
+    let toColor = d3.select(t);
+    let upvote = toColor.select(".link-votes").select(".upvote"),
+        downvote = toColor.select(".link-votes").select(".downvote");
+    if(edge.vote){
+        upvote.classed("up", true);
+        downvote.classed("down", false);
+    } else {
+        upvote.classed("up", false);
+        downvote.classed("down", true);
+    }
+    let scoreSpan = toColor.select(".link-info").select(".link-score"),
+        target = currentTopicData.issues.edges.find(i => {
+            return String(i.vertex._id) == String(edge.target);
+        });
+    scoreSpan.text(target.score);
+}
+function reflectUserProjectVote(edge){
+    let p = "#project-" + edge.project;
+    let toColor = d3.select(p);
+    let upvote = toColor.select(".project-votes").select(".upvote"),
+        downvote = toColor.select(".project-votes").select(".downvote");
+    if(edge.vote){
+        upvote.classed("up", true);
+        downvote.classed("down", false);
+    } else {
+        upvote.classed("up", false);
+        downvote.classed("down", true);
+    }
+    let scoreSpan = toColor.select(".project-info").select(".project-score"),
+        target = currentTopicData.projects.edges.find(i => {
+            return String(i.vertex._id) == String(edge.project);
+        });
+    scoreSpan.text(target.score);
+}
 
 // updateSubissues();
 
 function updateSubissues(){
-    connectionSelection = d3.select("#connections").selectAll(".connection")
-        .data(currentIssue.issues.edges, edge => edge.vertex._id);
+    connectionSelection = d3.select("#issue-connections").selectAll(".connection")
+        .data(currentTopicData.issues.edges, edge => edge.vertex._id);
     let connectionEnter = connectionSelection
         .enter()
             .append("div")
@@ -259,18 +398,51 @@ function updateSubissues(){
             .append("button")
                 .classed("upvote", true)
                 .text("Sub-issue")
-                .on("click", edge => upvoteLink(currentIssueID, edge.vertex._id));
+                .on("click", edge => upvoteIssueLink(topicID, edge.vertex._id));
         connectionVoteEnter
             .append("button")
                 .classed("downvote", true)
                 .text("Not")
-                .on("click", edge => downvoteLink(currentIssueID, edge.vertex._id));
+                .on("click", edge => downvoteIssueLink(topicID, edge.vertex._id));
     }
     connectionSelection.exit().remove();
     
     connectionSelection = connectionSelection.merge(connectionEnter);
     d3.select("#connections-are-empty")
         .classed("hidden", !connectionSelection.empty());
+}
+function updateProjects(){
+    projectLinkSelection = d3.select("#project-list").selectAll(".connection")
+        .data(currentTopicData.projects.edges, edge => edge.vertex._id);
+    let projectLinkEnter = projectLinkSelection
+        .enter()
+            .append("div")
+                .classed("connection", true)
+                .attr("id", edge => `project-${edge.vertex._id}`);
+    projectLinkEnter
+        .append("div")
+            .classed("project-info", true)
+            .html(edge => `<a href="project/${edge.vertex._id}">${edge.vertex.name}</a>: <span class="project-score">${edge.score}</span>`);
+    let projectVoteEnter = projectLinkEnter
+        .append("div")
+            .classed("project-votes", true);
+    if(loggedIn){
+        projectVoteEnter
+            .append("button")
+                .classed("upvote", true)
+                .text("Relevant")
+                .on("click", edge => upvoteProjectLink(edge.vertex._id, topicID));
+        projectVoteEnter
+            .append("button")
+                .classed("downvote", true)
+                .text("Not")
+                .on("click", edge => downvoteProjectLink(edge.vertex._id, topicID));
+    }
+    projectLinkSelection.exit().remove();
+    
+    projectLinkSelection = projectLinkSelection.merge(projectLinkEnter);
+    d3.select("#projects-are-empty")
+        .classed("hidden", !projectLinkSelection.empty());
 }
 
 // let issues = [];
@@ -289,6 +461,7 @@ function updateSubissues(){
 // Issue linker stuff
 
 issueToLink.on("change", issueLinkSearch);
+projectToLink.on("change", projectLinkSearch);
 // const linksearchInput = document.querySelector("#issue-searchbar input");
 // if(linksearchInput){
 //     linksearchInput.addEventListener("keyup", event => {
@@ -306,17 +479,19 @@ async function issueLinkSearch(){
     if(results === "Blocked") {
         return;
     }
-    issueSearchResults = d3.select("#found-link-issues").selectAll(".result")
+    issueSearchResults = d3.select("#found-issue-links").selectAll(".result")
         .data(results, issue => issue._id);
+    issueSearchResults.sort((a, b) => d3.descending(a.confidenceScore, b.confidenceScore));
+    issueSearchResults
+        .exit()
+            .remove();
     issueSearchResults
         .enter()
         .append("div")
             .classed("result", true)
             .text(issue => issue.name)
-            .on("click", issue => upvoteLink(currentIssueID, issue._id));
-    issueSearchResults
-        .exit()
-            .remove();
+            .on("click", issue => upvoteIssueLink(topicID, issue._id));
+    
 }
 
 let pendingSearch = "";
@@ -337,17 +512,73 @@ async function issueFetch(fetchString){
     let results = await fetch(baseURL + fetchString)
         .then(res => handleErrors(res))
         .then(res => res.json())
+        .then(res => { 
+                // If at least one other search was run after your initial call, you should run a new search with the latest one.
+                if(pendingSearch !== fetchString){
+                    return issueFetch(pendingSearch);
+                } else {
+                    pendingSearch = "";
+                    return res.issues;
+                }
+            })
+        .catch(err => {
+            console.log(err);
+        });
+    return results;
+}
+
+let projectSearchResults;
+
+async function projectLinkSearch(){
+    let input = String(projectToLink.property("value"));
+    let results = await projectSearch(input);
+    console.log(results);
+    if(results === "Blocked") {
+        return;
+    }
+    projectSearchResults = d3.select("#found-project-links").selectAll(".result")
+        .data(results, project => project._id);
+    projectSearchResults.sort((a, b) => d3.descending(a.confidenceScore, b.confidenceScore));
+    projectSearchResults
+        .enter()
+        .append("div")
+            .classed("result", true)
+            .text(project => project.name)
+            .on("click", project => upvoteProjectLink(project._id, topicID));
+    projectSearchResults
+        .exit()
+            .remove();
+}
+
+let pendingProjectSearch = "";
+async function projectSearch(input){
+    if(input){
+        let fetchString = `wiki/search?target=${encodeURIComponent(input)}&projects=true`;
+        if(pendingProjectSearch !== ""){
+            pendingProjectSearch = fetchString.slice(0);
+            return "Blocked";
+        }
+        pendingProjectSearch = fetchString.slice(0);
+        let results = await projectFetch(fetchString);
+        return results;
+    }
+    else return [];
+}
+async function projectFetch(fetchString){
+    let results = await fetch(baseURL + fetchString)
+        .then(res => handleErrors(res))
+        .then(res => res.json())
         .then(res => {
             // If at least one other search was run after your initial call, you should run a new search with the latest one.
-            if(pendingSearch !== fetchString){
-                return issueFetch(pendingSearch);
+            if(pendingProjectSearch !== fetchString){
+                return projectFetch(pendingProjectSearch);
             } else {
-                pendingSearch = "";
-                return res.issues;
+                pendingProjectSearch = "";
+                return res.projects;
             }
         })
         .catch(err => {
-            console.log(err)
+            console.log(err);
         });
     return results;
 }
@@ -396,8 +627,19 @@ function toggleIssueSearchbar(){
 
 // General functions
 
-async function upvoteLink(sourceID, targetID) {
-    await fetch(`${baseURL}issue/link/${sourceID}/${targetID}`, {
+async function upvoteIssueLink(sourceID, targetID) {
+    if(String(sourceID) === String(targetID)){
+        return;
+    }
+    let fetchString = "";
+    if(routeBase === "wiki"){
+        fetchString = `${baseURL}issue/link/${sourceID}/${targetID}`;
+    }
+    else if(routeBase === "project"){
+        fetchString = `${baseURL}project/toissue/${sourceID}/${targetID}`;
+    }
+
+    await fetch(fetchString, {
         method: "PUT"
     })
     .then(res => handleErrors(res))
@@ -408,8 +650,56 @@ async function upvoteLink(sourceID, targetID) {
     });
     loadVotes();
 }
-async function downvoteLink(sourceID, targetID){
-    await fetch(`${baseURL}issue/link/${sourceID}/${targetID}`, {
+async function downvoteIssueLink(sourceID, targetID){
+    let fetchString = "";
+    if(routeBase === "wiki"){
+        fetchString = `${baseURL}issue/link/${sourceID}/${targetID}`;
+    }
+    else if(routeBase === "project"){
+        fetchString = `${baseURL}project/toissue/${sourceID}/${targetID}`;
+    }
+    await fetch(fetchString, {
+        method: "DELETE"
+    })
+    .then(res => handleErrors(res))
+    .then(res => res.text())
+    .then(res => console.log(res))
+    .catch(err => {
+        return console.log(err);
+    });
+    loadVotes();
+}
+
+// Same logic as upvoteLink/downvoteLink but for projects
+async function upvoteProjectLink(projectID, nonProjectID) {
+    let fetchString = "";
+    if(routeBase === "wiki"){
+        fetchString = `${baseURL}project/toissue/${projectID}/${nonProjectID}`;
+    }
+    else if(routeBase === "task"){
+        console.log("You still need to implement this, Lavra");
+    }
+
+    await fetch(fetchString, {
+        method: "PUT"
+    })
+    .then(res => handleErrors(res))
+    .then(res => res.text())
+    .then(res => console.log(res))
+    .catch(err => {
+        return console.log(err);
+    });
+    loadVotes();
+}
+async function downvoteProjectLink(projectID, nonProjectID){
+    let fetchString = "";
+    if(routeBase === "wiki"){
+        fetchString = `${baseURL}project/toissue/${projectID}/${nonProjectID}`;
+    }
+    else if(routeBase === "project"){
+        console.log("You still need to implement this, Lavra");
+    }
+    await fetch(fetchString, {
         method: "DELETE"
     })
     .then(res => handleErrors(res))

@@ -23,6 +23,9 @@ router.post("/", isLoggedIn, (req, res) => {
 	const newIssue = req.body.issue;
 	newIssue.identifier = req.user._id;
     newIssue.path = encodeURIComponent(newIssue.name);
+    if(newIssue.image === ""){
+        delete newIssue.image;
+    }
 	Issue.findOne({name: newIssue.name}, (err, existing) => {
 		if(err){
 			console.log(err);
@@ -121,7 +124,10 @@ router.post("/", isLoggedIn, (req, res) => {
 // });
 router.put("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
 	// First, make sure the issues are in the database.
-	Issue.findById(req.params.rootid)
+	if(req.params.rootid === req.params.targetid){
+        return res.send("Those are the same issue!");
+    }
+    Issue.findById(req.params.rootid)
 		.populate("issues")
 		.exec(async (err, rootFound) => {
 			if(err){
@@ -489,6 +495,15 @@ router.get("/data/:id", async (req, res) => {
 	Issue.findById(req.params.id)
 		.populate({
 			path: "issues",
+			populate: { 
+                path: "edges",
+                populate: {
+                    path: "vertex"
+                }
+            }
+		})
+        .populate({
+			path: "projects",
 			populate: { 
                 path: "edges",
                 populate: {

@@ -1,5 +1,6 @@
-const mongoose = require("mongoose"),
-      Schema = mongoose.Schema;
+const   mongoose = require("mongoose"),
+        mongoose_fuzzy_searching = require('mongoose-fuzzy-searching'),
+        Schema = mongoose.Schema;
 
 const ProjectTemplateSchema = new Schema({
     name: String,
@@ -29,5 +30,5 @@ const ProjectTemplateSchema = new Schema({
     tasks: {type: Schema.Types.ObjectId, ref: "Taskgraph"}, 
     completionRequirements: String
 });
-
+ProjectTemplateSchema.plugin(mongoose_fuzzy_searching, { fields: ['name'] });      
 module.exports = mongoose.model("ProjectTemplate", ProjectTemplateSchema);

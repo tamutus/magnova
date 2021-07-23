@@ -394,14 +394,14 @@ button:active {
     font-weight: 500;
 }
 #header-links * {
-    background-color: rgba(169, 126, 204, .5);
-    box-shadow: 0px 0px 7px 7px rgba(169, 126, 204, .5);
+    background-color: rgba(169, 126, 204, .7);
+    box-shadow: 0px 0px 7px 7px rgba(169, 126, 204, .7);
     transition: box-shadow .5s ease;
     padding: 8px;
     border-radius: 8px;
 }
 #header-links *:hover {
-    box-shadow: 0px 0px 3px 3px rgba(169, 126, 204, .5);
+    box-shadow: 0px 0px 3px 3px rgba(169, 126, 204, .7);
 }
   /* ================ */
  /* Flash formatting */

@@ -1,14 +1,32 @@
 let editing = false,
     styleVars = document.documentElement;
 
-// Capture issue id
-const issueID = d3.select("#hidden-issue-id").text();
+// The below code is in wiki.js
+// // Capture topic id
+// const   issueIdDiv = d3.select("#hidden-issue-id"),
+//         projectIdDiv = d3.select("#hidden-project-id"),
+//         taskIdDiv = d3.select("#hidden-task-id");
+// let topicID,
+//     routeBase;
+
+// if(!issueIdDiv.empty()){ 
+//     topicID = issueIdDiv.text(); 
+//     routeBase = "wiki";
+// }
+// else if(!projectIdDiv.empty()){
+//     topicID = projectIdDiv.text(); 
+//     routeBase = "project";
+// }
+// else if(!taskIdDiv.empty()){
+//     topicID = taskIdDiv.text();
+//     routeBase = "task";
+// }
 
 // Capture display fields
 const nameBox = d3.select("#name-container"),
-    issueName = nameBox.select("h1.issue-name"),
+    topicName = nameBox.select("h1"),
     imageBox = d3.select("#image-container"),
-    issueImage = imageBox.select("#issue-image")
+    topicImage = imageBox.select("#topic-image")
     descriptionText = d3.select("#description-text"),
     dataDisplays = d3.selectAll(".data"),
     // Capture Editing buttons;
@@ -27,14 +45,14 @@ const nameBox = d3.select("#name-container"),
 const nameInput = d3.select("#name-container")
     .insert("input",":first-child")
         .attr("type", "text")
-            .property("value", issueName.text())
+            .property("value", topicName.text())
         .classed("issue-name", true)
         .classed("mutable", true)
         .classed("hidden", true);
 const imageInput = imageBox.
     append("input")
         .attr("type", "text")
-            .property("value", d3.select("#issue-image").attr("src"))
+            .property("value", d3.select("#topic-image").attr("src"))
         .attr("id", "image-input")
         .classed("mutable", true)
         .classed("hidden", true);
@@ -61,7 +79,6 @@ tinymce.init({
         });
         editor.on("input", e => {
             styleVars.style.setProperty('--editorHeight', `${tinyAppBox.style("height")}`);
-            console.log(descriptionEditorContainer.style("height"));
         });
     }
 });
@@ -92,19 +109,19 @@ async function toggleEditing(){
     // Save changes
     else{
         let descriptionHTML = tinymce.activeEditor.getContent();
-        profileUpdate = {
+        topicUpdate = {
             name: nameInput.property("value"),
             info: descriptionHTML,
             image: imageInput.property("value")
         };
         
         // Make an API call to get current user info to be up-to-date, then save the profile, returning and dislaying any error messages
-        let response = await fetch(`/wiki/${issueID}`, {
+        let response = await fetch(`/${routeBase}/${topicID}`, {
             method: "PUT",
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(profileUpdate)
+            body: JSON.stringify(topicUpdate)
         })
         .then(serverResponse => serverResponse.text())
         .then(serverMessage => {
@@ -120,11 +137,11 @@ async function toggleEditing(){
         // With failure code, change the failure message div's text but otherwise return from this function
         
         //Success 
-        issueName.text(profileUpdate.name);
-        // handle.text(`@ ${profileUpdate.username}`);  // username changes need to be implemented
-        descriptionText.html(profileUpdate.info);
+        topicName.text(topicUpdate.name);
+        // handle.text(`@ ${topicUpdate.username}`);  // username changes need to be implemented
+        descriptionText.html(topicUpdate.info);
         
-        issueImage.attr("src", profileUpdate.image);
+        topicImage.attr("src", topicUpdate.image);
         stopEditing();
     }
 }

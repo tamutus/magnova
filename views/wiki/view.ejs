@@ -2,10 +2,10 @@
 <span id="hidden-issue-id"><%= issue._id %></span>
     <div>
         <div id="name-container">
-            <h1 class="issue-name mutable data"><%= issue.name %></h1>
+            <h1 class="topic-name mutable data"><%= issue.name %></h1>
         </div>
         <div id="image-container">
-            <img id="issue-image" class="portrait" src=<%= `${issue.image}` %>>
+            <img id="topic-image" class="portrait" src=<%= `${issue.image}` %>>
         </div>
         <% if(currentUser){ %>
             <div id="editing-block">
@@ -48,7 +48,7 @@
             <% } %>
         </li>
         <li id="issues">
-            <h2>Issues that lead to <%= issue.name %></h2>
+            <h2>Issues that contribute to <%= issue.name %></h2>
             <% if(issue.issues && issue.issues.edges.length > 0 ) { %>
                 <p>The Magnova community says the following issues give rise to <%= issue.name %>. Addressing this issue could be accomplished by dealing with the following sub-issues.
                 <% if(currentUser) { %>
@@ -60,16 +60,60 @@
             <% } %>
                 <div id="connections-are-empty">No links here yet! <% if(!currentUser){ %>Log in to help break this issue down. <% } else { %> Break this issue down by identifying its causes: <% } %> </div>
                 <div id="connections-container">
-                    <div id="connections">
+                    <div id="issue-connections">
                     </div>
                     <% if(currentUser) { %>
                         <div id="issue-searchbar">
-                            <div class="searchbar-heading">Add link from <span id="link-source"><%= issue.name %></span> to:</div>
+                            <div class="searchbar-heading">Identify sub-issue of "<span class="link-source-name"><%= issue.name %></span>"</div>
                             <input type="text">
-                            <div id="found-link-issues"></div>
+                            <div id="found-issue-links"></div>
                         </div>
                     <% } %>
                 </div>
+        <li id="projects">
+            <h2>Projects addressing <%= issue.name %></h2>
+            <% if(issue.projects && issue.projects.edges.length > 0){ %>
+                <p>The following projects have been created by the Magnova community to address this issue.
+                <% if(currentUser){ %>
+                    If you think a project is important to addressing this issue, support it with an upvote. If you disagree with it or think it won't help with this issue, downvote it.
+                <% } else { %>
+                    (Registered users can upvote/downvote which projects they want to see implemented.)
+                <% } %>
+                </p>
+            <% } %>
+            <div id="projects-are-empty">No projects here yet. <% if(!currentUser){ %>Log in to create a new project. <% } else { %> Help solve this problem by finding an existing project that addresses this issue, or by creating a new project! <% } %> </div>
+            <div id="projects-container">
+                <div id="project-list"></div>
+                <% if(currentUser) { %>
+                    <div id="project-searchbar">
+                        <div class="searchbar-heading">Identify project that deals with "<span class="link-source-name"><%= issue.name %></span>"</div>
+                        <input type="text">
+                        <div id="found-project-links"></div>
+                    </div>
+                    <div id="project-submission">
+                        <h2>
+                            Create a Project
+                        </h2>	
+                        <div id="project-submitter">
+                            <form action="/project" method="post">
+                                <div class="form-group">
+                                    <input type="text" placeholder="Project name" name="project[name]">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" placeholder="Image URL" name="project[image]">
+                                </div>
+                                <div class="form-group">
+                                    <textarea placeholder="Description" name="project[info]"></textarea>
+                                </div>
+                                <button type="submit">
+                                    Submit
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </li>
         <!-- <h2>Backend Data</h2>
         <% let keys = ["name", "image", "info", "active", "identifier", "identificationDate", "editors", "talkpage", "harms", "resources", "instances", "issues", "projects"]; %>
         <% for(key of keys){ %>

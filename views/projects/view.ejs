@@ -1,0 +1,94 @@
+<%- include("../partials/wikiHeader") %>
+<span id="hidden-project-id"><%= project._id %></span>
+    <div>
+        <div id="name-container">
+            <h1 class="topic-name mutable data"><%= project.name %></h1>
+        </div>
+        <div id="image-container">
+            <img id="topic-image" class="portrait" src=<%= `${project.image}` %>>
+        </div>
+        <% if(currentUser){ %>
+            <div id="editing-block">
+                <span id="return-message"></span>
+                <a id="edit-button" onclick="toggleEditing();"><button>Edit page</button></a>
+                <a id="cancel-button" onclick="stopEditing();" class="hidden"><button>Cancel</button></a>
+            </div>
+            <div id="discussion-block">
+                <a href="<%= `/talk/${project.talkpage}` %>"><button>Discuss this project</button></a>
+            </div>
+        <% } %>
+        <ul>
+        <li id="about">
+            <h2>About</h2>
+            <div id="description">
+                <div id="description-text-container" class="mutable data">
+                    <div id="description-text"><%- project.info %></div>
+                </div>
+                <% if(currentUser){ %>
+                    <form id="description-editor-container" name="description-form" class="hidden mutable">
+                        <input type="text" id="description-editor" name="description-html"></input>
+                    </form>
+                <% } %>
+            </div>
+        </li>
+        <% if(project.identifier){ %>
+            <li id="identification">This project was first identified by <a href="<%= `users/${project.identifier.username}` %>"><%= project.identifier.username %></a> on <%= new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric'}).format(project.identificationDate) %></li>
+        <% } %>
+        <li id="designers">
+            Designers: 
+            <% for(let i = 1; i < project.designers.length -1; i++){ %>
+                <a href="<%= `/users/${project.designers[i].username}` %>"><%= project.designers[i].username %></a>, 
+            <% } %>
+            <% if(project.designers.length > 1){ %>
+                and 
+            <% } if(project.designers.length > 0){ %>
+            <a href="<%= `/users/${project.designers[project.designers.length-1].username}` %>"><%= project.designers[project.designers.length-1].username %></a>.
+            <% } else { %>
+                none.
+            <% } %>
+        </li>
+        <li id="issues">
+            <h2>Issues that <%= project.name %> addresses</h2>
+            <% if(project.issues && project.issues.edges.length > 0 ) { %>
+                <p>The Magnova community says <%= project.name %> addresses the following issues.
+                <% if(currentUser) { %>
+                    If you agree that <%= project.name %> will help combat a given issue below, press the "Sub-issue" button next to it. If you think they are not actually related, click the "Not" (a sub-issue) button.
+                <% } else { %>
+                    (Registered users can upvote/downvote these connections.)
+                <% } %>
+                </p>
+            <% } %>
+                <div id="connections-are-empty">No links here yet! <% if(!currentUser){ %>Log in to help break this issue down. <% } else { %> Break this issue down by identifying its causes: <% } %> </div>
+                <div id="connections-container">
+                    <div id="issue-connections">
+                    </div>
+                    <% if(currentUser) { %>
+                        <div id="issue-searchbar">
+                            <div class="searchbar-heading">Link project "<span id="link-source"><%= project.name %></span>" to an issue:</div>
+                            <input type="text">
+                            <div id="found-issue-links"></div>
+                        </div>
+                    <% } %>
+                </div>
+        <!-- <h2>Backend Data</h2>
+        <% let keys = ["name", "image", "info", "tags", "creator", "creationDate", "designers", "volunteers", "talkpage", "harms", "resources", "implementations", "issues", "tasks", "completionRequirements"]; %>
+        <% for(key of keys){ %>
+            <li><%= key %> : <%= project[key] %></li>
+        <% } %>
+        <p class="hidden projectID"><%= project._id %></p>
+        </ul> -->
+        <div id="qr">
+            <img src=<%= `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURI(currentHost + currentURL)}&amp;size=100x100` %> alt="" title="<%= project.name %>" />
+            <h3>QR Code</h3>
+            <p>This QR code links to this page. Print stickers, add it to fliers, or chalk it onto your driveway.</p>
+        </div>
+        
+    </div>
+    <!-- <a href=<%= `report/project/${project._id}` %>><button>Report Project</button></a> -->
+
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="scripts/wiki.js"></script>
+<script src="https://cdn.tiny.cloud/1/f7o04qadc9hhjre2my3ep3ae1qdzax2od04t9ncrm7wold54/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="scripts/wikiEditor.js"></script>
+<%- include("../partials/footer") %>

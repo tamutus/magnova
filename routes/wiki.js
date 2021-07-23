@@ -2,22 +2,31 @@ const	express = require('express'),
 		router = express.Router(),
 		Issue = require('../api/issue/issue.template'),
 		Issuegraph = require("../api/issue/issue.graph"),
+        Project = require("../api/project/project.template"),
         Projectgraph = require("../api/project/project.graph"),
         Talkpage = require("../api/comments/talkpage.model"),
 		User = require("../api/user/user");
+const { isLoggedIn } = require("../middleware");
 
 router.get('/', (req, res) => {
 	let currentDate = new Date();
-    let weekAgo = new Date(currentDate.setDate(currentDate.getDate() - 7)).toISOString();
+    let weekAgo = new Date(currentDate.setDate(currentDate.getDate() - 28)).toISOString();
     Issue.find({identificationDate: {$gte: weekAgo} }, (err, recentIssues) => {
 		if(err){
 			console.log(err);
-			res.redirect("back");
+			return res.redirect("back");
 		}
-		res.render('wiki/landing', {
-			title: "Wiki view",
-			topIssues: recentIssues
-		});
+		Project.find({creationDate: {$gte: weekAgo} }, (err, recentProjects) => {
+            if(err){
+                console.log(err);
+                return res.redirect("back");
+            }
+            return res.render('wiki/landing', {
+                title: "Wiki view",
+                topIssues: recentIssues,
+                topProjects: recentProjects
+            });
+        })
 	});
 });
 
@@ -47,25 +56,21 @@ router.get("/search", async (req, res) => {
         searchTerm = decodeURIComponent(req.query.target.replace(/\+/g, ' '));
     }
     if(req.query.issues === "true"){
-        results["issues"] = [];
-        await Issue.fuzzySearch(searchTerm, (err, issues)=> {
-            if(err){
-                console.log(err);
-                return res.send("Error fuzzy searching: " + err);
-            } else {
-                results["issues"] = issues;
-            }
+        results["issues"] = await Issue.fuzzySearch(searchTerm).catch(err => {
+            console.error(err);
+            return res.send("Error fuzzy searching: " + err);
         });
     }
     if(req.query.users === "true"){
-        results["users"] = [];
-        await User.fuzzySearch(searchTerm, (err, users)=> {
-            if(err){
-                console.log(err);
-                return res.send("Error fuzzy searching: " + err);
-            } else {
-                results["users"] = users;
-            }
+        results["users"] = await User.fuzzySearch(searchTerm).catch(err => {
+            console.error(err);
+            return res.send("Error fuzzy searching: " + err);
+        });
+    }
+    if(req.query.projects === "true"){
+        results["projects"] = await Project.fuzzySearch(searchTerm).catch(err => {            
+            console.error(err);
+            return res.send("Error fuzzy searching: " + err);
         });
     }
     return res.send(results);
@@ -80,6 +85,10 @@ router.get('/:id', (req, res) => {
 			path: "issues",
 			populate: { path: "edges.vertex" }
 		})
+        .populate({
+            path: "projects",
+            populate: { path: "edges.vertex" }
+        })
         .populate("tags")
         .populate("resources.resource")
 		.populate("instances")
@@ -157,11 +166,11 @@ router.get('/:id', (req, res) => {
 			});
 		});
 });
-router.put("/:id", (req, res) => {
+router.put("/:id", isLoggedIn, (req, res) => {
 	const {name, info, image} = req.body;
-    // if(username.length == 0){
-    //     res.send("You sent in a blank username!");
-    // }
+    if(name.length == 0){
+        res.send("You sent in a blank name!");
+    }
     Issue.findById(req.params.id, async (err, issue) => {
         if(err){
             console.log(err);

@@ -214,12 +214,21 @@ router.get("/:id", async (req, res) => {
                 }
                 else{
                     title = project.name;
-                    rootLink = `/wiki/project/${project._id}`;
+                    rootLink = `/project/${project._id}`;
+                    let startScript = "<script>";
+                    if(req.query.thread){
+                        startScript += `openThreadAtIndex(${req.query.thread}`
+                        if(req.query.comment){
+                            startScript += `, ${req.query.comment}`
+                        }
+                        startScript += ");"
+                    }
+                    startScript += "</script>"
                     return res.render("talk/page", {
                         title: title,
                         rootLink: rootLink,
                         page: page,
-                        startScript: ""
+                        startScript: startScript
                     });
                 }
             });

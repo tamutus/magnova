@@ -20,6 +20,7 @@ var UserSchema = new mongoose.Schema({
     inbox: {type: Schema.Types.ObjectId, ref: "Inbox"},
     location: {type: Schema.Types.ObjectId, ref: "Location"},
 	issues: [{type: Schema.Types.ObjectId, ref: "IssueTemplate"}],
+    projects: [{type: Schema.Types.ObjectId, ref: "ProjectTemplate"}],
 	edgeVotes: [{ 
 		source: {type: Schema.Types.ObjectId, ref: "IssueTemplate"}, 
 		targets: [{

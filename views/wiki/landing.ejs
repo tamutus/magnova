@@ -22,7 +22,8 @@
     </section>
     <div id="search">
         <form>
-            <h2>Search for: <input type="checkbox" name="issues" value="true" checked="true">Issues <input type="checkbox" name="users" value="true">Users</h2>
+            <h2>Search for:</h2>
+            <h2><input type="checkbox" name="issues" value="true" checked="true">Issues <input type="checkbox" name="users" value="true">Users <input type="checkbox" name="projects" value="true">Projects</h2>
             <div class="search-bar"><input name="target" type="text" id="search-query"><button type="submit">Search Magnova</button><button type="button" onclick="clearSearch();">Clear results</button></div>
             
         </form>
@@ -31,6 +32,8 @@
             <div id="issue-results"></div>
             <h2 class="hidden" id="user-results-header">Users</h2>
             <div id="user-results"></div>
+            <h2 class="hidden" id="project-results-header">Projects</h2>
+            <div id="project-results"></div>
         </div>
     </div>
     <div id="issue-submission">
@@ -54,7 +57,7 @@
             </form>
         </div>
     </div>
-    <!-- <div id="project-submission">
+    <div id="project-submission">
         <h2>
             Create a Project
         </h2>	
@@ -74,7 +77,7 @@
                 </button>
             </form>
         </div>
-    </div> -->
+    </div>
     <section id="issues">
 		<% if(topIssues?.length > 0){%>
             <h2>Know: Recently Identified Issues</h2>
@@ -99,8 +102,27 @@
 	</section>
 	<section id="projects">
 		<h2>Organize: Projects</h2>
+
 		<p>At each level of complexity, people have a variety of ideas for how to solve these problems, and so on any issue you will be able to crowdsource projects to create change with volunteer opportunities for the Magnova community. A project is a coordinated gameplan, a collection of Tasks and strategic insights. Projects have templates and local instances. The template is a general outline of a plan, and includes any information that can be helpful to people in different locations. Once location handling is developed on Magnova, you will be able to create an instance of a project template at a given location. A project template has links to task templates, and when you create a local instance of a project, you will create local instances of those tasks as well.</p>
         <br>
+        <% if(topProjects?.length > 0){%>
+            <div id="project-browse">
+                <% topProjects.forEach(function(project){ %>
+                    <div class="project-snapshot" title="<%= project.name %>">
+                        <a href="project/<%=project._id%>">
+                            <div class="project-thumbnail"><img src="<%=project.image%>"></div>
+                            <h4>
+                                <% if(project.name.length <= 30){ %>
+                                    <%= project.name %>
+                                <% } else { %>
+                                    <%= `${project.name.slice(0, 26)}...` %>
+                                <% } %>
+                            </h4>
+                        </a>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
         <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
 	<section id="tasks">
@@ -122,7 +144,7 @@
 	</section>
     <section id="formulas">
 		<h2>Formulas</h2>
-        Socializing the means of production means making it easier to get involved with producing things. And so Magnova will house a repository of guides on how to create things. Formulas will allow the community to establish best practices for transforming one set of resources to another. Knowledge about how to make things belongs to everyone!
+        <p>Socializing the means of production means making it easier to get involved with producing things. And so Magnova will house a repository of guides on how to create things. Formulas will allow the community to establish best practices for transforming one set of resources to another. Knowledge about how to make things belongs to everyone!</p>3
         <br><p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
     <section id="tags">
