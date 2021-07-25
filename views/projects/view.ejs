@@ -16,6 +16,8 @@
             <div id="discussion-block">
                 <a href="<%= `/talk/${project.talkpage}` %>"><button>Discuss this project</button></a>
             </div>
+        <% } else { %>
+            <p><em>Log in to discuss and edit this issue</em></p>
         <% } %>
         <ul>
         <li id="about">

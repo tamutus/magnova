@@ -1,19 +1,23 @@
 :root {
 	--editorHeight: 0px;
     --bodyGradient: linear-gradient(-10deg, rgb(209, 105, 2), rgba(94, 49, 105, 1) 40%, rgba(44, 23, 136, 1) 80%, rgba(46, 8, 77, 1));
-    --linkColor: rgb(174, 247, 225);
-    --visitedLinkColor: rgb(128, 235, 203);
+    --headerLinkColor: rgb(174, 247, 225);
+    --linkColor: rgb(128, 235, 203);
+    --linkBGColor: rgba(169, 126, 204, .7);
 }
 
 body {
     background: var(--bodyGradient);
 }
-a {
+#header-links a, #header-links a:visited {
+    background-color: var(--linkBGColor);
+    box-shadow: 0px 0px 7px 7px var(--linkBGColor);
+    font-weight: 700;
+    color: var(--headerLinkColor);
+}
+a, a:visited {
 	color: var(--linkColor);
 	text-decoration: none;
-}
-a:visited {
-	color: var(--visitedLinkColor);
 }
 
 #hidden-issue-id, #hidden-project-id, #hidden-task-id {
@@ -183,13 +187,16 @@ h4.result-name {
 }
 #issue-browse, #project-browse {
     width: 100%;
-    height: 250px;
+    height: 500px;
     display: flex;
     align-items: flex-start;
     align-content: flex-end;
     justify-content: flex-start;
     flex-flow: row wrap-reverse;
     overflow: auto;
+    border-radius: 15px;
+    border: 6px solid rgb(77, 30, 109);
+    background-color: rgba(187, 255, 215, 0.116);
 }
 .portrait {
     max-height: 500px;
@@ -393,6 +400,9 @@ input.issue-name {
     white-space: nowrap;
     overflow: hidden;
 }
+.topic-name {
+    white-space: normal;
+}
 .mutable, #description-editor-container, #description-text-container, #image-input {
     transition: width .5s ease-in-out, border .5s ease-in-out, padding .5s ease-in-out, flex .5s ease-in-out, margin .5s ease-in-out, height .5s ease-in-out;
 }
@@ -407,6 +417,7 @@ input.issue-name {
     margin-left: 0;
     margin-right: 0;
     overflow: hidden;
+    white-space: nowrap;
 }
 #description-editor-container {
     transition: width .5s ease-in-out, height .5s ease-in-out;

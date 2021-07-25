@@ -550,8 +550,8 @@ function toggleLinkTools(link){
         activeLink = link;
         colorVote();
         linkButtons.classed("hidden", false);
-        linkUpvoter.on("click", d => upvoteLink(activeLink.source._id, activeLink.target._id));
-        linkDownvoter.on("click", d => downvoteLink(activeLink.source._id, activeLink.target._id));
+        linkUpvoter.on("click", d => upvoteIssueLink(activeLink.source._id, activeLink.target._id));
+        linkDownvoter.on("click", d => downvoteIssueLink(activeLink.source._id, activeLink.target._id));
         activeLinkCoords.x = (activeLink.source.x + activeLink.target.x) / 2;
         activeLinkCoords.y = (activeLink.source.y + activeLink.target.y) / 2;
         linkButtons.attr("transform", `translate(${activeLinkCoords.x}, ${activeLinkCoords.y})`);
@@ -712,7 +712,7 @@ function colorVote(){
     linkUpvoter.classed("upvoted", false);
     linkDownvoter.classed("downvoted", false);
 }
-async function upvoteLink(sourceID, targetID) {
+async function upvoteIssueLink(sourceID, targetID) {
     await fetch(`${baseURL}issue/link/${sourceID}/${targetID}`, {
         method: "PUT"
     })
@@ -737,7 +737,7 @@ async function upvoteLink(sourceID, targetID) {
         saveLinksToCookie(); // in "cookie handling"
     }
 }
-async function downvoteLink(sourceID, targetID){
+async function downvoteIssueLink(sourceID, targetID){
     await fetch(`${baseURL}issue/link/${sourceID}/${targetID}`, {
         method: "DELETE"
     })

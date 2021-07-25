@@ -108,7 +108,7 @@ h1, h2, h3, h4, h5, h6, p {
 	display: block;
 }
 h1 {
-	font-size: 50px;
+	font-size: 70px;
 	padding: 20px;
 	transition: all .5s ease-out;
 }

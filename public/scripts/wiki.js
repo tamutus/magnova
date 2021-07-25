@@ -33,7 +33,9 @@ else if(!projectIdDiv.empty()){
     topicID = projectIdDiv.text(); 
     routeBase = "project";
     domRoot.style.setProperty("--bodyGradient", "linear-gradient(-10deg, rgb(0, 148, 0), rgb(13, 125, 139), rgb(106, 19, 141), rgb(209, 105, 2))");
-    // domRoot.style.setProperty("--linkColor")
+    domRoot.style.setProperty("--headerLinkColor", "rgb(213 31 98)");
+    domRoot.style.setProperty("--linkColor", "rgb(158 231 255)");
+    domRoot.style.setProperty("--linkBGColor", "rgb(250 177 133)");
 }
 else if(!taskIdDiv.empty()){
     topicID = taskIdDiv.text();
