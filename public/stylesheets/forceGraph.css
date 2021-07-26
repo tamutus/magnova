@@ -1,3 +1,10 @@
+/*
+* Prefixed by https://autoprefixer.github.io
+* PostCSS: v7.0.29,
+* Autoprefixer: v9.7.6
+* Browsers: last 4 version
+*/
+
 body {
     background-color: rgb(51, 39, 61);
     font-family: 'Poppins', sans-serif;
@@ -12,6 +19,8 @@ body {
     margin: 5vh 5vw 5vh 1vw;
     border: 2px solid black;
     background-color: rgb(52, 32, 112);
+    -webkit-transition: .5s ease all;
+    -o-transition: .5s ease all;
     transition: .5s ease all;
 }
 
@@ -34,7 +43,8 @@ circle {
     stroke-width: 50px;
     stroke: rgb(253, 222, 174);
     opacity: .3;
-    filter: blur(10px);
+    -webkit-filter: blur(10px);
+            filter: blur(10px);
 }
 .link-arrow {
     stroke-width: 7px;
@@ -43,7 +53,11 @@ circle {
     stroke-linecap: round;
 }
 circle {
+    -webkit-transition: r .5s ease, fill .3s ease, -webkit-transform .3s ease;
+    transition: r .5s ease, fill .3s ease, -webkit-transform .3s ease;
+    -o-transition: r .5s ease, transform .3s ease, fill .3s ease;
     transition: r .5s ease, transform .3s ease, fill .3s ease;
+    transition: r .5s ease, transform .3s ease, fill .3s ease, -webkit-transform .3s ease;
 }
 circle.node {
     stroke: rgb(253, 144, 80);
@@ -66,20 +80,33 @@ circle.node:active {
     width: 100%;
     border-radius: 100%;
     position: relative;
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
     justify-items: center;
-    justify-content: center;
-    align-items: center;
-    align-content: center;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+    -ms-flex-line-pack: center;
+        align-content: center;
     text-anchor: middle;
 }
 .node-text div, .tool-text div {
     font-size: 20px;
-    flex: 0 1 auto;
+    -webkit-box-flex: 0;
+        -ms-flex: 0 1 auto;
+            flex: 0 1 auto;
     text-align: center;
     margin: 0;
     padding: 0;
+    -webkit-transition: font-size .5s ease, -webkit-transform .3s ease;
+    transition: font-size .5s ease, -webkit-transform .3s ease;
+    -o-transition: font-size .5s ease, transform .3s ease;
     transition: font-size .5s ease, transform .3s ease;
+    transition: font-size .5s ease, transform .3s ease, -webkit-transform .3s ease;
 }
 .node-text div {
     color:black;
@@ -97,20 +124,34 @@ circle.node:active {
 .tool circle {
     stroke: rgb(241, 175, 247);
     fill: rgb(241, 175, 247);
+    -webkit-transition: cx .5s ease, cy .5s ease, r .5s ease;
+    -o-transition: cx .5s ease, cy .5s ease, r .5s ease;
     transition: cx .5s ease, cy .5s ease, r .5s ease;
 }
 .tool foreignObject {
+    -webkit-transition: x, y, width, height;
+    -o-transition: x, y, width, height;
     transition: x, y, width, height;
-    transition-timing-function: ease;
-    transition-duration: .5s;
+    -webkit-transition-timing-function: ease;
+         -o-transition-timing-function: ease;
+            transition-timing-function: ease;
+    -webkit-transition-duration: .5s;
+         -o-transition-duration: .5s;
+            transition-duration: .5s;
 }
 .tool-text {
     font-size: 17px;
     color:rgb(52, 32, 112);
+    -webkit-transition: font-size .5s ease;
+    -o-transition: font-size .5s ease;
     transition: font-size .5s ease;
 }
 #link-buttons {
+    -webkit-transition: -webkit-transform .05s;
+    transition: -webkit-transform .05s;
+    -o-transition: transform .05s;
     transition: transform .05s;
+    transition: transform .05s, -webkit-transform .05s;
 }
 #link-buttons foreignObject {
     overflow: visible;
@@ -129,12 +170,14 @@ circle.link-vote {
     color: rgb(52, 32, 112);
 }
 .show-links {
+    cursor: -webkit-zoom-in;
     cursor: zoom-in;
 }
 .add-link {
     cursor: crosshair;
 }
 .unloader {
+    cursor: -webkit-zoom-out;
     cursor: zoom-out;
 }
 .wiki-link {
@@ -154,13 +197,21 @@ circle.link-vote {
     left: calc(140px + 1vw);
     margin: 10px 0 0 30px;
     pointer-events: none;
-    transform-origin: top left;
+    -webkit-transform-origin: top left;
+        -ms-transform-origin: top left;
+            transform-origin: top left;
+    -webkit-transition: left .3s ease, top .3s ease, -webkit-transform .5s ease;
+    transition: left .3s ease, top .3s ease, -webkit-transform .5s ease;
+    -o-transition: transform .5s ease, left .3s ease, top .3s ease;
     transition: transform .5s ease, left .3s ease, top .3s ease;
+    transition: transform .5s ease, left .3s ease, top .3s ease, -webkit-transform .5s ease;
 }
 #fg-buttons {
     border-radius: 10px;
     margin: 15px 0 0 15px;
     padding: 0;
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
     justify-items: flex-start;
     pointer-events: auto;
@@ -174,7 +225,11 @@ circle.link-vote {
     border-radius: 5px;
     color: rgb(253, 174, 211);
     font-family: 'Montserrat', sans-serif;
-    transition-timing-function: cubic-bezier(0.560, 1.650, 0.570, 0.790);
+    -webkit-transition-timing-function: cubic-bezier(0.560, 1.650, 0.570, 0.790);
+         -o-transition-timing-function: cubic-bezier(0.560, 1.650, 0.570, 0.790);
+            transition-timing-function: cubic-bezier(0.560, 1.650, 0.570, 0.790);
+    -webkit-transition: .25s ease color, .25s ease background-color, .2s transform, .2s box-shadow;
+    -o-transition: .25s ease color, .25s ease background-color, .2s transform, .2s box-shadow;
     transition: .25s ease color, .25s ease background-color, .2s transform, .2s box-shadow;
 }
 #fg-buttons button.pressed {
@@ -186,12 +241,21 @@ circle.link-vote {
     background-color: rgb(146, 34, 86);
 }
 #issue-loader {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
-    flex-flow: column nowrap;
-    align-items: flex-start;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-flow: column nowrap;
+            flex-flow: column nowrap;
+    -webkit-box-align: start;
+        -ms-flex-align: start;
+            align-items: flex-start;
     justify-items: flex-start; 
     background: none;
     color: lavender;
+    -webkit-transition: left .5s ease, opacity .3s ease-out;
+    -o-transition: left .5s ease, opacity .3s ease-out;
     transition: left .5s ease, opacity .3s ease-out;
     pointer-events: none;
 }
@@ -207,6 +271,26 @@ circle.link-vote {
     color: lavender;
     font-family: 'Poppins', sans-serif;
     pointer-events: auto;
+}
+#issue-loader input::-webkit-input-placeholder {
+    color: rgb(255, 185, 102);
+    opacity: .9;
+    font-family: 'Montserrat', sans-serif;
+}
+#issue-loader input::-moz-placeholder {
+    color: rgb(255, 185, 102);
+    opacity: .9;
+    font-family: 'Montserrat', sans-serif;
+}
+#issue-loader input:-ms-input-placeholder {
+    color: rgb(255, 185, 102);
+    opacity: .9;
+    font-family: 'Montserrat', sans-serif;
+}
+#issue-loader input::-ms-input-placeholder {
+    color: rgb(255, 185, 102);
+    opacity: .9;
+    font-family: 'Montserrat', sans-serif;
 }
 #issue-loader input::placeholder {
     color: rgb(255, 185, 102);
@@ -224,10 +308,19 @@ circle.link-vote {
     min-height: 100px;
     max-height: 500px;
     min-width: 200px;
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
-    flex-flow: column nowrap;
-    justify-content: start;
-    align-items: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-flow: column nowrap;
+            flex-flow: column nowrap;
+    -webkit-box-pack: start;
+        -ms-flex-pack: start;
+            justify-content: start;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
     overflow-y: auto;
     pointer-events: auto;
 }
@@ -248,13 +341,20 @@ circle.link-vote {
     right: 6vw;
     top: 8vh;
     padding: 5px;
-    justify-content: space-around;
+    -ms-flex-pack: distribute;
+        justify-content: space-around;
     font-size: 15px;
     background-color: rgb(71, 5, 77);
     border-radius: 10px;
     z-index: 3;
-    transform-origin: top right;
+    -webkit-transform-origin: top right;
+        -ms-transform-origin: top right;
+            transform-origin: top right;
+    -webkit-transition: -webkit-transform .5s ease;
+    transition: -webkit-transform .5s ease;
+    -o-transition: transform .5s ease;
     transition: transform .5s ease;
+    transition: transform .5s ease, -webkit-transform .5s ease;
 }
 #issue-searchbar > div {
     background-color: rgb(107, 8, 116);
@@ -277,8 +377,12 @@ circle.link-vote {
     max-height: 500px;
     overflow-y: auto;
     display: flexbox;
-    flex-flow: column nowrap;
-    align-content: center;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-flow: column nowrap;
+            flex-flow: column nowrap;
+    -ms-flex-line-pack: center;
+        align-content: center;
 }
 #found-link-issues div.result{
     color: black;
@@ -298,8 +402,7 @@ circle.link-vote {
     margin: 10px;
     border-radius: 3px;
     -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none; /* Safari */
-     -khtml-user-select: none; /* Konqueror HTML */
+    -webkit-user-select: none; /* Safari */ /* Konqueror HTML */
        -moz-user-select: none; /* Old versions of Firefox */
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
@@ -310,16 +413,31 @@ circle.link-vote {
     text-align: center;
     left: 50vw;
     top: 50vh;
-    animation: 2s test forwards;
+    -webkit-animation: 2s test forwards;
+            animation: 2s test forwards;
+}
+@-webkit-keyframes test {
+    from {
+        opacity: 1;
+        -webkit-transform: scale(2);
+                transform: scale(2);
+    }
+    to {
+        opacity: 0;
+        -webkit-transform: scale(0);
+                transform: scale(0);
+    }
 }
 @keyframes test {
     from {
         opacity: 1;
-        transform: scale(2);
+        -webkit-transform: scale(2);
+                transform: scale(2);
     }
     to {
         opacity: 0;
-        transform: scale(0);
+        -webkit-transform: scale(0);
+                transform: scale(0);
     }
 }
 
@@ -328,19 +446,27 @@ circle.link-vote {
 /* ========================== */
 @media screen and (max-width: 900px){
     #issue-searchbar {
-        transform: scale(.8);
+        -webkit-transform: scale(.8);
+            -ms-transform: scale(.8);
+                transform: scale(.8);
     }
     #fg-utilities {
-        transform: scale(.8);
+        -webkit-transform: scale(.8);
+            -ms-transform: scale(.8);
+                transform: scale(.8);
         left: 130px;
     }
     .tool-text {
-        transform: scale(.75);
+        -webkit-transform: scale(.75);
+            -ms-transform: scale(.75);
+                transform: scale(.75);
     }
 }
 @media screen and (max-height: 500px){
     #fg-utilities {
-        transform: scale(.8);
+        -webkit-transform: scale(.8);
+            -ms-transform: scale(.8);
+                transform: scale(.8);
         top: 3vh;
     }
 }
@@ -352,11 +478,15 @@ circle.link-vote {
     }
     
     #fg-utilities {
-        transform: scale(.6);
+        -webkit-transform: scale(.6);
+            -ms-transform: scale(.6);
+                transform: scale(.6);
         left: 70px;
     }
     .tool-text {
-        transform: scale(.55);
+        -webkit-transform: scale(.55);
+            -ms-transform: scale(.55);
+                transform: scale(.55);
     }
     /* .node-text div, .tool-text {
         font-size: 10.2px;
@@ -364,6 +494,8 @@ circle.link-vote {
 }
 @media screen and (max-height: 300px){
     #fg-utilities {
-        transform: scale(.6);
+        -webkit-transform: scale(.6);
+            -ms-transform: scale(.6);
+                transform: scale(.6);
     }
 }

@@ -72,7 +72,12 @@ router.get("/search", async (req, res) => {
             console.error(err);
             return res.send("Error fuzzy searching: " + err);
         });
+        // results["projects"] = results["projects"].filter(project => project.confidenceScore > 10);
     }
+    Object.keys(results).forEach(key => {
+        results[key] = results[key].filter(item => JSON.parse(JSON.stringify(item)).confidenceScore > 5); // https://stackoverflow.com/a/36522374 and https://stackoverflow.com/a/35038179 explain why this JSON conversion is necessary.
+    });
+    // console.log(results);
     return res.send(results);
 });
 

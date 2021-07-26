@@ -22,10 +22,11 @@
     </section>
     <div id="search">
         <form>
-            <h2>Search for:</h2>
-            <h2><input type="checkbox" name="issues" value="true" checked="true">Issues <input type="checkbox" name="users" value="true">Users <input type="checkbox" name="projects" value="true">Projects</h2>
-            <div class="search-bar"><input name="target" type="text" id="search-query"><button type="submit">Search Magnova</button><button type="button" onclick="clearSearch();">Clear results</button></div>
-            
+            <div id="search-form">
+                <h2>Search for:</h2>
+                <h2><input type="checkbox" name="issues" value="true" checked="true">Issues <input type="checkbox" name="users" value="true">Users <input type="checkbox" name="projects" value="true">Projects</h2>
+                <div class="search-bar"><input name="target" type="text" id="search-query"><button type="submit">Search Magnova</button><button type="button" onclick="clearSearch();">Clear results</button></div> 
+            </div>
         </form>
         <div id="search-results">
             <h2 class="hidden" id="issue-results-header">Issues</h2>
@@ -36,46 +37,48 @@
             <div id="project-results"></div>
         </div>
     </div>
-    <div id="issue-submission">
-        <h2>
-            Identify a new issue
-        </h2>	
-        <div id="issue-submitter">
-            <form action="/issue" method="post">
-                <div class="form-group">
-                    <input type="text" placeholder="Issue name" name="issue[name]">
-                </div>
-                <div class="form-group">
-                    <input type="text" placeholder="Image URL" name="issue[image]">
-                </div>
-                <div class="form-group">
-                    <textarea placeholder="Description" name="issue[info]"></textarea>
-                </div>
-                <button type="submit">
-                    Submit
-                </button>
-            </form>
+    <div id="submission">
+        <div id="issue-submission">
+            <h2>
+                Identify a new issue
+            </h2>	
+            <div id="issue-submitter">
+                <form action="/issue" method="post">
+                    <div class="form-group">
+                        <input type="text" placeholder="Issue name" name="issue[name]">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" placeholder="Image URL" name="issue[image]">
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Description" name="issue[info]"></textarea>
+                    </div>
+                    <button type="submit">
+                        Submit
+                    </button>
+                </form>
+            </div>
         </div>
-    </div>
-    <div id="project-submission">
-        <h2>
-            Create a Project
-        </h2>	
-        <div id="project-submitter">
-            <form action="/project" method="post">
-                <div class="form-group">
-                    <input type="text" placeholder="Project name" name="project[name]">
-                </div>
-                <div class="form-group">
-                    <input type="text" placeholder="Image URL" name="project[image]">
-                </div>
-                <div class="form-group">
-                    <textarea placeholder="Description" name="project[info]"></textarea>
-                </div>
-                <button type="submit">
-                    Submit
-                </button>
-            </form>
+        <div id="project-submission">
+            <h2>
+                Create a Project
+            </h2>	
+            <div id="project-submitter">
+                <form action="/project" method="post">
+                    <div class="form-group">
+                        <input type="text" placeholder="Project name" name="project[name]">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" placeholder="Image URL" name="project[image]">
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Description" name="project[info]"></textarea>
+                    </div>
+                    <button type="submit">
+                        Submit
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
     <section id="issues">

@@ -17,7 +17,7 @@
                 <a href="<%= `/talk/${project.talkpage}` %>"><button>Discuss this project</button></a>
             </div>
         <% } else { %>
-            <p><em>Log in to discuss and edit this issue</em></p>
+            <p><em>Log in to discuss and edit this project</em></p>
         <% } %>
         <ul>
         <li id="about">
@@ -33,8 +33,8 @@
                 <% } %>
             </div>
         </li>
-        <% if(project.identifier){ %>
-            <li id="identification">This project was first identified by <a href="<%= `users/${project.identifier.username}` %>"><%= project.identifier.username %></a> on <%= new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric'}).format(project.identificationDate) %></li>
+        <% if(project.creator){ %>
+            <li id="creation">This project was created by <a href="<%= `users/${project.creator.username}` %>"><%= project.creator.username %></a> on <%= new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric'}).format(project.creationDate) %></li>
         <% } %>
         <li id="designers">
             Designers: 
@@ -60,7 +60,7 @@
                 <% } %>
                 </p>
             <% } %>
-                <div id="connections-are-empty">No links here yet! <% if(!currentUser){ %>Log in to help break this issue down. <% } else { %> Break this issue down by identifying its causes: <% } %> </div>
+                <div id="connections-are-empty">No links here yet! <% if(!currentUser){ %>Log in to link this project to an issue. <% } else { %> Help this project get seen by connecting it to the issues it addresses: <% } %> </div>
                 <div id="connections-container">
                     <div id="issue-connections">
                     </div>
@@ -79,6 +79,12 @@
         <% } %>
         <p class="hidden projectID"><%= project._id %></p>
         </ul> -->
+        <li id="tasks">
+            <h2>Tasks that make up this project</h2>
+            <% if(project.tasks && project.tasks.edges.length > 0){ %>
+                
+            <% } %>
+        </li>
         <div id="qr">
             <img src=<%= `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURI(currentHost + currentURL)}&amp;size=100x100` %> alt="" title="<%= project.name %>" />
             <h3>QR Code</h3>
