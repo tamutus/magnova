@@ -42,20 +42,27 @@ a, a:visited {
     -webkit-box-align: start;
         -ms-flex-align: start;
             align-items: flex-start;
-    width: 800px;
+    width: 100%;
 }
-
+#search-headers {
+    display: flex;
+    flex-flow: row wrap;
+}
+#search-form h2 {
+    font-size: 40px;
+    transition: font-size .3s ease-in-out;
+}
 .search-bar {
     display: -webkit-box;
     display: -ms-flexbox;
-    display: flex;
     flex: 1 1 100%;
+    display: flex;
     max-width: 100%;
     box-sizing: border-box;
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
-        -ms-flex-flow: row nowrap;
-            flex-flow: row nowrap;
+        -ms-flex-flow: row wrap;
+            flex-flow: row wrap;
     -ms-flex-line-pack: distribute;
         align-content: space-around;
     -webkit-box-align: center;
@@ -63,8 +70,8 @@ a, a:visited {
             align-items: center;
 }
 #search-query {
-    flex: 1 1 70%;
-    max-width: 70%;
+    flex: 1 1 60%;
+    max-width: 60%;
     margin-left: 50px;
     display: inline-block;
     font-size: 30px;
@@ -79,7 +86,7 @@ a, a:visited {
 }
 #search {
     display: inline-block;
-    width: 800px;
+    width: min(800px, 80vw);
     margin-right: 100px;
 }
 #search-results .hidden {
@@ -224,7 +231,7 @@ h4.result-name {
 #project-submission h2 {
     color: rgb(144, 255, 190);
 }
-#issue-forms form, #project-forms form{
+#issue-submitter form, #project-submitter form{
     width: 300px;
     display: -webkit-box;
     display: -ms-flexbox;
@@ -244,9 +251,9 @@ h4.result-name {
     width: 100%;
 }
 #issue-submitter * input, #issue-submitter * textarea, #project-submitter * input, #project-submitter * textarea {
-    width: 85%;
+    width: 100%;
     padding: 5px;
-    margin: 5px;
+    margin: 5px auto;
     border-radius: 5px;
 }
 #issue-submitter * button, #project-submitter * button {
@@ -257,6 +264,12 @@ h4.result-name {
     height: 200px;
     text-align: left;
     margin: 15px 10px;
+}
+.issue-snapshot:hover img, .project-snapshot:hover img {
+    filter: contrast(170%) grayscale(30%) brightness(1.6);
+}
+.issue-snapshot:hover a h4, .project-snapshot:hover img a h4{
+    color: rgb(255, 221, 25);
 }
 .issue-thumbnail, .project-thumbnail {
     width: 200px;
@@ -276,13 +289,16 @@ h4.result-name {
     max-height: 150px;
     margin: auto;
     border-radius: 10px;
+    transition: filter .5s ease-out;
 }
 .issue-snapshot a h4, .project-snapshot a h4 {
     margin: auto;
     text-align: center;
+    transition: color .4s ease-out;
 }
 #issue-browse, #project-browse {
     width: 100%;
+    max-width: 75vw;
     height: 500px;
     display: -webkit-box;
     display: -ms-flexbox;
@@ -782,6 +798,9 @@ input.issue-name {
     }
     #issue-connections {
         padding: 20px 7px;
+    }
+    #search-form h2 {
+        font-size: 30px;
     }
 } 
 @media screen and (max-width: 800px){

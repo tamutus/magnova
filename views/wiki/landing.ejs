@@ -24,8 +24,14 @@
         <form>
             <div id="search-form">
                 <h2>Search for:</h2>
-                <h2><input type="checkbox" name="issues" value="true" checked="true">Issues <input type="checkbox" name="users" value="true">Users <input type="checkbox" name="projects" value="true">Projects</h2>
-                <div class="search-bar"><input name="target" type="text" id="search-query"><button type="submit">Search Magnova</button><button type="button" onclick="clearSearch();">Clear results</button></div> 
+                <div id="search-headers">
+                    <h2><input type="checkbox" name="issues" value="true" checked="true">Issues </h2>
+                    <h2><input type="checkbox" name="users" value="true">Users </h2>
+                    <h2><input type="checkbox" name="projects" value="true">Projects</h2>
+                </div>
+                <div class="search-bar">
+                    <input name="target" type="text" id="search-query"><button type="submit">Search Magnova</button><button type="button" onclick="clearSearch();">Clear results</button>
+                </div> 
             </div>
         </form>
         <div id="search-results">
