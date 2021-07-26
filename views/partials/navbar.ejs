@@ -7,9 +7,9 @@
 		<li><a href="https://www.patreon.com/magnova">Donate</a></li>
 	</ul>
 </nav>
-<div id="user-bar">
+<div id="user-bar" class="collapsed">
 	<% if(currentUser){ %>
-		<div id="logged-in">
+		<div id="logged-in" class="collapsed">
 			<span style="display: none;" id="hidden-user-id"><%= currentUser._id %></span>
 			<a href=<%= `/users/${currentUser.username}` %> >
                 <span id="username"><%= currentUser.username %></span>
