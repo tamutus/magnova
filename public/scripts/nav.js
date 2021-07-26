@@ -14,7 +14,9 @@ window.addEventListener("resize", e => {
 
 });
 avatar.on("click", toggleUserBar);
-
+if(userInfo.empty()){
+    toggleUserBar();
+}
 function squeezeSidebar() {
     if (sidebar.classed("collapsed")){
         sidebar.classed("peeking", true);

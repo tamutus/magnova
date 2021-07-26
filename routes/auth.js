@@ -106,13 +106,16 @@ router.put("/my_data", async (req, res) => {
 });
 router.post("/register", async (req, res) => {
     const {username, password, email} = req.body;
+    if(username.length > 30){
+        return res.send("Sorry, that username is way too long. 40 characters max.");
+    }
     lowercaseUsername = username.slice(0).toLowerCase();
     lowercaseEmail = email.slice(0).toLowerCase();
-    User.find({username: lowercaseUsername}, async (err, user) => {
+    User.findOne({username: lowercaseUsername}, async (err, user) => {
         if(err){
             console.log(err);
         }
-        else if(user.length > 0){
+        else if(user){
             res.send("Sorry, that username has been taken");
         }
         else{
@@ -120,7 +123,7 @@ router.post("/register", async (req, res) => {
                 if(err){
                     console.log(err);
                 }
-                else if(user.length >0){
+                else if(user.length > 0){
                     res.send("Sorry, that email has been taken");
                 }
                 else {
