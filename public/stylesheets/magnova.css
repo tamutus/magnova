@@ -505,11 +505,12 @@ button:active {
 /* ====================== */
 
 #user-bar {
-	position: absolute;
+	position: fixed;
 	z-index: 8;
-	top: 10px;
+	top: 15px;
 	right: 15px;
 	height: 50px;
+    width: 400px;
 	background-color: rgb(139, 17, 74);
 	border-radius: 0 8px 0 8px;
 	display: -webkit-box;
@@ -524,12 +525,15 @@ button:active {
 	        align-items: center;
     -ms-flex-line-pack: center;
         align-content: center;
-	-webkit-transition: .5s ease transform;
-	-o-transition: .5s ease transform;
-	transition: .5s ease transform;
+	-webkit-transition: .5s ease transform, .3s ease-out width;
+	-o-transition: .5s ease transform, .3s ease-out width;
+	transition: .5s ease transform, .3s ease-out width;
 	-webkit-transform-origin: top right;
 	    -ms-transform-origin: top right;
 	        transform-origin: top right;
+}
+#user-bar.collapsed {
+    width: 60px;
 }
 #user-bar div {
     display: -webkit-box;
@@ -549,16 +553,37 @@ button:active {
 	font-family: 'Montserrat', sans-serif;
     vertical-align: middle;
 }
-
+#logged-in, #logged-out {
+    overflow: hidden;
+    flex: 0 1 100%;
+    transition: flex .3s ease-out;
+    display: flex;
+    justify-content: space-evenly;
+}
+#logged-in a {
+    flex: 0 1 50px;
+    width: 100%;
+    transition: width .3s ease-out;
+    display: flex;
+    justify-content: center;
+}
+#logged-in.collapsed {
+    flex: 0 1 0;
+}
+#logged-in.collapsed a {
+    width: 0;
+}
 #user-bar div a, #user-bar div a:visited {
     color: rgb(238, 203, 247);
 }
 #user-avatar {
     width: 40px;
     height: 40px;
+    margin: 5px 10px;
     border-radius: 50%;
     -o-object-fit: cover;
        object-fit: cover;
+    cursor: pointer;
 }
 
 #header-links {

@@ -1,6 +1,9 @@
-const sidebar = d3.select("#sidebar");
-const content = d3.select("#allContent");
-const menuItems = d3.selectAll("#sidebar ul li");
+const   sidebar = d3.select("#sidebar"),
+        content = d3.select("#allContent"),
+        menuItems = d3.selectAll("#sidebar ul li"),
+        userBar = d3.select("#user-bar"),
+        userInfo = d3.select("#logged-in"),
+        avatar = d3.select("#user-avatar");
 
 let root = document.documentElement;
 twistMenu();
@@ -10,6 +13,7 @@ window.addEventListener("resize", e => {
 //   root.style.setProperty('--mouse-y', e.clientY + "px");
 
 });
+avatar.on("click", toggleUserBar);
 
 function squeezeSidebar() {
     if (sidebar.classed("collapsed")){
@@ -32,6 +36,11 @@ function toggleSidebar() {
     unsqueezeSidebar();
     sidebar.classed("collapsed", !sidebar.classed("collapsed"));
     content.classed("expanded", !content.classed("expanded"));
+}
+
+function toggleUserBar(){
+    userBar.classed("collapsed", !userBar.classed("collapsed"))
+    userInfo.classed("collapsed", !userInfo.classed("collapsed"));
 }
 
 function twistMenu(){

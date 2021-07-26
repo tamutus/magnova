@@ -12,11 +12,11 @@
 		<div id="logged-in">
 			<span style="display: none;" id="hidden-user-id"><%= currentUser._id %></span>
 			<a href=<%= `/users/${currentUser.username}` %> >
-                <img id="user-avatar" src="<%=currentUser.pfpLink %>"></img>
                 <span id="username"><%= currentUser.username %></span>
             </a>
 			<a id="logout" href="/auth/logout">Logout</a>
 		</div>
+        <img id="user-avatar" src="<%=currentUser.pfpLink %>"></img>
 	<% } else { %>
 		<div id="logged-out">
 			<a id="register" href="/auth/register">Register</a>
