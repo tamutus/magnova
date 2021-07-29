@@ -79,6 +79,7 @@ a, a:visited {
 }
 .search-bar button {
     padding: 10px 20px;
+    margin: 20px;
 }
 .testdiv {
     display: inline-block;
@@ -581,9 +582,9 @@ input.issue-name {
 }
 .link-info, .project-info, .link-info *, .project-info * {
     font-size: 20px;
-    -webkit-transition: font-size .3s ease-in-out, width .3s ease-in-out;
-    -o-transition: font-size .3s ease-in-out, width .3s ease-in-out;
-    transition: font-size .3s ease-in-out, width .3s ease-in-out;
+    -webkit-transition: font-size .3s ease-in-out, width .3s ease-in-out, color .5s ease-out;
+    -o-transition: font-size .3s ease-in-out, width .3s ease-in-out, color .5s ease-out;
+    transition: font-size .3s ease-in-out, width .3s ease-in-out, color .5s ease-out;
 } 
 .link-votes, .project-votes{
     margin-left: 25px;
@@ -750,6 +751,9 @@ input.issue-name {
                 transform: scale(1, 1);
     }
 }
+#editing-block a {
+    height: 40px;
+}
 #edit-button, #cancel-button {
     display: inline-block;
     width: 125px;
@@ -780,6 +784,9 @@ input.issue-name {
         -ms-flex-align: baseline;
             align-items: baseline;
     margin-bottom: 30px;
+}
+#qr {
+    margin-top: 150px;
 }
 @media screen and (max-width: 1000px){
     .connection {

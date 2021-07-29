@@ -64,14 +64,28 @@
             </form>
         <% } %>
     </div>
-<h2>
-    Issues <%= shownUser.preferredName %> has identified:
-</h2>    
-<ul id="identified-issues">
-    <% for(issue of shownUser.issues){ %>
-        <li><a href=<%= `wiki/${issue._id}` %>><%= issue.name %></a></li>
-    <% } %>
-</ul>
+    <div id="creations">
+        <div>
+            <h2>
+                Issues <%= shownUser.preferredName || shownUser.username %> has identified:
+            </h2>    
+            <ul id="identified-issues">
+                <% for(issue of shownUser.issues){ %>
+                    <li><a href=<%= `wiki/${issue._id}` %>><%= issue.name %></a></li>
+                <% } %>
+            </ul>
+        </div>
+        <div>
+            <h2>
+                Projects <%= shownUser.preferredName || shownUser.username %> has created:
+            </h2>  
+            <ul id="created-projects">
+                <% for(project of shownUser.projects){ %>
+                    <li><a href=<%= `project/${project._id}` %>><%= project.name %></a></li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
 <% if(currentUser && String(shownUser._id) === String(currentUser._id)){ %>
     <script src="https://d3js.org/d3.v4.js"></script>
     <script src="https://cdn.tiny.cloud/1/f7o04qadc9hhjre2my3ep3ae1qdzax2od04t9ncrm7wold54/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>

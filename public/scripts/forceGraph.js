@@ -445,6 +445,7 @@ async function loadLastGraph(){
 
 
 window.addEventListener('resize', updateSimDimensions);
+updateSimDimensions();
 
 function dragStart(d) {
     // console.log("Start");

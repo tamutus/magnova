@@ -88,6 +88,7 @@ const indexRoutes   = require('./routes/index'),
 	  userRoutes	= require("./routes/users"),
       talkRoutes    = require("./routes/talk"),
       projectRoutes = require("./routes/project");
+      taskRoutes = require("./routes/task");
 
 
 app.use('/', indexRoutes);
@@ -97,6 +98,7 @@ app.use('/auth', authRoutes);
 app.use("/users", userRoutes);
 app.use("/talk", talkRoutes);
 app.use("/project", projectRoutes);
+app.use("/task", taskRoutes);
 
 // wild card route: 
 app.all('*', (req, res, next) => {

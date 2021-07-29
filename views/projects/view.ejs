@@ -1,4 +1,5 @@
 <%- include("../partials/wikiHeader") %>
+<link rel="stylesheet" type="text/css" href="/stylesheets/projects.css">
 <span id="hidden-project-id"><%= project._id %></span>
     <div>
         <div id="name-container">
@@ -82,7 +83,67 @@
         <li id="tasks">
             <h2>Tasks that make up this project</h2>
             <% if(project.tasks && project.tasks.edges.length > 0){ %>
-                
+                <div id="tasks-container">
+                    <div id="task-viewer">
+                        <div id="task-buttons" class="hidden">
+                            <span id="task-return-message"></span>
+                            <a id="task-edit-button" onclick="toggleTaskEditing();"><button>Edit task</button></a>
+                            <a id="task-cancel-button" onclick="stopTaskEditing();" class="hidden"><button>Cancel</button></a>
+                        </div>
+                        <div id="task-display">
+                            <em>Viewing task:</em>
+                            <div id="task-name">
+                                <h3 class="task-data">None</h3>
+                            </div>
+                            <div id="task-info-container">
+                                <div id="task-info-text-container" class="task-data">
+                                    <div id="task-info-text"></div>
+                                </div>
+                                <div id="task-info-editor-container" class="hidden task-input"></div>
+                            </div>
+                            <div id="task-completion">
+                                <h4>Completion requirements:</h4>
+                                <div class="task-data">
+                                    <p>None</p>
+                                </div>
+                            </div>
+                            <div id="task-creation">
+                                <p class="task-data"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <ul id="task-list">
+                        <% for(task of project.tasks.edges){ %>
+                            <li><%= task.vertex.name %></li>
+                        <% } %>
+                    </ul>
+                </div>
+            <% } else { %>
+                <p>Nothing here yet! 
+                <% if(currentUser){ %> 
+                    Why don't you create a new task for this project?
+                <% } else { %>
+                    Register or log in to create tasks for this project.
+                <% } %>
+                </p>
+            <% } %>
+            <% if(currentUser){ %>
+                <div id="task-submission">
+                    <form>
+                        <div id="task-submitter">
+                            <h2>Create task:</h2>
+                            <h4>What is the task? Give it a straightforward name.</h4>
+                            <input type="text" placeholder="Task name" name="name">
+                            <h4>Describe what must be done and how to do it. Include any resources that might help. Once you create this task, you can edit it richly and add hyperlinks.</h4>
+                            <input type="text" placeholder="Task description" name="info">
+                            <h4>What are the completion requirements for this task? How will completion be measured, proven, and disproven?</h4>
+                            <input type="text" placeholder="Completion requirements" name="completionRequirements">
+                        </div>
+                        <button type="submit">
+                            Submit
+                        </button>
+                    </form>
+                </div>
             <% } %>
         </li>
         <div id="qr">
@@ -99,4 +160,5 @@
 <script src="scripts/wiki.js"></script>
 <script src="https://cdn.tiny.cloud/1/f7o04qadc9hhjre2my3ep3ae1qdzax2od04t9ncrm7wold54/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 <script src="scripts/wikiEditor.js"></script>
+<script src="scripts/projectManager.js"></script>
 <%- include("../partials/footer") %>

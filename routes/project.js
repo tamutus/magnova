@@ -16,6 +16,7 @@ const 	User = require('../api/user/user'),
         Tag = require("../api/tags/tag.model"),
         Talkpage = require("../api/comments/talkpage.model"),
         Location = require("../api/maps/location.model");
+const taskTemplate = require("../api/task/task.template");
 
 router.post("/", isLoggedIn, (req, res) => {
     const newProject = req.body.project;
@@ -89,7 +90,7 @@ router.get("/", (req, res) => {
             console.log(err);
             return res.redirect("back");
         } else {
-            return res.render('project/landing', {
+            return res.render('projects/landing', {
                 title: "Project view",
                 projects: allProjects
             });
@@ -112,7 +113,8 @@ router.get("/data/:id", async (req, res) => {
 			populate: { 
                 path: "edges",
                 populate: {
-                    path: "vertex"
+                    path: "vertex",
+                    populate: "creator"
                 }
             }
         })
@@ -122,6 +124,71 @@ router.get("/data/:id", async (req, res) => {
 			}
 			return res.send(project);
 		});
+})
+router.post("/addtask/:projectid", isLoggedIn, async (req, res) => {
+    // Start out by finding the project you're making a task for
+    Project.findById(req.params.projectid)
+        // Populate tasks so you can modify the taskgraph
+        .populate("tasks") 
+        .exec(async (err, project)=> {
+            if(err){
+                console.log("When trying to create a task for a project, error finding the project: " + err);
+                return res.send(err);
+            } else {
+                // Make sure there's a taskgraph for this project in the first place.
+                if(!project.tasks) {
+                    Taskgraph.create({ root: project._id, rootType: "ProjectTemplate"}, (err, taskgraph) => {
+                        if(err) {
+                            console.log(`Trouble creating projectgraph for a project: ${err}`);
+                            return res.send("There wasn't a taskgraph and a new one couldn't be created: " + err);
+                        }
+                        else {
+                            project.tasks = taskgraph._id;
+                        }
+                    });
+                }
+                // Load the current user, just to be sure you're dealing with a real user
+                User.findById(req.user._id)
+                    .exec(async (err, currentUser) => {
+                        if(err){
+                            console.log(err);
+                            return res.send("For some reason, couldn't load your user info when trying to create a task: " + err);
+                        } else {
+                            // Get the data for the new task from the request body and the mongoose models you've just loaded
+                            let newTask = req.body;
+                            newTask.creator = currentUser._id;
+                            newTask.project = project._id;
+                            // Make the task!
+                            Task.create(newTask, (err, task) => {
+                                if(err){
+                                    console.log("Couldn't create a new task: " + err);
+                                    return res.send(err);
+                                } else {
+                                    // Make a talkpage for this new task
+                                    Talkpage.create({root: task._id, rootType: "TaskTemplate"}, (err, talkpage) => {
+                                        if(err){
+                                            console.log(`Trouble creating talkpage for task: ${err}`);
+                                        }
+                                        else{
+                                            task.talkpage = talkpage._id;
+                                            task.markModified("talkpage");
+                                            task.save();
+                                            // Finally, everything's set up to add the task to the project's taskgraph
+                                            project.tasks.edges.push({
+                                                vertex: task._id,
+                                                score: 0 // Score will represent the number of other tasks that are dependent on this one.
+                                            });
+                                            project.tasks.markModified("edges");
+                                            project.tasks.save();
+                                            return res.send(task);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+            }
+        });
 })
 router.put("/toissue/:projectid/:issueid", isLoggedIn, async (req, res) => {
     Project.findById(req.params.projectid)

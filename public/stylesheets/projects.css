@@ -1,0 +1,194 @@
+:root {
+    --taskEditorHeight: 0px;
+}
+
+#task-submission {
+    padding: 50px;
+    margin: 30px auto;
+    max-width: 1000px;
+    /* border-radius: 20px; */
+    border: 5px solid purple;
+}
+#task-submitter h4 {
+    margin-top: 10px;
+}
+#task-submitter input, #task-submtiter textarea {
+    margin-bottom: 10px;
+    width: 100%;
+}
+#tasks-container {
+    display: flex;
+    flex-flow: row-reverse wrap;
+    background-color: rgba(213, 247, 227, 0.205);
+    border-radius: 20px;
+    padding: 10px;
+}
+#task-buttons {
+    margin-bottom: 15px;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: flex-end;
+    height: 50px;
+    transition: height .4s ease-in-out;
+    overflow: hidden;
+}
+#task-buttons.hidden {
+    height: 0;
+}
+#task-buttons a {
+    margin-left: 30px;
+    height: 50px;
+    flex: 0 0 115px;
+    overflow: hidden;
+    transition: flex .5s ease-in-out, margin-left .5s ease-in-out;
+}
+#task-buttons a.hidden {
+    flex: 0 0 0px;
+    margin-left: 0;
+}
+#task-buttons a button {
+    width: 115px;
+}
+#task-return-message {
+    -webkit-transform: scaleX(0);
+        -ms-transform: scaleX(0);
+            transform: scaleX(0);
+    border-radius: 4px;
+    background-color: rgb(49, 92, 47);
+    padding: 10px;
+}
+#task-return-message.revealed {
+    -webkit-animation: flashMessage 10s;
+            animation: flashMessage 10s;
+}
+@-webkit-keyframes flashMessage {
+    0%, 100% {
+        -webkit-transform: scale(0, 0);
+                transform: scale(0, 0);
+    }
+    5%, 95% {
+        -webkit-transform: scale(.8, .8);
+                transform: scale(.8, .8);
+    }
+    10%, 90% {
+        -webkit-transform: scale(1, 1);
+                transform: scale(1, 1);
+    }
+}
+@keyframes flashMessage {
+    0%, 100% {
+        -webkit-transform: scale(0, 0);
+                transform: scale(0, 0);
+    }
+    5%, 95% {
+        -webkit-transform: scale(.8, .8);
+                transform: scale(.8, .8);
+    }
+    10%, 90% {
+        -webkit-transform: scale(1, 1);
+                transform: scale(1, 1);
+    }
+}
+#task-list {
+    flex: 1 1 400px;
+    overflow-y: auto;
+}
+.task {
+    cursor: pointer;
+    padding: 20px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    background-color: rgb(217, 183, 236);
+    border: 2px solid rgb(76, 24, 160);
+    color: rgb(41, 35, 33);
+    transition: background-color .6s ease-out, color .6s ease-out, border .6s ease-out, border-radius .6s ease-out, padding .6s ease-out;
+}
+.task:hover, .task.active {
+    padding: 17px;    
+    border-radius: 0;
+}
+.task:hover {
+    background-color: rgb(72, 252, 132);
+    border: 5px solid rgb(9, 138, 52);
+}
+.task.active, .task.active:hover {
+    color: white;
+    background-color: rgb(72, 165, 252);
+    border: 5px solid blue;
+}
+#task-viewer {
+    flex: 1 1 1000px;
+    max-width: 90%;
+    border-radius: 10px;
+    border: 7px solid rgb(125, 214, 255);
+    background-color: rgb(19, 7, 61);
+    color: rgb(155, 218, 255);
+    padding: 30px;
+    margin-left: 20px;
+    transition: flex .3s ease-out;
+}
+#task-viewer.hidden {
+    flex: 0 1 0px;
+}
+#task-name, #task-info-container, #task-creation, #task-completion {
+    width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    margin-bottom: 15px;
+}
+.task-data, .task-input {
+    white-space: nowrap;
+    overflow: hidden;
+    -webkit-transition: width .5s ease-in-out, border .5s ease-in-out, padding .5s ease-in-out, margin .5s ease-in-out, height .5s ease-in-out, font-size .5s ease-in-out, -webkit-box-flex .5s ease-in-out;
+    transition: width .5s ease-in-out, border .5s ease-in-out, padding .5s ease-in-out, margin .5s ease-in-out, height .5s ease-in-out, font-size .5s ease-in-out, -webkit-box-flex .5s ease-in-out;
+    -o-transition: width .5s ease-in-out, border .5s ease-in-out, padding .5s ease-in-out, flex .5s ease-in-out, margin .5s ease-in-out, height .5s ease-in-out, font-size .5s ease-in-out;
+    transition: width .5s ease-in-out, border .5s ease-in-out, padding .5s ease-in-out, flex .5s ease-in-out, margin .5s ease-in-out, height .5s ease-in-out, font-size .5s ease-in-out;
+    transition: width .5s ease-in-out, border .5s ease-in-out, padding .5s ease-in-out, flex .5s ease-in-out, margin .5s ease-in-out, height .5s ease-in-out, font-size .5s ease-in-out, -webkit-box-flex .5s ease-in-out, -ms-flex .5s ease-in-out;
+    flex: 1 1 100%;
+    display: inline-block;
+}
+#task-info-container {
+    display: flex;
+}
+#task-info-text {
+    white-space: normal;
+    width: 50vw;
+}
+#task-completion div p {
+    white-space: normal;
+    width: 40vw;
+}
+
+.task-data.hidden, .task-input.hidden, #task-info-text-container.hidden, #cancel-button.hidden {
+    visibility: visible;
+    width: 0;
+    flex: 0 1 0px;
+    border-left: 0;
+    border-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+#task-info-text-container.hidden {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 1 0px;
+            flex: 0 1 0px;
+}
+#task-info-editor-container {
+    flex: 0 1 100%;
+    -webkit-transition: flex .5s ease-in-out, height .5s ease-in-out;
+    -o-transition: flex .5s ease-in-out, height .5s ease-in-out;
+    transition: flex .5s ease-in-out, height .5s ease-in-out;
+    height: var(--taskEditorHeight);
+    display: inline-block;
+}
+#task-info-editor-container.hidden {
+    -webkit-box-flex: 0;
+        -ms-flex: 0 1 0px;
+            flex: 0 1 0px;
+    height: 0;
+}

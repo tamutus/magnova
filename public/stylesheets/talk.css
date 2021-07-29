@@ -5,18 +5,15 @@
 #new-thread-zone {
     margin: 40px auto;
 }
-#threads {
-    
-}
 .threader {
-    flex: 1 2 20%;
+    flex: 1 0 125px;
 }
 .thread {
     display: flex;
     flex-flow: row nowrap;
     text-align: left;
     width: 80%;
-    height: 150px;
+    height: 156px;
     margin: 20px auto;
     padding: 30px;
     background-color: rgb(97, 63, 124);
@@ -39,13 +36,24 @@
 .your-comment {
     background-color: rgb(19, 138, 58);
 }
+.threader, .preview-text, .preview-text * {
+    font-size: 16px;
+    transition: font-size .3s ease-in-out;
+}
 .threader, .first-comment, .last-comment {
     height: 120px;
     margin-left: 10px;
     margin-right: 10px;
 }
+.comment-previews {
+    flex: 2 2 80%;
+    height: 156px;
+    display: flex;
+    flex-flow: row wrap;
+    overflow: auto;
+}
 .first-comment, .last-comment {
-    flex: 2 1 40%;
+    flex: 2 2 40%;
     display: flex;
     flex-flow: row nowrap;
     align-items: center;
@@ -188,4 +196,14 @@ div.tox.tox-tinymce {
 .viewer-backdrop.hidden {
     opacity: 0;
     pointer-events: none;
+}
+
+/* Small Screen changes */
+@media screen and (max-width: 800px){
+    .threader, .preview-text, .preview-text * {
+        font-size: 12px;
+    }
+    .thread {
+        padding: 10px;
+    }
 }

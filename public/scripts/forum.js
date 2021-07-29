@@ -52,11 +52,12 @@ async function updateThreads(){
                 let threadPreviewHTML = `<div class="threader">
                     ${thread.subject}<br>
                     ${new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", timeZoneName: 'short'}).format(Date.parse(thread.lastActivity))}
-                    </div>
+                    </div><div class="comment-previews">
                     `;
                 if(thread.comments.length > 0){
                     const threadIndex = pageData.threads.findIndex(t => String(t._id) == thread._id);
-                    threadPreviewHTML += `<div class="first-comment" onclick="setParams(${threadIndex}, 0); openThreadAtIndex(${threadIndex}, 0);">
+                    threadPreviewHTML += `
+                    <div class="first-comment" onclick="setParams(${threadIndex}, 0); openThreadAtIndex(${threadIndex}, 0);">
                         <div class="preview-author">
                             <img class="mini-pfp" src="${thread.comments[0].author.pfpLink}">
                             <h4>${thread.comments[0].author.username}</h4>
@@ -66,7 +67,8 @@ async function updateThreads(){
                 }
                 if(thread.comments.length > 1){
                     const threadIndex = pageData.threads.findIndex(t => String(t._id) == thread._id);
-                    threadPreviewHTML += `<div class="last-comment" onclick="setParams(${threadIndex}, ${thread.comments.length-1}); openThreadAtIndex(${threadIndex}, ${thread.comments.length-1});">
+                    threadPreviewHTML += `
+                    <div class="last-comment" onclick="setParams(${threadIndex}, ${thread.comments.length-1}); openThreadAtIndex(${threadIndex}, ${thread.comments.length-1});">
                         <div class="preview-author">
                             <img class="mini-pfp" src="${thread.comments[thread.comments.length - 1].author.pfpLink}">
                             <h4>${thread.comments[thread.comments.length - 1].author.username}</h4>
@@ -74,6 +76,7 @@ async function updateThreads(){
                         <div class="preview-text">${thread.comments[thread.comments.length - 1].text.slice(0, 140)}...</div>
                     </div>`;
                 }
+                threadPreviewHTML += "</div>"
                 return threadPreviewHTML;
             });
             

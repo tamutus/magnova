@@ -98,7 +98,7 @@ async function toggleEditing(){
             return "Changes are unsaved. Would you still like to leave?";
         };
         // Put bio into the text editor
-        tinymce.activeEditor.setContent(descriptionText.html());
+        tinymce.get("description-editor").setContent(descriptionText.html());
         // Hide display fields and show input fields, bio editor, and cancel-editing button
         dataDisplays.classed("hidden", true);
         // issueImage.classed("shrunk", true);
@@ -108,7 +108,7 @@ async function toggleEditing(){
     }
     // Save changes
     else{
-        let descriptionHTML = tinymce.activeEditor.getContent();
+        let descriptionHTML = tinymce.get("description-editor").getContent();
         topicUpdate = {
             name: nameInput.property("value"),
             info: descriptionHTML,
@@ -125,11 +125,11 @@ async function toggleEditing(){
         })
         .then(serverResponse => serverResponse.text())
         .then(serverMessage => {
-            displayMessage(serverMessage);
+            displayTaskMessage(serverMessage);
             return serverMessage;
         })
         .catch(error => {
-            displayMessage("That didn't work!")
+            displayTaskMessage("That didn't work!")
             console.error('Error:', error);
         });
         console.log(response);
@@ -162,8 +162,9 @@ function toggleField(id){
     
     // let fieldType = 
 }
-function displayMessage(message){
-    messageSpan.text(message);
+function displayTaskMessage(message){
     messageSpan.classed("revealed", false);
+    void messageSpan.node().offsetWidth;
+    messageSpan.text(message);
     messageSpan.classed("revealed", true);
 }

@@ -42,7 +42,9 @@ function toggleSidebar() {
 
 function toggleUserBar(){
     userBar.classed("collapsed", !userBar.classed("collapsed"))
-    userInfo.classed("collapsed", !userInfo.classed("collapsed"));
+    if(!userInfo.empty()){
+        userInfo.classed("collapsed", !userInfo.classed("collapsed"));
+    }
 }
 
 function twistMenu(){

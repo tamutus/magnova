@@ -333,14 +333,33 @@ h2 {
         margin-top: -225px;
     }
 }
-#identified-issues {
+#creations {
+    display: flex;
+    flex-flow: row wrap;
+}
+#creations div {
+    flex: 1 1 500px;
+    box-sizing: border-box;
+}
+#identified-issues, #created-projects {
     max-height: 600px;
     overflow: auto;
     max-width: 40%;
     margin-left: 100px;
-    background-color: rgb(80, 56, 99);
-    padding: 40px 20px 40px 70px;
+    padding: 40px 40px 40px 70px;
     border-radius: 40px;
+}
+#identified-issues {
+    background-color: rgb(80, 56, 99);
+}
+#created-projects {
+    background-color: rgb(56, 99, 90);
+}
+#created-projects li a, #created-projects li a:visited {
+    color: rgb(245, 241, 191);
+}
+#created-projects li a:hover, #created-projects li a:visited:hover {
+    color: rgb(240, 180, 255);
 }
 #comments {
     background-color:rgb(24, 100, 201);
