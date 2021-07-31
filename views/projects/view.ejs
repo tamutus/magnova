@@ -5,8 +5,16 @@
         <div id="name-container">
             <h1 class="topic-name mutable data"><%= project.name %></h1>
         </div>
-        <div id="image-container">
-            <img id="topic-image" class="portrait" src=<%= `${project.image}` %>>
+        <div id="overview-area">
+            <div id="table-of-contents">
+                <a onclick="document.querySelector('#about').scrollIntoView({behavior: 'smooth'});">About</a>
+                <a onclick="document.querySelector('#issues').scrollIntoView({behavior: 'smooth'});">Issues</a>
+                <a onclick="document.querySelector('#tasks').scrollIntoView({behavior: 'smooth'});">Tasks</a>
+                <a onclick="document.querySelector('#qr').scrollIntoView({behavior: 'smooth'});">QR Code</a>
+            </div>
+            <div id="image-container">
+                <img id="topic-image" class="portrait" src=<%= `${project.image}` %>>
+            </div>
         </div>
         <% if(currentUser){ %>
             <div id="editing-block">
@@ -84,11 +92,12 @@
             <h2>Tasks that make up this project</h2>
             <% if(project.tasks && project.tasks.edges.length > 0){ %>
                 <div id="tasks-container">
-                    <div id="task-viewer">
+                    <div id="task-viewer" class="minimized">
                         <div id="task-buttons" class="hidden">
                             <span id="task-return-message"></span>
                             <a id="task-edit-button" onclick="toggleTaskEditing();"><button>Edit task</button></a>
                             <a id="task-cancel-button" onclick="stopTaskEditing();" class="hidden"><button>Cancel</button></a>
+                            <a id="task-cancel-button" onclick="displayThisTask();"><button>Unload</button></a>
                         </div>
                         <div id="task-display">
                             <em>Viewing task:</em>

@@ -352,7 +352,21 @@ h4.result-name {
 input.issue-name {
     width: 700px;
 }
+#overview-area {
+    display: flex;
+}
+#table-of-contents {
+    flex: 1 1 33%;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-evenly;
+    align-items: center;
+}
+#table-of-contents a {
+    font-size: 35px;
+}
 #image-container {
+    flex: 1 1 67%;
     margin: 40px auto 20px auto;
 }
 #description {

@@ -46,27 +46,45 @@ async function displayTasks(projectID){
 };
 function displayTheseTasks(taskgraph){
     taskSelection = taskList.selectAll("li.task")
-        .data(taskgraph.edges);
+        .data(taskgraph.edges, edge => `${edge.vertex._id}:${edge.vertex.__v}`);
     let taskEnter = taskSelection.enter()
         .append("li")
         .classed("task", true)
         .attr("id", taskEdge => `task-${taskEdge.vertex._id}`)
         .text(taskEdge => taskEdge.vertex.name)
-        .on("click", taskEdge => displayThisTask(taskEdge.vertex));
+        // .on("click", taskEdge => displayThisTask(taskEdge.vertex));
     taskSelection.exit().remove();
     taskSelection = taskEnter.merge(taskSelection);
+    taskSelection.on("click", taskEdge => displayThisTask(taskEdge.vertex));
 }
 function displayThisTask(task){
-    activeTask = task;
-    if(!task){
+    stopTaskEditing();
+    document.querySelector('#tasks-container').scrollIntoView({behavior: 'smooth'});
+    let same = false;
+    if(activeTask && task && String(activeTask._id) == String(task._id)){
+        same = true;
+    }
+    if(!task || same){
+        taskViewer.classed("minimized", true);
+        taskList.select(".active").classed("active", false);
         taskNameDisplay.select("h3").text("None");
+        taskCompletionDisplay.select("div").select("p").text("");
         taskCreationDisplay.html("");
-        taskCompletionDisplay.select("div").select("p").text();
-        d3.select("#task-info-text").html();
+        d3.select("#task-info-text").html("");
         taskButtons.classed("hidden", true);
+        if(same){
+            activeTask = null;
+            return;
+        }
     } else {
+        // Change classes of divs
+        taskViewer.classed("minimized", false);
         taskList.select(".active").classed("active", false);
         d3.select(`#task-${task._id}`).classed("active", true);
+
+        // Set height of textarea for taskCompletion
+        rootStyle.style.setProperty('--completionInputHeight', `${taskCompletionDisplay.style("height")}`);
+
         taskNameDisplay.select("h3").text(task.name);
         taskCreationDisplay.html(`<p>Created on ${new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", timeZoneName: 'short'}).format(Date.parse(task.creationDate))} by <a href="/users/${task.creator.username}">${task.creator.username}</a></p>`);
         taskCompletionDisplay.select("div").select("p").text(task.completionRequirements);
@@ -75,6 +93,7 @@ function displayThisTask(task){
             taskButtons.classed("hidden", false);
         }
     }
+    activeTask = task;
 }
 async function createTask(){
     if(routeBase === "project"){
@@ -94,7 +113,7 @@ async function createTask(){
         .then(res => handleErrors(res))
         .then(res => res.json())
         .then(task => {
-            displayTasks();
+            displayTasks(topicID);
             displayThisTask(task);
         })
         .catch(err => {
@@ -119,6 +138,11 @@ const taskInfoInput = taskInfoDisplay.select("#task-info-editor-container")
         .attr("id", "task-info-editor");
 // Get one selection for both above inputs
 const taskInputs = d3.selectAll(".task-input");
+
+// Add event listener to input to adjust height of completion input, so when its width shrinks it doesn't super-expand vertically
+taskCompletionInput.on("input", e => {
+    rootStyle.style.setProperty('--completionInputHeight', `${taskCompletionDisplay.style("height")}`);
+});
 
 // Capture the DOM elements for the article editor
 const taskDescriptionEditor = taskInfoDisplay.select("#task-info-editor");
@@ -182,6 +206,7 @@ async function toggleTaskEditing(){
         .then(serverResponse => serverResponse.text())
         .then(serverMessage => {
             displayTaskMessage(serverMessage);
+            displayTasks(topicID);
             return serverMessage;
         })
         .catch(error => {
@@ -194,6 +219,7 @@ async function toggleTaskEditing(){
         
         //Success
         taskNameDisplay.select("h3").text(taskUpdate.name);
+        // d3.select(".task.active").text(taskUpdate.name);
         taskCompletionDisplay.select("div").select("p").text(taskUpdate.completionRequirements);
         d3.select("#task-info-text").html(taskUpdate.info);
 
@@ -216,6 +242,6 @@ function stopTaskEditing(){
 function displayTaskMessage(message){
     taskMessageSpan.classed("revealed", false);
     taskMessageSpan.text(message);
-    void taskMessageSpan.node().offsetWidth;
+    void taskMessageSpan.node().offsetWidth; // See https://stackoverflow.com/questions/60686489/what-purpose-does-void-element-offsetwidth-serve for more info
     taskMessageSpan.classed("revealed", true);
 }
