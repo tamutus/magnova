@@ -354,16 +354,25 @@ input.issue-name {
 }
 #overview-area {
     display: flex;
+    flex-flow: row wrap;
+    justify-content: space-evenly;
 }
 #table-of-contents {
-    flex: 1 1 33%;
+    flex: 1 1 calc(33% - 140px);
     display: flex;
     flex-flow: column nowrap;
     justify-content: space-evenly;
     align-items: center;
+    margin: 0 50px 50px 50px;
+    padding: 20px;
+    background-color:rgba(58, 172, 153, 0.404);
+    border-radius: 30px;
 }
 #table-of-contents a {
     font-size: 35px;
+}
+#overview-area div:nth-child(2) {
+    flex: 1 1 67%;
 }
 #image-container {
     flex: 1 1 67%;
