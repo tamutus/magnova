@@ -568,7 +568,7 @@ li {
 #logged-in a {
     flex: 0 1 50px;
     width: 100%;
-    transition: width .3s ease-out;
+    transition: width .3s ease-out, color .5s ease-out;
     display: flex;
     justify-content: center;
 }

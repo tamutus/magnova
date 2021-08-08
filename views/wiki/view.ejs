@@ -9,6 +9,7 @@
                 <a onclick="document.querySelector('#about').scrollIntoView({behavior: 'smooth'});">About</a>
                 <a onclick="document.querySelector('#issues').scrollIntoView({behavior: 'smooth'});">Issues</a>
                 <a onclick="document.querySelector('#projects').scrollIntoView({behavior: 'smooth'});">Projects</a>
+                <a onclick="document.querySelector('#locations').scrollIntoView({behavior: 'smooth'});">Locations</a>
                 <a onclick="document.querySelector('#qr').scrollIntoView({behavior: 'smooth'});">QR Code</a>
             </div>
             <div id="image-container">
@@ -123,6 +124,10 @@
                     </div>
                 <% } %>
             </div>
+        </li>
+        <li id="locations">
+            <h2>Locations</h2>
+            <div id="map-container"></div>
         </li>
         <!-- <h2>Backend Data</h2>
         <% let keys = ["name", "image", "info", "active", "identifier", "identificationDate", "editors", "talkpage", "harms", "resources", "instances", "issues", "projects"]; %>

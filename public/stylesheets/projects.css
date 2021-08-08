@@ -174,7 +174,7 @@
     width: 170px;
 }
 #task-display em, #task-info-text *, #task-completion h4, #task-completion div p {
-    transition: font-size .5s ease-in-out, transform .5s ease-in-out, flex .5s ease-in-out, width .5s ease-in-out;
+    transition: font-size .5s ease-in-out, transform .5s ease-in-out, flex .5s ease-in-out, width .5s ease-in-out, color .5s ease-out;
 }
 #task-info-container {
     display: flex;

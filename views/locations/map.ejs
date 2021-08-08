@@ -1,0 +1,25 @@
+<%- include("../partials/mapHeader") %>
+
+<h1>Maps on Magnova</h1>
+
+<div id="fetch-display">
+    <input id="fetch-target" type="text">
+    <!-- <input id="fetch-query" type="text"> -->
+    <div id="fetch-result"></div>
+    <button onclick="fetchThis();">Submit</button>
+</div>
+
+<div id="map-container"></div>
+<div id="instructions">
+    <h3>Controls</h3>
+    <p>Double click to focus a country.</p>
+</div>
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<!-- Make sure you put this AFTER Leaflet's CSS -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+crossorigin=""></script>
+<script src="https://unpkg.com/geojson-vt@3.2.0/geojson-vt.js"></script>
+<script src="scripts/map.js"></script>
+<%- include("../partials/footer") %>

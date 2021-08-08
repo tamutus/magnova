@@ -10,13 +10,13 @@ const { isLoggedIn } = require("../middleware");
 
 router.get('/', (req, res) => {
 	let currentDate = new Date();
-    let weekAgo = new Date(currentDate.setDate(currentDate.getDate() - 28)).toISOString();
-    Issue.find({identificationDate: {$gte: weekAgo} }, (err, recentIssues) => {
+    let startDate = new Date(currentDate.setDate(currentDate.getDate() - 60)).toISOString();
+    Issue.find({identificationDate: {$gte: startDate} }, (err, recentIssues) => {
 		if(err){
 			console.log(err);
 			return res.redirect("back");
 		}
-		Project.find({creationDate: {$gte: weekAgo} }, (err, recentProjects) => {
+		Project.find({creationDate: {$gte: startDate} }, (err, recentProjects) => {
             if(err){
                 console.log(err);
                 return res.redirect("back");
