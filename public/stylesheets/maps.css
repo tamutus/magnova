@@ -1,3 +1,17 @@
 #map-container {
+    display: flex;
     height: 700px;
+}
+#map-display {
+    height: 700px;
+    flex: 1 0 500px;
+}
+#location-info-display {
+    flex: 1 1 200px;
+    overflow-y: auto;
+    max-height: 100%;
+    margin: 0 50px 0 30px;
+    background-color: rgba(50, 218, 224, 0.178);
+    padding: 30px;
+    border-radius: 30px;
 }

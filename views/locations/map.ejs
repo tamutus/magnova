@@ -2,17 +2,29 @@
 
 <h1>Maps on Magnova</h1>
 
-<div id="fetch-display">
+<!-- <div id="fetch-display">
     <input id="fetch-target" type="text">
-    <!-- <input id="fetch-query" type="text"> -->
+    <input id="fetch-query" type="text">
     <div id="fetch-result"></div>
     <button onclick="fetchThis();">Submit</button>
-</div>
+</div> -->
 
-<div id="map-container"></div>
+<div id="map-container">
+    <div id="map-display"></div>
+    <div id="location-info-display">
+        Here's some info;
+    </div>
+</div>
 <div id="instructions">
     <h3>Controls</h3>
-    <p>Double click to focus a country.</p>
+    <p>Click to focus a place.</p><br>
+    <p>Soon, you'll be able to see local issues, projects, tasks, double click to show sublocations. This is a somewhat glitchy work in progress.</p>
+</div>
+<div id="bugs">
+    <h3>Known bugs</h4>
+    <ol>
+        <li>Some parts of locations do not properly change style at certain zoom levels. You will notice Alaska and Russia in particular have this problem. Zoom in to somewhat fix this.</li>
+    </ol>
 </div>
 
 <script src="https://d3js.org/d3.v4.js"></script>
@@ -20,6 +32,9 @@
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
 crossorigin=""></script>
-<script src="https://unpkg.com/geojson-vt@3.2.0/geojson-vt.js"></script>
+<script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.bundled.js"></script>
+<script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-array@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-geo@3"></script>
 <script src="scripts/map.js"></script>
 <%- include("../partials/footer") %>
