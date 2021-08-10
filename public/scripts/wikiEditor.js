@@ -125,11 +125,11 @@ async function toggleEditing(){
         })
         .then(serverResponse => serverResponse.text())
         .then(serverMessage => {
-            displayTaskMessage(serverMessage);
+            displayMessage(serverMessage);
             return serverMessage;
         })
         .catch(error => {
-            displayTaskMessage("That didn't work!")
+            displayMessage("That didn't work!")
             console.error('Error:', error);
         });
         console.log(response);
@@ -162,7 +162,7 @@ function toggleField(id){
     
     // let fieldType = 
 }
-function displayTaskMessage(message){
+function displayMessage(message){
     messageSpan.classed("revealed", false);
     void messageSpan.node().offsetWidth;
     messageSpan.text(message);
