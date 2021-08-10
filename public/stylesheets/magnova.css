@@ -42,7 +42,7 @@ body {
     font-family: 'Poppins', sans-serif;
 	color: lavender;
 	font-weight: 400;
-    height: 100%;
+    min-height: 100vh;
 }
 #allContent {
 	text-align: center;
@@ -304,7 +304,7 @@ li {
 /* ============= */
 
 #sidebar {
-	z-index: 4;
+	z-index: 1001;
 	background-color: rgb(166, 79, 120);
 	position: fixed;
 	left: 0;
@@ -394,7 +394,7 @@ li {
 	left: 15px;
 	top: 15px;
 	margin: none;
-	z-index: 5;
+	z-index: 1002;
 	width: 100px;
 	height: 100px;
 	background-color: rgb(139, 17, 74);
@@ -690,6 +690,9 @@ li {
 /* ========================== */
 
 @media screen and (max-height: 450px){
+	#user-bar {
+		transform: scale(.8);
+	}
 	#sidebar-toggler {
 		-webkit-transform: scale(.7);
 		    -ms-transform: scale(.7);
@@ -715,10 +718,36 @@ li {
 	}
 }
 @media screen and (max-width: 1000px){
-    #allContent, #allContent.expanded {
+    h1 {
+		font-size: 60px;
+	}
+	h2, h2 em {
+		font-size: 35px;
+	}
+	h3 {
+		font-size: 25px;
+	}
+	#allContent, #allContent.expanded {
         padding-left: 100px;
         margin-left: 25px;
     }
+	#user-bar {
+		transform: scale(.8);
+	}
+	#header-links {
+		transform: translate(-50px, -10px) scale(.9);
+	}
+}
+@media screen and (max-width: 800px){
+	h1 {
+		font-size: 50px;
+	}
+	h2, h2 em {
+		font-size: 30px;
+	}
+	h3 {
+		font-size: 22px;
+	}
 }
 @media screen and (max-width: 650px){
 	#allContent, #allContent.expanded {
@@ -742,9 +771,9 @@ li {
 		font-size: 30px;
 	}
 	#user-bar {
-		-webkit-transform: scale(.8);
-		    -ms-transform: scale(.8);
-		        transform: scale(.8);
+		-webkit-transform: scale(.6) translate(20px, -20px);
+		    -ms-transform: scale(.6) translate(20px, -20px);
+		        transform: scale(.6) translate(20px, -20px);
 	}
 	#conrols {
 		-webkit-transform: scale(.4);
@@ -757,9 +786,9 @@ li {
 		color: white; 
 	}
     #header-links {
-        -webkit-transform: translate(-98px, -15px);
-            -ms-transform: translate(-98px, -15px);
-                transform: translate(-98px, -15px);
+        -webkit-transform: translate(-130px, -25px) scale(.7);
+            -ms-transform: translate(-130px, -25px) scale(.7);
+                transform: translate(-130px, -25px) scale(.7);
     }
 }
 @media screen and (max-height: 400px){

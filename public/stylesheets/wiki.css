@@ -834,6 +834,9 @@ input.issue-name {
     }
 } 
 @media screen and (max-width: 800px){
+    #table-of-contents a {
+        font-size: 30px;
+    }
     .connection {
         width: 400px;
     }

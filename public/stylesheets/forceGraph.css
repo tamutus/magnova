@@ -13,9 +13,9 @@ body {
 #force-graph {
     position: fixed;
     top: 0;
-    left: 150px;
+    left: 30px;
     height: 90vh;
-    width: calc(94% - 150px);
+    width: calc(94% - 30px);
     margin: 5vh 5vw 5vh 1vw;
     border: 2px solid black;
     background-color: rgb(52, 32, 112);
@@ -451,9 +451,9 @@ circle.link-vote {
                 transform: scale(.8);
     }
     #fg-utilities {
-        -webkit-transform: scale(.8);
-            -ms-transform: scale(.8);
-                transform: scale(.8);
+        -webkit-transform: scale(.8) translate(-30px, 0px);
+            -ms-transform: scale(.8) translate(-30px, 0px);
+                transform: scale(.8) translate(-30px, 0px);
         left: 130px;
     }
     .tool-text {
@@ -462,26 +462,30 @@ circle.link-vote {
                 transform: scale(.75);
     }
 }
-@media screen and (max-height: 500px){
+@media screen and (max-height: 650px){
     #fg-utilities {
-        -webkit-transform: scale(.8);
-            -ms-transform: scale(.8);
-                transform: scale(.8);
+        -webkit-transform: scale(.8) translate(-70px, 0px);
+            -ms-transform: scale(.8) translate(-70px, 0px);
+                transform: scale(.8) translate(-70px, 0px);
         top: 3vh;
     }
 }
 @media screen and (max-width: 650px){
     #force-graph {
-        left: 90px;
-        width: calc(94vw - 90px);
+        left: 15px;
+        width: calc(94vw - 15px);
         margin: 5vh 5vw 5vh 1vw;
     }
-    
     #fg-utilities {
+        -webkit-transform: scale(.6) translate(-90px, 20px);
+            -ms-transform: scale(.6) translate(-90px, 20px);
+                transform: scale(.6) translate(-90px, 20px);
+        left: 70px;
+    }
+    #issue-searchbar {
         -webkit-transform: scale(.6);
             -ms-transform: scale(.6);
                 transform: scale(.6);
-        left: 70px;
     }
     .tool-text {
         -webkit-transform: scale(.55);
