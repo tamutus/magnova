@@ -18,8 +18,9 @@
         
     <foreignObject>
         <div id="header" xmlns="http://www.w3.org/1999/xhtml">
-            <div id="pfp-container">
+            <div id="pfp-container" onclick="d3.select(this).classed('qr-up', !d3.select(this).classed('qr-up'));">
                 <img id="profile-picture" class="round mutable data" src="<%= shownUser.pfpLink %>" alt="Profile Picture">
+                <img id="user-qr" src=<%= `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURI(currentHost + currentURL)}&amp;size=200x200` %> alt="" title="<%= shownUser.username %>'s QR code" />
             </div>
             <div id="header-main">
                 <div id="names">

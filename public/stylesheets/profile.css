@@ -53,18 +53,40 @@ h2 {
     flex-flow: row nowrap;
     /* justify-content: center; */
     margin: 25px 0 25px 30px;
+    perspective: 1000px;
 }
-#profile-picture {
+#pfp-container {
+    height: 200px;
+    flex: 0 0 200px;
+    margin-right: 25px;
+    transform-style: preserve-3d;
+    transition: transform .6s linear;
+    transform-origin: center;
+}
+#pfp-container.qr-up {
+    transform: rotateX(90deg);
+}
+#profile-picture, #user-qr {
+    position: absolute;
     height: 200px;
     width: 200px;
-    margin-right: 25px;
     animation-name: constellate;
     animation-timing-function: ease-out;
     animation-duration: .7s;
-    transform-origin: top center;
+    transform-origin: center 100px;
     transition: transform .5s ease, height .5s ease, width .5s ease;
+    transform-style: preserve-3d;
 }
-#profile-picture.shrunk {
+#profile-picture {
+    top: 0px;
+    left: 0;
+}
+#user-qr {
+    top: 100px;
+    left: 30px;
+    transform: rotateX(-90deg);
+}
+#profile-picture.shrunk, #user-qr.shrunk {
     width: 100px;
     height: 100px;
 }
