@@ -86,6 +86,9 @@ h2 {
     left: 30px;
     transform: rotateX(-90deg);
 }
+#profile-picture.shrunk {
+    transform: translateY(50px);
+}
 #profile-picture.shrunk, #user-qr.shrunk {
     width: 100px;
     height: 100px;
