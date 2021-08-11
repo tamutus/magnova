@@ -617,8 +617,8 @@ input.issue-name {
     display: flex;
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
-        -ms-flex-flow: row nowrap;
-            flex-flow: row nowrap;
+        -ms-flex-flow: row wrap;
+            flex-flow: row wrap;
     -webkit-transform-origin: left;
         -ms-transform-origin: left;
             transform-origin: left;
