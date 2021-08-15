@@ -102,7 +102,7 @@ h2 {
 }
 #names {
     display: flex;
-    flex-flow: row nowrap;
+    flex-flow: row wrap;
     justify-content: flex-start;
     align-items: baseline;
     text-shadow: 4px 4px 5px black;
@@ -129,6 +129,9 @@ h2 {
     font-size: 24px;
     letter-spacing: .1em;
     transform: translateX(20px);
+}
+#scores {
+    margin-bottom: 30px;
 }
 #bio {
     display: flex;
@@ -340,6 +343,11 @@ h2 {
 @media screen and (max-width: 700px){
     #header-svg {
         transform: scale(.6) translate(-200px, 80px);
+    }
+}
+@media screen and (max-width: 600px){
+    #header-svg {
+        transform: scale(.6) translate(-300px, 80px);
     }
 }
 @media screen and (max-height: 450px){

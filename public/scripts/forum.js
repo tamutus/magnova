@@ -59,7 +59,7 @@ async function updateThreads(){
                     threadPreviewHTML += `
                     <div class="first-comment" onclick="setParams(${threadIndex}, 0); openThreadAtIndex(${threadIndex}, 0);">
                         <div class="preview-author">
-                            <img class="mini-pfp" src="${thread.comments[0].author.pfpLink}">
+                            <img class="mini-pfp" src="${thread.comments[0].author.pfpLink || '/assets/default_avatar.png'}">
                             <h4>${thread.comments[0].author.username}</h4>
                         </div>
                         <div class="preview-text">${thread.comments[0].text.slice(0, 140)}...</div>
@@ -157,7 +157,10 @@ window.addEventListener("popstate", event => {
 });
 async function openThreadAtIndex(index, commentIndex){
     // Stop event propagation so clicking a first/last comment in a thread preview doesn't activate openThread() on top of openThreadAtIndex().
-    window.event.stopPropagation();
+    if(window.event){
+        window.event.stopPropagation();
+    }
+    
 
     threadIndexDiv.text(index);
 
@@ -222,7 +225,7 @@ function updateComments(){
             .html(c => {
                 // let commentDate = new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", timeZoneName: 'short'}).format(c.date);
                 let commentDate = new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", timeZoneName: 'short'}).format(Date.parse(c.date));
-                return `<a href="/users/${c.author.username}"><img class="pfp" src=${c.author.pfpLink}>${c.author.username}</a><br>${commentDate}`
+                return `<a href="/users/${c.author.username}"><img class="pfp" src=${c.author.pfpLink || '/assets/default_avatar.png'}>${c.author.username}</a><br>${commentDate}`
             });
     commentEnter
         .append("div")

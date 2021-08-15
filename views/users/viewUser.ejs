@@ -19,7 +19,7 @@
     <foreignObject>
         <div id="header" xmlns="http://www.w3.org/1999/xhtml">
             <div id="pfp-container">
-                <img id="profile-picture" onclick="d3.select('#pfp-container').classed('qr-up', !d3.select('#pfp-container').classed('qr-up'));" class="round mutable data" src="<%= shownUser.pfpLink %>" alt="Profile Picture">
+                <img id="profile-picture" onclick="d3.select('#pfp-container').classed('qr-up', !d3.select('#pfp-container').classed('qr-up'));" class="round mutable data" src="<%= shownUser.pfpLink || '/assets/default_avatar.png' %>" alt="Profile Picture">
                 <img id="user-qr" onclick="d3.select('#pfp-container').classed('qr-up', !d3.select('#pfp-container').classed('qr-up'));" src=<%= `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURI(currentHost + currentURL)}&amp;size=200x200` %> alt="" title="<%= shownUser.username %>'s QR code" />
             </div>
             <div id="header-main">
@@ -55,6 +55,10 @@
             <a id="cancel-button" onclick="stopEditing();" class="hidden"><button>Cancel</button></a>
         </div>
     <% } %>
+    <div id="scores">
+        <% let voteNumber = 0; for(voteSet of shownUser.edgeVotes){ voteNumber += voteSet.targets.length}; for(voteSet of shownUser.projectVotes){ voteNumber += voteSet.targets.length }; %>
+        <p><em>Votes cast: <%= voteNumber %></em></p>
+    </div>
     <div id="bio">
         <div id="bio-text-container" class="mutable data">
             <div id="bio-text"><%- shownUser.bio %></div>
@@ -68,7 +72,7 @@
     <div id="creations">
         <div>
             <h2>
-                Issues <%= shownUser.preferredName || shownUser.username %> has identified:
+                <%= shownUser.issues.length %> Issues <%= shownUser.preferredName || shownUser.username %> has identified:
             </h2>    
             <ul id="identified-issues">
                 <% for(issue of shownUser.issues){ %>
@@ -78,7 +82,7 @@
         </div>
         <div>
             <h2>
-                Projects <%= shownUser.preferredName || shownUser.username %> has created:
+                <%= shownUser.projects.length %> Projects <%= shownUser.preferredName || shownUser.username %> has created:
             </h2>  
             <ul id="created-projects">
                 <% for(project of shownUser.projects){ %>
@@ -95,7 +99,7 @@
 <% } %>
 
 <h2>
-    Recent forum activity
+    Recent forum activity (<%= shownUser.comments.length %> comments made)
 </h2>
     <% for(let i = 0; i < 10 && i < shownUser.comments.length; i++) { let thisComment = shownUser.comments[shownUser.comments.length - i -1 ]; %>
         <a href=<%= `/talk/comment/${thisComment._id}` %>>

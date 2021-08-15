@@ -69,9 +69,11 @@ let searchResults = {},
 function displayResults(){
     if(searchResults.issues && searchResults.issues.length > 0){
         issueResultHeader.classed("hidden", false);
+        issueResultDisplay.classed("hidden", false);
     }
     else{
         issueResultHeader.classed("hidden", true);
+        issueResultDisplay.classed("hidden", true);
         searchResults.issues = [];
     }
     if(searchResults.users && searchResults.users.length > 0){
@@ -126,7 +128,11 @@ function displayResults(){
                 }
                 else{ return formattedInfo; }
             });
-    issueResultSelection.exit().remove();
+    issueResultSelection.exit()
+        .classed("leaving", true)
+        .transition(0)
+        .delay(500)
+        .remove();
     issueResultSelection = issueResultSelection.merge(issueResultsEnter);
     
     // Display user results
@@ -166,7 +172,11 @@ function displayResults(){
                 }
                 else{ return formattedBio; }
             });
-    userResultSelection.exit().remove();
+    userResultSelection.exit()
+        .classed("leaving", true)
+        .transition(0)
+        .delay(500)
+        .remove();
     userResultSelection = userResultSelection.merge(userResultsEnter);
     
     // Display project results
@@ -207,7 +217,11 @@ function displayResults(){
                 }
                 else{ return formattedInfo; }
             });
-    projectResultSelection.exit().remove();
+    projectResultSelection.exit()
+        .classed("leaving", true)
+        .transition(0)
+        .delay(500)
+        .remove();
     projectResultSelection = projectResultSelection.merge(projectResultsEnter);
     
 }

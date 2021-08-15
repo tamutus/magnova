@@ -16,6 +16,7 @@ var UserSchema = new mongoose.Schema({
 		unique: true
 	},
 	pfpLink: String,
+    bannerLink: String,
 	bio: String,
     inbox: {type: Schema.Types.ObjectId, ref: "Inbox"},
     location: {type: Schema.Types.ObjectId, ref: "Location"},

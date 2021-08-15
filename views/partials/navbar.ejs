@@ -18,7 +18,7 @@
             </a>
 			<a id="logout" href="/auth/logout">Logout</a>
 		</div>
-        <img id="user-avatar" src="<%=currentUser.pfpLink %>"></img>
+        <img id="user-avatar" src="<%=currentUser.pfpLink || "/assets/default_avatar.png" %>"></img>
 	<% } else { %>
 		<div id="logged-out">
 			<a id="register" href="/auth/register">Register</a>
