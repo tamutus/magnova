@@ -124,7 +124,7 @@ h2 {
     z-index: 2;
 }
 .name-shield input {
-    width: 500px;
+    width: max(500px, 100%);
     position: absolute;
     left: 0;
     font-size: 55px;

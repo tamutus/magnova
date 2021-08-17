@@ -76,7 +76,7 @@ router.get("/my_data", (req, res) => {
     
 });
 router.put("/my_data", async (req, res) => {
-    const {preferredName, email, bio, pfpLink} = req.body;
+    const {preferredName, email, bio, pfpLink, bannerLink} = req.body;
     // if(username.length == 0){
     //     res.send("You sent in a blank username!");
     // }
@@ -97,6 +97,8 @@ router.put("/my_data", async (req, res) => {
             user.bio = bio;
             user.email = email;
             user.pfpLink = pfpLink;
+            user.bannerLink = bannerLink; 
+                user.markModified("bannerLink");
             user.save();
             let returnMessage = `Update successful!`;
             console.log(returnMessage);
@@ -110,13 +112,17 @@ router.post("/register", async (req, res) => {
         return res.send("Sorry, that username is way too long. 40 characters max.");
     }
     lowercaseUsername = username.slice(0).toLowerCase();
+
+    if(lowercaseUsername == "all"){
+        return res.send("That word is reserved, sorry")
+    }
     lowercaseEmail = email.slice(0).toLowerCase();
     User.findOne({username: lowercaseUsername}, async (err, user) => {
         if(err){
             console.log(err);
         }
         else if(user){
-            res.send("Sorry, that username has been taken");
+            return res.send("Sorry, that username has been taken");
         }
         else{
             User.find({email: lowercaseEmail}, async (err, user) => {
@@ -124,7 +130,7 @@ router.post("/register", async (req, res) => {
                     console.log(err);
                 }
                 else if(user.length > 0){
-                    res.send("Sorry, that email has been taken");
+                    return res.send("Sorry, that email has been taken");
                 }
                 else {
                     const user = new User({username: lowercaseUsername, email: lowercaseEmail});
