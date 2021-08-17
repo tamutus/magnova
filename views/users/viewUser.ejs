@@ -24,7 +24,9 @@
             </div>
             <div id="header-main">
                 <div id="names">
-                    <h1 class="preferred-name mutable data"><%= shownUser.preferredName || "Preferred Name" %></h1>
+                    <div class="name-shield">
+                        <h1 class="preferred-name mutable data"><%= shownUser.preferredName || shownUser.username %></h1>
+                    </div>
                     <h3 class="handle">@ <%= shownUser.username %></h3>
                 </div>
                 <div id="badges">

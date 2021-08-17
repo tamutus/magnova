@@ -94,13 +94,15 @@ h2 {
     height: 100px;
 }
 #header-main {
-    display: flex;
+    align-self: flex-end;
     flex-flow: column nowrap;
     justify-content: space-between;
     width: 80%;
-    height: 200px;
+    min-height: 200px;
 }
 #names {
+    position: absolute;
+    bottom: 75px;
     display: flex;
     flex-flow: row wrap;
     justify-content: flex-start;
@@ -113,15 +115,36 @@ h2 {
     flex-shrink: 1;
 }
 #names .handle {
-    flex: 1 1 50%;
+    flex: 1 1 0;
+    margin: 10px 0 30px 0;
 }
-#names > .hidden {
-    flex: 0 1 0%;
+.name-shield {
+    display: inline-block;
+    transform: translateY(15px);
+    z-index: 2;
 }
-.preferred-name {
+.name-shield input {
+    width: 500px;
+    position: absolute;
+    left: 0;
+    font-size: 55px;
+    height: 80px;
+    z-index: 3;
+}
+.name-shield > input.hidden {
+    width: 0;
+}
+.preferred-name, h1.preferred-name.hidden {
+    font-size: 70px;
     font-family: 'Oxygen', sans-serif;
     font-weight: 700;
     box-sizing: border-box;
+    padding: 0;
+    display: inline-block;
+    position: relative;
+    left: 0;
+    visibility: visible;
+    width: 100%;
 }
 .handle {
     font-family: 'Orbitron', sans-serif;
@@ -136,14 +159,15 @@ h2 {
 #bio {
     display: flex;
     flex-flow: row nowrap;
+    width: 70vw;
 }
 #bio-text-container {
-    width: 70vw;
-    margin-right: 10%;
+    width: 90%;
+    /* margin-right: 10%; */
     margin-bottom: 30px;
 }
 #bio-text {
-    width: 70vw;
+    width: 63vw;
     white-space: pre-wrap;
     text-align: justify;
 }
@@ -241,6 +265,8 @@ h2 {
     /* overflow-y: scroll; */
     height: 75px;
     padding-left: 20px;
+    position: absolute;
+    bottom: 0;
 }
 .badge {
     height: 75px;

@@ -12,11 +12,11 @@ let editing = false,
 
 // Capture display fields
 const names = d3.select("#names"),
-    preferredName = names.select("h1.preferred-name"),
+    preferredName = names.select("div").select("h1.preferred-name"),
     handle = names.select("h3.handle"),
     emailBox = d3.select("#email-box"),
     emailDisplay = emailBox.select("#email-display"),
-    pfp = d3.select("#pfp-container").select("#profile-picture")
+    pfp = d3.select("#pfp-container").select("#profile-picture"),
     bioText = d3.select("#bio-text"),
     dataDisplays = d3.selectAll(".data"),
     // Capture Edit button;
@@ -33,9 +33,11 @@ let currentUser = fetch("/auth/my_data")
 
 // Add and capture hidden input fields on top of display fields
 const preferredNameInput = d3.select("#names")
+    .select("div")
     .insert("input",":first-child")
         .attr("type", "text")
             .property("value", preferredName.text())
+            .attr("placeholder", "Preferred Name")
         .classed("preferred-name", true)
         .classed("mutable", true)
         .classed("hidden", true);
@@ -43,13 +45,15 @@ const emailInput = d3.select("#email-box")
     .append("input")
         .attr("type", "text")
             .property("value", emailDisplay.text())
-        .classed("handle", true)
+            .attr("placeholder", "Email address")
+        .classed("email", true)
         .classed("mutable", true)
         .classed("hidden", true);
 const imageInput = d3.select("#pfp-container").
     append("input")
         .attr("type", "text")
             .property("value", d3.select("#profile-picture").attr("src"))
+            .attr("placeholder", "Profile Picture URL")
         .attr("id", "pfp-input")
         .classed("mutable", true)
         .classed("hidden", true);
