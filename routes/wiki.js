@@ -5,6 +5,7 @@ const	express = require('express'),
         Project = require("../api/project/project.template"),
         Projectgraph = require("../api/project/project.graph"),
         Talkpage = require("../api/comments/talkpage.model"),
+        Patchlist = require("../api/patchlist.model"),
 		User = require("../api/user/user");
 const { isLoggedIn } = require("../middleware");
 
@@ -79,6 +80,25 @@ router.get("/search", async (req, res) => {
     });
     // console.log(results);
     return res.send(results);
+});
+
+router.get("/edits/:id", isLoggedIn, (req, res) => {
+    Patchlist.findById(req.params.id)
+        .populate("patches.editor", "username")
+        .exec((err, patchlist) => {
+            const packet = {
+                message: "Success!",
+                content: {}
+            };
+            if(err){
+                console.log(err);
+                packet.message = "Couldn't find the patch list";  
+            }
+            else {
+                packet.content = patchlist;
+            }
+            return res.send(packet);
+        });
 });
 
 // To do: check whether req.params.id is mongoose objectid by this method, https://stackoverflow.com/a/29231016/6096923 , and if it's not look up at the path. refactor to have stable paths.
@@ -160,6 +180,23 @@ router.get('/:id', (req, res) => {
                     }
                 });
             }
+            if(!issue.edits){
+                Patchlist.create({root: issue._id, rootType: "IssueTemplate"}, (err, patchlist) => {
+                    if(err){console.log(err);}
+                    else{
+                        Issue.findByIdAndUpdate(issue._id, {edits: patchlist}, {omitUndefined: true, strict: false}, (err, updatedIssue) => {
+                            if(err){ console.log(err); }
+                            else{ issue.edits = updatedIssue.edits; }
+                        });
+                    }
+                });
+            }
+            if(!issue.version){
+                Issue.findByIdAndUpdate(issue._id, {version: 0}, {omitUndefined: true, strict: false}, (err, updatedIssue) => {
+                    if(err){console.log(err);}
+                    else { issue.version = 0; }
+                })
+            }
             if(issue.creator || issue.creationDate){
                 Issue.findByIdAndUpdate(issue._id, {creator: undefined, creationDate: undefined}, {omitUndefined: true, strict: false}, (err, updatedIssue) => {
                     if(err){console.log(err);}
@@ -172,33 +209,66 @@ router.get('/:id', (req, res) => {
 		});
 });
 router.put("/:id", isLoggedIn, (req, res) => {
-	const {name, info, image} = req.body;
+	const {name, info, image, patch, latestVersion} = req.body;
     if(name.length == 0){
         res.send("You sent in a blank name!");
     }
-    Issue.findById(req.params.id, async (err, issue) => {
-        if(err){
-            console.log(err);
-        }
-        else{
-            // user.username = username; implementing username changes will require some modification of the middleware for serializing users
-            let returnMessage = `Update not needed`;
-            if(issue.name != name || issue.info != info || issue.image != image){
-                issue.name = name;
-                issue.info = info;
-                issue.image = image;
-                if(!issue.editors){
-                    issue.editors = [];
-                }
-                if(!issue.editors.find(e => String(e) == String(req.user._id))){
-                    issue.editors.push(req.user._id);
-                }
-                issue.save();
-                returnMessage = `Update successful!`;
+    Issue.findById(req.params.id)
+        .populate("edits")
+        .exec(async (err, issue) => {
+            if(err){
+                console.log(err);
             }
-            res.send(returnMessage);
-        }
-    });
+            else{
+                let returnMessage = `Update not needed`;
+                if(issue.name != name || issue.info != info || issue.image != image){
+                    if(!issue.version){
+                        issue.version = 0;
+                        issue.markModified("version");
+                    }
+                    if(issue.version != latestVersion){
+                        return res.send("Latest version changed while you were creating a patch. Try again now.")
+                    }
+                    if(!issue.edits){
+                        Patchlist.create({root: issue._id, rootType: "IssueTemplate"}, (err, patchlist) => {
+                            if(err){console.log(err);}
+                            else{
+                                issue.edits = patchlist;
+                                issue.markModified("edits");
+                            }
+                        });
+                    }
+                    if(issue.info != info){
+                        issue.edits.patches.push({
+                            editor: req.user._id,
+                            patch: patch
+                        });
+                        issue.edits.markModified("patches");
+                        issue.edits.save();
+                        
+                        issue.version++;
+                        issue.markModified("version");
+                        issue.info = info;
+                    }
+                    
+                    if(!issue.editors){
+                        issue.editors = [];
+                        issue.markModified("editors");
+                    }
+                    if(!issue.editors.find(e => String(e) == String(req.user._id))){
+                        issue.editors.push(req.user._id);
+                        issue.markModified("editors");
+                    }
+
+                    issue.name = name;
+                    issue.image = image;
+
+                    issue.save();
+                    returnMessage = `Update successful!`;
+                }
+                return res.send(returnMessage);
+            }
+        });
 })
 
 module.exports = router;

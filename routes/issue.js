@@ -511,6 +511,7 @@ router.get("/data/:id", async (req, res) => {
                 }
             }
 		})
+        .populate("identifier", "username")
 		.exec((err, issue) => {
 			if(err){
 				console.log(`Error while loading data for issue ${req.params.id}: ${err}`);

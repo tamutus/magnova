@@ -9,6 +9,8 @@ const HarmSchema = new Schema({
     unit: String,
     image: String,
     info: String,
+    edits: {type: Schema.Types.ObjectId, ref: "Patchlist"},
+    version: {type: Number, default: 0},
     tags: [{type: Schema.Types.ObjectId, ref: "Tag"}],
     identifier: {type: Schema.Types.ObjectId, ref: "User"},
     identificationDate: {type: Date, default: Date.now },

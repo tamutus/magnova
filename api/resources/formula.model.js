@@ -13,6 +13,8 @@ const FormulaSchema = new Schema({
     }],
     recipe: String,
     authors: [{type: Schema.Types.ObjectId, ref: "User"}],
+    edits: {type: Schema.Types.ObjectId, ref: "Patchlist"},
+    version: {type: Number, default: 0},
     creationDate: {type: Date, default: Date.now},
     talkpage: {type: Schema.Types.ObjectId, ref: "Talkpage"},
     applications: {

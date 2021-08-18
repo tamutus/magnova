@@ -6,6 +6,8 @@ const mongoose = require("mongoose"),
 const ResourceSchema = new Schema({
     name: String,
     info: String,
+    edits: {type: Schema.Types.ObjectId, ref: "Patchlist"},
+    version: {type: Number, default: 0},
     image: String,
     unit: {type: String, default: "kg"},
     identifier: {type: Schema.Types.ObjectId, ref: "User"},

@@ -1,4 +1,7 @@
 let editing = false,
+    rolling = false,
+    version = Number(d3.select("#current-version-count").text()),
+    revisionVersion = version;
     styleVars = document.documentElement;
 
 // The below code is in wiki.js
@@ -32,7 +35,21 @@ const nameBox = d3.select("#name-container"),
     // Capture Editing buttons;
     editButton = d3.select("#edit-button"),
     cancelButton = d3.select("#cancel-button"),
-    messageSpan = d3.select("#return-message");
+    messageSpan = d3.select("#return-message"),
+    versionCount = d3.select("#current-version-count"),
+    revisionVersionCount = d3.select("#revision-version-count"),
+    revisionMetadata = d3.select("#revision-metadata"),
+    editLoader = d3.select("#edit-loader"),
+    rollingTray = d3.select("#rolling-tray"),
+    revisionText = d3.select("#revision-display").select("#revision-text");
+
+let liveVersion,
+    editID, 
+    patchData;
+const editIdDiv = d3.select("#hidden-patchlist-id");
+if(!editIdDiv.empty()){
+    editID = editIdDiv.text();
+}
 
 // let currentUser = fetch("/auth/my_data")
 //     .then(res => res.json())
@@ -108,14 +125,49 @@ async function toggleEditing(){
     }
     // Save changes
     else{
-        let descriptionHTML = tinymce.get("description-editor").getContent();
+        
+        // Make an API call to get a live verison of info for a three way merge with what you started editing and your edits, then save, returning and dislaying any error messages.
+        
+        const dataRoute =   routeBase == "wiki" ? "issue" : routeBase;
+        liveVersion = await fetch(`/${dataRoute}/data/${topicID}`)
+            .then(serverResponse => serverResponse.json())
+            .catch(error => {
+                displayMessage("Couldn't get the live data");
+                console.error('Error:', error);
+            });
+        // Three way merge logic
+        let oldInfo = descriptionText.html(),
+            newInfo = tinymce.get("description-editor").getContent(),
+            liveInfo = liveVersion.info;
+        console.log(`Old: ${oldInfo}, New: ${newInfo}, Live: ${liveInfo}`);
+        const merged = Textmerger.get().merge(oldInfo, newInfo, liveInfo);
+        console.log(`Merged: ${merged}`);
+        
+        // version = patchData.length + 1;
+        // versionDisplay.text(`Version: ${version}`);
+        // finalStuff.html(merged);
+        // editedTextArea.property("value", merged);
+        // sourceTextArea.html(merged);
+        
+        
+        // patchData.push(JSON.stringify(patch));
+        // displayPatches();
+        // return;
+        if(!liveVersion){return;}
+        
+        // Logic for recording the change.
+        const patch = Diff3.diffPatch(liveInfo, merged);
+        console.log("Patch yields: " + Diff3.patch(liveInfo, patch).join(""));
+        console.log("Inverted patch yields" + Diff3.patch(merged, Diff3.invertPatch(patch)).join(""));
+
+        // Collect info to post into an object called topicUpdate
         topicUpdate = {
             name: nameInput.property("value"),
-            info: descriptionHTML,
-            image: imageInput.property("value")
+            info: merged,
+            image: imageInput.property("value"),
+            patch: patch,
+            latestVersion: liveVersion.version                                           // *** This needs to be implemented on backend
         };
-        
-        // Make an API call to get current user info to be up-to-date, then save the profile, returning and dislaying any error messages
         let response = await fetch(`/${routeBase}/${topicID}`, {
             method: "PUT",
             headers: {
@@ -157,6 +209,112 @@ function stopEditing(){
     
     cancelButton.classed("hidden", true);
     // issueImage.classed("shrunk", false);
+}
+async function toggleRolling(){
+    if(!rolling){
+        rolling = true;
+        rollingTray.classed("hidden", false);
+        styleVars.style.setProperty('--editorHeight', `500px`);
+        
+        if(!patchData){
+            const dataRoute = routeBase == "wiki" ? "issue" : routeBase;
+            liveResponse = fetch(`/${dataRoute}/data/${topicID}`)
+                .then(serverResponse => serverResponse.json())
+                .catch(error => {
+                    displayMessage("Couldn't get the live data");
+                    console.error('Error:', error);
+                });
+            const patchResponse = fetch(`/wiki/edits/${editID}`)
+                .then(serverResponse => serverResponse.json())
+                .catch(error => {
+                    displayMessage("Couldn't get the live data");
+                    console.error('Error:', error);
+                });
+            Promise.all([liveResponse, patchResponse]).then(values => {
+                if(values[1].message !== "Success!"){ 
+                    stopRolling();
+                    return;
+                }
+                liveVersion = values[0];
+                patchData = values[1].content;
+                
+                if(liveVersion.version !== version){
+                    if(editing){
+                        window.alert("While you've been editing, this document's About section has been updated. You can still submit those edits, just check to make sure the three-way merge algorithm was performed correctly. You could also refresh.");
+                    } else {
+                        descriptionText.html(liveVersion.info);
+                    }
+                }
+                version = liveVersion.version;
+                versionCount.text(version)
+                revisionVersion = version;
+                revisionVersionCount.text(revisionVersion);
+
+                revisionText.html(liveVersion.info);
+                displayRevisionMetadata();
+            });
+        }
+    } else {
+        stopRolling();
+    }
+}
+function stopRolling(){
+    rolling = false;
+    rollingTray.classed("hidden", true);
+}
+function rollBack(){
+    if(revisionVersion <= 0){
+        window.alert("This is the earliest version. You can't roll back anymore!");
+        return;
+    }
+    revisionVersion--;
+    const patchBox = patchData.patches[revisionVersion];
+    const invertedPatch = Diff3.invertPatch(patchBox.patch);
+    const rolledBack = Diff3.patch(revisionText.html(), invertedPatch).join("");
+
+    displayRevisionMetadata();
+
+    revisionVersionCount.text(revisionVersion);
+    revisionText.html(rolledBack);
+}
+function rollForward(){
+    if(revisionVersion >= version){
+        window.alert("You've reached the latest version! No more rolling.");
+        return;
+    }
+    const patchBox = patchData.patches[revisionVersion];
+    const parsedPatch = patchBox.patch;
+    const rolledForward = Diff3.patch(revisionText.html(), parsedPatch).join("");
+    
+    revisionVersion++;
+    displayRevisionMetadata();
+    
+    revisionVersionCount.text(revisionVersion);
+    revisionText.html(rolledForward);
+}
+function displayRevisionMetadata(){
+    const metadata = {};
+    if(revisionVersion > 0){
+        metadata.editor = patchData.patches[revisionVersion - 1].editor.username;
+        metadata.editDate = patchData.patches[revisionVersion - 1].editDate;
+    } else {
+        if(liveVersion.identifier){
+            metadata.editor = liveVersion.identifier.username;
+        }
+        else if (liveVersion.creator){
+            metadata.editor = liveVersion.creator.username;
+        }
+        if(liveVersion.identificationDate){
+            metadata.editDate = liveVersion.identificationDate;
+        }
+        else if (liveVersion.creationDate){
+            metadata.editDate = liveVersion.creationDate;
+        }
+    }
+    revisionMetadata.html(`<a href="/users/${metadata.editor}">${metadata.editor}</a> submitted this version on ${new Date(metadata.editDate).toLocaleDateString()}`);
+}
+function rollSave(){
+
 }
 function toggleField(id){
     

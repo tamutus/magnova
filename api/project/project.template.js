@@ -10,6 +10,8 @@ const ProjectTemplateSchema = new Schema({
     creator: {type: Schema.Types.ObjectId, ref: "User"},
     creationDate: {type: Date, default: Date.now},
     designers: [{type: Schema.Types.ObjectId, ref: "User"}], // People who edit the project and its tasks
+    edits: {type: Schema.Types.ObjectId, ref: "Patchlist"},
+    version: {type: Number, default: 0},
     talkpage: {type: Schema.Types.ObjectId, ref: "Talkpage"},
     volunteers: [{ // People who worked on tasks of this project
         user: {type: Schema.Types.ObjectId, ref: "User"}, 

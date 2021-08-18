@@ -41,6 +41,28 @@
                     </form>
                 <% } %>
             </div>
+            
+            <% if(currentUser && currentUser.username == "lavra"){ %>
+                <button id="edit-loader" onclick="toggleRolling();">Edit History</button>
+                <div id="rolling-tray" class="hidden">
+                    <button id="back-roller" onclick="rollBack();">Roll back</button>
+                    <button id="forward-roller" onclick="rollForward();">Roll forward</button>
+                    <% if(currentUser && currentUser.username == "lavra"){ %>
+                        <button id="cleric" onclick="rollSave();">Restore</button>
+                    <% } %>
+                    <span id="hidden-patchlist-id" class="hidden"><%= issue.edits %></span>
+                <% } %>
+                    <div id="versions">
+                        Version <span id="revision-version-count"><%= issue.version %></span> of <span id="current-version-count"><%= issue.version %></span>
+                    </div>
+                <% if(currentUser && currentUser.username == "lavra"){ %>
+                    <div id="revision-display">
+                        <div id="revision-metadata"></div>
+                        <div id="revision-text"></div>
+                    </div>
+                </div>
+
+            <% } %>
         </li>
         <% if(issue.identifier){ %>
             <li id="identification">This issue was first identified by <a href="<%= `users/${issue.identifier.username}` %>"><%= issue.identifier.username %></a> on <%= new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric'}).format(issue.identificationDate) %></li>
@@ -149,5 +171,7 @@
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="scripts/wiki.js"></script>
 <script src="https://cdn.tiny.cloud/1/f7o04qadc9hhjre2my3ep3ae1qdzax2od04t9ncrm7wold54/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="scripts/TextMerger.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/node-diff3@3.0/dist/index.iife.min.js"></script>
 <script src="scripts/wikiEditor.js"></script>
 <%- include("../partials/footer") %>

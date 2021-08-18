@@ -10,6 +10,8 @@ const IssueTemplateSchema = new Schema({
     identifier: {type: Schema.Types.ObjectId, ref: "User"},
     identificationDate: {type: Date, default: Date.now },
     editors: [{type: Schema.Types.ObjectId, ref: "User"}],
+    edits: {type: Schema.Types.ObjectId, ref: "Patchlist"},
+    version: {type: Number, default: 0},
     talkpage: {type: Schema.Types.ObjectId, ref: "Talkpage"},
     harms: [{
         form: {type: Schema.Types.ObjectId, ref: "Harm"},

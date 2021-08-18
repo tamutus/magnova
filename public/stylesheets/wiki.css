@@ -481,6 +481,36 @@ input.issue-name {
     height: var(--editorHeight);
     display: inline-block;
 }
+#rolling-tray {
+    height: var(--editorHeight);
+    transition: height .5s ease-in-out, padding .5s ease-in-out;
+    visibility: visible;
+    overflow: hidden;
+    padding: 30px 0;
+    margin: 0;
+}
+#versions {
+    margin: 35px 0 0 0;
+}
+#rolling-tray.hidden {
+    height: 0;
+    padding: 0;
+}
+#revision-text {
+    padding: 20px;
+    height: calc(var(--editorHeight) - 150px);
+    margin: 25px 10px;
+    color: #51310c;
+    border-radius: 20px 10px 10px 0;
+    background-color: #ebd097;
+    overflow-y: auto;
+}
+#revision-text a, #revision-text a:visited {
+    color: rgb(172, 19, 143);
+}
+#revision-text a:hover {
+    color: rgb(225, 47, 192);
+}
 #connections-container, #projects-container {
     width: 90%;
     display: -webkit-box;

@@ -15,6 +15,7 @@ const 	User = require('../api/user/user'),
         Resource = require("../api/resources/resource.model"),
         Tag = require("../api/tags/tag.model"),
         Talkpage = require("../api/comments/talkpage.model"),
+        Patchlist = require("../api/patchlist.model"),
         Location = require("../api/maps/location.model");
 const taskTemplate = require("../api/task/task.template");
 
@@ -118,6 +119,7 @@ router.get("/data/:id", async (req, res) => {
                 }
             }
         })
+        .populate("creator", "username")
 		.exec((err, project) => {
 			if(err){
 				console.log(`Error while loading data for project ${req.params.id}: ${err}`);
@@ -580,6 +582,23 @@ router.get("/:id", (req, res) => {
             console.log(err);
             return res.redirect("back");
         } else if(project) {
+            if(!project.edits){
+                Patchlist.create({root: project._id, rootType: "ProjectTemplate"}, (err, patchlist) => {
+                    if(err){console.log(err);}
+                    else{
+                        Project.findByIdAndUpdate(project._id, {edits: patchlist}, {omitUndefined: true, strict: false}, (err, updatedProject) => {
+                            if(err){ console.log(err); }
+                            else{ project.edits = updatedProject.edits; }
+                        });
+                    }
+                });
+            }
+            if(!project.version){
+                Project.findByIdAndUpdate(project._id, {version: 0}, {omitUndefined: true, strict: false}, (err, updatedProject) => {
+                    if(err){console.log(err);}
+                    else { project.version = 0; }
+                })
+            }
             return res.render('projects/view', {
                 title: `${project.name} — A Magnova Project`,
                 project: project
@@ -590,35 +609,66 @@ router.get("/:id", (req, res) => {
     });
 });
 router.put("/:id", isLoggedIn, (req, res) => {
-	const {name, info, image} = req.body;
+    const {name, info, image, patch, latestVersion} = req.body;
     if(name.length == 0){
         res.send("You sent in a blank name!");
     }
-    Project.findById(req.params.id, async (err, project) => {
-        if(err){
-            console.log(err);
-        }
-        else{
-            // user.username = username; implementing username changes will require some modification of the middleware for serializing users
-            let returnMessage = `Update not needed`;
-            if(project.name != name || project.info != info || project.image != image){
-                project.name = name;
-                project.info = info;
-                project.image = image;
-                if(!project.designers){
-                    project.designers = [];
-                    project.markModified("designers");
-                }
-                if(!project.designers.find(e => String(e) == String(req.user._id))){
-                    project.designers.push(req.user._id);
-                    project.markModified("designers");
-                }
-                project.save();
-                returnMessage = `Update successful!`;
+    Project.findById(req.params.id)
+        .populate("edits")
+        .exec(async (err, project) => {
+            if(err){
+                console.log(err);
             }
-            res.send(returnMessage);
-        }
-    });
-})
+            else{
+                let returnMessage = `Update not needed`;
+                if(project.name != name || project.info != info || project.image != image){
+                    if(!project.version){
+                        project.version = 0;
+                        project.markModified("version");
+                    }
+                    if(project.version != latestVersion){
+                        return res.send("Latest version changed while you were creating a patch. Try again now.")
+                    }
+                    if(!project.edits){
+                        Patchlist.create({root: project._id, rootType: "ProjectTemplate"}, (err, patchlist) => {
+                            if(err){console.log(err);}
+                            else{
+                                project.edits = patchlist;
+                                project.markModified("edits");
+                            }
+                        });
+                    }
+                    if(project.info != info){
+                        project.edits.patches.push({
+                            editor: req.user._id,
+                            patch: patch
+                        });
+                        project.edits.markModified("patches");
+                        project.edits.save();
+                        
+                        project.version++;
+                        project.markModified("version");
+                        project.info = info;
+                    }
+
+                    if(!project.designers){
+                        project.designers = [];
+                        project.markModified("designers");
+                    }
+                    if(!project.designers.find(e => String(e) == String(req.user._id))){
+                        project.designers.push(req.user._id);
+                        project.markModified("designers");
+                    }
+
+                    project.name = name;
+                    project.image = image;
+
+                    project.save();
+                    returnMessage = `Update successful!`;
+                }
+                res.send(returnMessage);
+            }
+        });
+});
 
 module.exports = router;

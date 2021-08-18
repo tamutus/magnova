@@ -8,6 +8,8 @@ var TaskTemplateSchema = new Schema({
     creator: {type: Schema.Types.ObjectId, ref: "User"},
     creationDate: {type: Date, default: Date.now},
     designers: [{type: Schema.Types.ObjectId, ref: "User"}],
+    edits: {type: Schema.Types.ObjectId, ref: "Patchlist"},
+    version: {type: Number, default: 0},
     volunteers: [{
         user: {type: Schema.Types.ObjectId, ref: "User"}, 
         signupDate: {type: Date, default: Date.now},
