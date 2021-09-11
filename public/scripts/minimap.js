@@ -122,10 +122,12 @@ async function findNewParents(){
                     childAndParent += `${location.name.slice(0, 46)}...` ;
                 }
                 else{ childAndParent += location.name; }
-                childAndParent += " of ";
-                if(location.superlocation.name > 50 ){
-                    childAndParent += `${location.superlocation.name.slice(0, 46)}...`;
-                } else { childAndParent += location.superlocation.name; }
+                if(location?.superlocation?.name){
+                    childAndParent += " of ";
+                    if(location.superlocation.name > 50 ){
+                        childAndParent += `${location.superlocation.name.slice(0, 46)}...`;
+                    } else { childAndParent += location.superlocation.name; }
+                }
                 return childAndParent;
             })
             .on("click", location => adopt(location, staticLocation));
