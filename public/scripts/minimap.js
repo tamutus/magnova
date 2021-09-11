@@ -10,7 +10,8 @@ let thisGeo,
     // minimap.js is loaded for a single location of focus where it's preferable to work with Magnova-formatted data:
     staticLocation,
     activeFeature,
-    colorEditor;
+    colorEditor,
+    colorName;
 
 initializeMiniMap();
 
@@ -39,7 +40,7 @@ const colorControl = L.control();
 if(!d3.select("#username").empty()){
     colorControl.onAdd = function(mymap){
         this._div = L.DomUtil.create("div", "color-editing-box");
-        this._div.innerHTML = `<h4>Change location color:</h4><input type="color" id="color-editor">`;
+        this._div.innerHTML = `<h4>Change color: <a id="location-color-name" href="https://chir.ag/projects/ntc/ntc.js" target="_blank" rel="noopener noreferrer"></a></h4><input type="color" id="color-editor">`;
         return this._div;
     }
     colorControl.addTo(mymap);
@@ -49,6 +50,7 @@ if(!d3.select("#username").empty()){
         colorEditor.style("background-color", colorEditor.property("value"));
         updateColor();
     });
+    colorName = d3.select("#location-color-name");
 }
 
 async function initializeMiniMap(){
@@ -73,6 +75,9 @@ async function initializeMiniMap(){
             },
             type: "Feature"
         };
+        colorEditor.property("value", staticLocation.color);
+        colorEditor.style("background-color", staticLocation.color);
+        colorName.text(`(${ntc.name(staticLocation.color)[1]})`);
     } else {
         thisGeo = {
             geometry: JSON.parse(d3.select("#hidden-geojson").text()),
@@ -112,7 +117,8 @@ async function findNewParents(){
     let locationResultsEnter = newParentResultSelection
         .enter()
         .append("div")
-            .classed("search-result", true);
+            .classed("search-result", true)
+            .on("click", location => adopt(location, staticLocation));
     locationResultsEnter
         .append("h4")
             .classed("result-name", true)
@@ -129,8 +135,7 @@ async function findNewParents(){
                     } else { childAndParent += location.superlocation.name; }
                 }
                 return childAndParent;
-            })
-            .on("click", location => adopt(location, staticLocation));
+            });
     newParentResultSelection.exit()
         .classed("leaving", true)
         .transition(0)
@@ -170,6 +175,9 @@ function styleFeature(feature){
 function updateColor(){
     const   newColor = colorEditor.property("value"),
             newColorNTC = ntc.name(newColor);
+            colorEditor.property("value", newColor);
+            colorEditor.style("background-color", newColor);
+            colorName.text(`(${ntc.name(newColor)[1]})`);
     if(!staticLocation._id || !window.confirm(`Would you like to change the color of ${staticLocation.name} to ${newColorNTC[1]} (${newColorNTC[0]})?`)){
         return;
     }
@@ -187,6 +195,9 @@ function updateColor(){
         .then(text => {
             if(text.charAt(0) === '#'){
                 activeFeature.setStyle(styleFeature({properties: {color: text}}));
+                colorEditor.property("value", text);
+                colorEditor.style("background-color", text);
+                colorName.text(`(${ntc.name(text)[1]})`);
             } else {
                 // display a message to the user that it didn't work
                 return;

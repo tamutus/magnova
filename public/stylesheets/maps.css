@@ -210,15 +210,22 @@ span.subdivision-name {
     background-color: rgba(7, 39, 182, 0.774);
     border-radius: 10px;
     width: 123px;
-    height: 190px;
+    height: 230px;
     padding: 5px;
+}
+#location-color-name:not(:hover) {
+    color: rgb(216, 252, 212);
 }
 #sublocation-submitter button[type=submit]{
     align-self: center;
     padding: 15px;
 }
-
-
+#parent-replacement-form {
+    margin: 15px 30px;
+}
+#parent-replacement-form button {
+    margin-left: 20px;
+}
 #new-parent-search-toggler {
     margin: 20px 50px;
 }

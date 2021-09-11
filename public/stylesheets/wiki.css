@@ -123,6 +123,9 @@ a, a:visited {
         -ms-flex-flow: row wrap;
             flex-flow: row wrap;
 }
+#adoption-search-results .search-result {
+    cursor: pointer;
+}
 .search-result {
     display: -webkit-box;
     display: -ms-flexbox;
