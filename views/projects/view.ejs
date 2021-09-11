@@ -29,6 +29,7 @@
             <p><em>Log in to discuss and edit this project</em></p>
         <% } %>
         <ul>
+        <hr>
         <li id="about">
             <h2>About</h2>
             <div id="description">
@@ -80,6 +81,7 @@
                 none.
             <% } %>
         </li>
+        <hr>
         <li id="issues">
             <h2>Issues that <%= project.name %> addresses</h2>
             <% if(project.issues && project.issues.edges.length > 0 ) { %>
@@ -110,6 +112,7 @@
         <% } %>
         <p class="hidden projectID"><%= project._id %></p>
         </ul> -->
+        <hr>
         <li id="tasks">
             <h2>Tasks that make up this project</h2>
             <% if(project.tasks && project.tasks.edges.length > 0){ %>
@@ -159,16 +162,16 @@
                 </p>
             <% } %>
             <% if(currentUser){ %>
+                <hr>
                 <div id="task-submission">
                     <form>
                         <div id="task-submitter">
                             <h2>Create task:</h2>
                             <h4>What is the task? Give it a straightforward name.</h4>
                             <input type="text" placeholder="Task name" name="name">
-                            <h4>Describe what must be done and how to do it. Include any resources that might help. Once you create this task, you can edit it richly and add hyperlinks.</h4>
-                            <input type="text" placeholder="Task description" name="info">
                             <h4>What are the completion requirements for this task? How will completion be measured, proven, and disproven?</h4>
                             <input type="text" placeholder="Completion requirements" name="completionRequirements">
+                            <em>You can add a description for this task once you create it.</em>
                         </div>
                         <button type="submit">
                             Submit
@@ -177,6 +180,7 @@
                 </div>
             <% } %>
         </li>
+        <hr>
         <div id="qr">
             <img src=<%= `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURI(currentHost + currentURL)}&amp;size=100x100` %> alt="" title="<%= project.name %>" />
             <h3>QR Code</h3>

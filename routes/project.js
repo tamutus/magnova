@@ -620,7 +620,7 @@ router.put("/:id", isLoggedIn, (req, res) => {
                 console.log(err);
             }
             else{
-                let returnMessage = `Update not needed`;
+                let returnMessage = "Update ";
                 if(project.name != name || project.info != info || project.image != image){
                     if(!project.version){
                         project.version = 0;
@@ -631,7 +631,10 @@ router.put("/:id", isLoggedIn, (req, res) => {
                     }
                     if(!project.edits){
                         Patchlist.create({root: project._id, rootType: "ProjectTemplate"}, (err, patchlist) => {
-                            if(err){console.log(err);}
+                            if(err){
+                                console.log(err);
+                                return res.send("No patch list for edits, and an error creating a new one: " + err);
+                            }
                             else{
                                 project.edits = patchlist;
                                 project.markModified("edits");
@@ -639,6 +642,7 @@ router.put("/:id", isLoggedIn, (req, res) => {
                         });
                     }
                     if(project.info != info){
+                        returnMessage += "to this project's info, ";
                         project.edits.patches.push({
                             editor: req.user._id,
                             patch: patch
@@ -660,12 +664,20 @@ router.put("/:id", isLoggedIn, (req, res) => {
                         project.markModified("designers");
                     }
 
-                    project.name = name;
-                    project.image = image;
-
+                    if(project.name != name){
+                        returnMessage += "to this project's name, ";
+                        project.name = name;
+                    }
+                    if(project.image != image){
+                        returnMessage += "to this project's image, ";
+                        project.image = image;
+                    }
+                    returnMessage += "Successful!";
                     project.save();
-                    returnMessage = `Update successful!`;
+                } else {
+                    returnMessage += "not needed.";
                 }
+
                 res.send(returnMessage);
             }
         });

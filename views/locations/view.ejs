@@ -1,0 +1,289 @@
+<%- include("../partials/wikiHeader") %>
+<link rel="stylesheet" type="text/css" href="/stylesheets/projects.css">
+<link rel="stylesheet" type="text/css" href="/stylesheets/maps.css">
+<span id="hidden-location-id" class="hidden"><%= shownLocation._id %></span>
+<span id="hidden-geojson" class="hidden"><%= JSON.stringify(shownLocation.geometry) %></span>
+    <div>
+        <div id="name-container">
+            <h1 class="topic-name mutable data"><%= shownLocation.name %></h1>
+        </div>
+        <div id="overview-area">
+            <div id="table-of-contents">
+                <a onclick="document.querySelector('#about').scrollIntoView({behavior: 'smooth'});">About</a>
+                <a onclick="document.querySelector('#locations').scrollIntoView({behavior: 'smooth'});">Geo Relationships</a>
+                <a onclick="document.querySelector('#issues').scrollIntoView({behavior: 'smooth'});">Local Issues</a>
+                <a onclick="document.querySelector('#projects').scrollIntoView({behavior: 'smooth'});">Local Projects</a>
+                <a onclick="document.querySelector('#tasks').scrollIntoView({behavior: 'smooth'});">Local Tasks</a>
+                <a onclick="document.querySelector('#qr').scrollIntoView({behavior: 'smooth'});">QR Code</a>
+            </div>
+            <div id="map-display">
+                <!-- <img id="topic-image" class="portrait" src="<%= `${shownLocation.image}` %>"> -->
+
+            </div>
+        </div>
+        <% if(currentUser){ %>
+            <div id="editing-block">
+                <span id="return-message"></span>
+                <a id="edit-button" onclick="toggleEditing();"><button>Edit page</button></a>
+                <a id="cancel-button" onclick="stopEditing();" class="hidden"><button>Cancel</button></a>
+            </div>
+            <div id="discussion-block">
+                <a href="<%= `/talk/${shownLocation.talkpage}` %>"><button>Discuss this location</button></a>
+            </div>
+        <% } else { %>
+            <p><em>Log in to discuss and edit this location</em></p>
+        <% } %>
+        <ul>
+        <hr>
+        <li id="about">
+            <h2>About</h2>
+            <div id="description">
+                <div id="description-text-container" class="mutable data">
+                    <div id="description-text"><%- shownLocation.info %></div>
+                </div>
+                <% if(currentUser){ %>
+                    <form id="description-editor-container" name="description-form" class="hidden mutable">
+                        <input type="text" id="description-editor" name="description-html"></input>
+                    </form>
+                <% } %>
+            </div>
+            
+            <% if(currentUser && currentUser.username == "lavra"){ %>
+                <button id="edit-loader" onclick="toggleRolling();">Edit History</button>
+                <div id="rolling-tray" class="hidden">
+                    <button id="back-roller" onclick="rollBack();">Roll back</button>
+                    <button id="forward-roller" onclick="rollForward();">Roll forward</button>
+                    <% if(currentUser && currentUser.username == "lavra"){ %>
+                        <button id="cleric" onclick="rollSave();">Restore</button>
+                    <% } %>
+                    <span id="hidden-patchlist-id" class="hidden"><%= shownLocation.edits %></span>
+                <% } %>
+                    <div id="versions">
+                        Version <span id="revision-version-count"><%= shownLocation.version %></span> of <span id="current-version-count"><%= shownLocation.version %></span>
+                    </div>
+                <% if(currentUser && currentUser.username == "lavra"){ %>
+                    <div id="revision-display">
+                        <div id="revision-metadata"></div>
+                        <div id="revision-text"></div>
+                    </div>
+                </div>
+
+            <% } %>
+        </li>
+        <% if(shownLocation.geometrySource){ %>
+            <li id="creation">This location's boundary shape is <%- shownLocation.geometrySource || "unattributed. Somebody should re-upload geometry geoJSON with has an attribution." %>
+        <% } %>
+        <hr>
+        <li id="locations">
+            <h2>Geo Relationships</h2>
+            <div id="geo-relationships">
+                <% if(shownLocation.superlocation){ %>
+                    <h3 id="superlocation">Parent Location</h3>
+                    <p>
+                        <%= shownLocation.name %> is a <%= shownLocation.ownSubWord || shownLocation.superlocation.sublocationWord || "subdivision" %> of <a class="superlocation-link" href="<%= `/locations/${shownLocation.superlocation._id}` %>"><%= shownLocation.superlocation.name %></a>
+                        <% if(currentUser){ %>
+                            <button id="new-parent-search-toggler" onclick="toggleParentSearchbar();">Replace parent</button> 
+                        <% } %>
+                    </p>
+                <% } else { %>
+                    <h3><%= shownLocation.name %> doesn't have a parent location. 
+                        <% if(currentUser){ %><button id="new-parent-search-toggler" onclick="toggleParentSearchbar();">Replace parent</button> <% } %>
+                    </h3>
+                <% } %>
+                <% if(currentUser){ %>
+                    <!-- <button id="new-parent-search-toggler" onclick="toggleParentSearchbar();">Replace parent</button> -->
+                    <div id="parent-search-bar" class="hidden">
+                        <h4>Search for a new parent: <form id="parent-replacement-form"><input id="parent-replacement-input" type="text" placeholder="New parent name"><button type="submit">Search</button></h4>
+                        <div id="adoption-search-results" class="hidden"></div>
+                    </div>
+                <% } %>
+                <h3>Sublocations:</h3>
+                <h5><%= shownLocation.name %> calls each of its highest subdivisions a:</h5>
+                <div id="sub-word-container"><em class="empty-message <% if(shownLocation.sublocationWord){ %>hidden<% } %>">(blank)</em><p class="sublocation-word mutable data"><%= shownLocation.sublocationWord %></p>
+                </div>
+                <% if(shownLocation?.sublocations?.length > 0){ %>
+                    <div id="sublocations">
+                        <h3>Each <%= shownLocation.sublocationWord || "sublocation" %> of <%= shownLocation.name %></h3>
+                        <div id="sublocation-list">
+                            <% const subs = []; subs.push(shownLocation.sublocations[0]); %>
+                            <% for(let subIndex = 1; subIndex < shownLocation.sublocations.length; subIndex++){ const sub = shownLocation.sublocations[subIndex]; %>
+                                <% for(let sortedSubIndex = 0; sortedSubIndex < subs.length; sortedSubIndex++){ %>
+                                    <% if(sortedSubIndex + 1 === subs.length){ subs.push(sub); break; } %>
+                                    <% if(sub.name < subs[sortedSubIndex].name){ subs.splice(sortedSubIndex, 0, sub); break; } %>
+                                <% } %>
+                            <% } %>
+                            <% for(let subIndex = 0; subIndex < subs.length; subIndex ++){ const sortedSub = subs[subIndex]; %>
+                                <a href="<%= `/locations/${sortedSub._id}` %>"><%= sortedSub.name %></a>
+                            <% } %>
+                        </div>
+                    </div>
+                <% } else { %>
+                    <p>No <%= shownLocation.sublocationWord || "sublocation" %> has been registered for <%= shownLocation.name %>.</p>
+                <% } %>
+            </div>
+        </li>
+        <hr>
+        <li id="issues">
+            <h2>Local Issues in <%= shownLocation.name %></h2>
+            <p>Is there some suffering or injustice in your area that people should do something about? Search Magnova's catalog of "Issues" and  start sharing information about what's going on in <%= shownLocation.name %>. "Local Issue" pages let you measure the impact of a given issue in a certain location, and discuss things that are particular to a certain community.
+            <% if(shownLocation.issues && shownLocation.issues.length > 0 ) { %>    
+                
+                    Magnova users have noticed the following issues affecting this community:
+                
+                </p>
+            <% } %>
+                <div id="connections-are-empty"><p>None identified yet! <% if(!currentUser){ %>Registered users will be able to identify local issues soon. <% } else { %>Local Issues haven't been implemented quite yet, but are coming soon. Once they are, share the news about what's going on in a certain location by finding an Issue to create a page with local info. <% } %> </p></div>
+                <div id="connections-container">
+                    <div id="issue-connections">
+                    </div>
+                    <% if(currentUser) { %>
+                        <div id="issue-searchbar">
+                            <div class="searchbar-heading">Identify an issue affecting <span id="link-source"><%= shownLocation.name %></span>:</div>
+                            <input type="text">
+                            <div id="found-issue-links"></div>
+                        </div>
+                    <% } %>
+                </div>
+        <!-- <h2>Backend Data</h2>
+        <% let keys = ["name", "image", "info", "tags", "creator", "creationDate", "designers", "volunteers", "talkpage", "harms", "resources", "implementations", "issues", "tasks", "completionRequirements"]; %>
+        <% for(key of keys){ %>
+            <li><%= key %> : <%= shownLocation[key] %></li>
+        <% } %>
+        </ul> -->
+        <hr>
+        <li id="projects">
+            <h2>Local Projects in <%= shownLocation.name %></h2>
+            <% if(shownLocation.projects && shownLocation.projects.length > 0){ %>
+                <p>The following projects have been created by the Magnova community to address this issue.
+                <% if(currentUser){ %>
+                    If you think a project is important to addressing this issue, support it with an upvote. If you disagree with it or think it won't help with this issue, downvote it.
+                <% } else { %>
+                    (Registered users can upvote/downvote which projects they want to see implemented.)
+                <% } %>
+                </p>
+            <% } %>
+            <div id="projects-are-empty"><p>No projects here yet. <% if(!currentUser){ %>Soon, registered users will be able to create local instances of projects to organize local action with the support of the global Magnova community. <% } else { %> Local projects will be implemented soon as a way to organize local action around globally-supported project templates. Once they roll out, help solve this problem by finding an existing project that addresses this issue, or by creating a new project! <% } %> </p></div>
+            <div id="projects-container">
+                <div id="project-list"></div>
+                <% if(currentUser) { %>
+                    <div id="project-searchbar">
+                        <div class="searchbar-heading">Identify project that deals with "<span class="link-source-name"><%= shownLocation.name %></span>"</div>
+                        <input type="text">
+                        <div id="found-project-links"></div>
+                    </div>
+                    <!-- <div id="project-submission">
+                        <h2>
+                            Create a Project
+                        </h2>	
+                        <div id="project-submitter">
+                            <form action="/project" method="post">
+                                <div class="form-group">
+                                    <input type="text" placeholder="Project name" name="project[name]">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" placeholder="Image URL" name="project[image]">
+                                </div>
+                                <button type="submit">
+                                    Submit
+                                </button>
+                            </form>
+                        </div>
+                    </div> -->
+                <% } %>
+            </div>
+        </li>
+        <hr>
+        <li id="tasks">
+            <h2>Local Tasks in <%= shownLocation.name %></h2>
+            <% if(shownLocation.tasks && shownLocation.tasks.length > 0){ %>
+                <div id="tasks-container">
+                    <div id="task-viewer" class="minimized">
+                        <div id="task-buttons" class="hidden">
+                            <span id="task-return-message"></span>
+                            <a id="task-edit-button" onclick="toggleTaskEditing();"><button>Edit task</button></a>
+                            <a id="task-cancel-button" onclick="stopTaskEditing();" class="hidden"><button>Cancel</button></a>
+                            <a id="task-cancel-button" onclick="displayThisTask();"><button>Unload</button></a>
+                        </div>
+                        <div id="task-display">
+                            <em>Viewing task:</em>
+                            <div id="task-name">
+                                <h3 class="task-data">None</h3>
+                            </div>
+                            <div id="task-info-container">
+                                <div id="task-info-text-container" class="task-data">
+                                    <div id="task-info-text"></div>
+                                </div>
+                                <div id="task-info-editor-container" class="hidden task-input"></div>
+                            </div>
+                            <div id="task-completion">
+                                <h4>Completion requirements:</h4>
+                                <div class="task-data">
+                                    <p>None</p>
+                                </div>
+                            </div>
+                            <div id="task-creation">
+                                <p class="task-data"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <ul id="task-list">
+                        <% for(task of shownLocation.tasks){ %>
+                            <li><%= task.name %></li>
+                        <% } %>
+                    </ul>
+                </div>
+            <% } else { %>
+                <p>Nothing here yet! 
+                <!-- <% if(currentUser){ %> 
+                    Why don't you create a new task for this project?
+                <% } else { %>
+                    Register or log in to create tasks for this project.
+                <% } %> -->
+                </p>
+            <% } %>
+            <!-- <% if(currentUser){ %>
+                <div id="task-submission">
+                    <form>
+                        <div id="task-submitter">
+                            <h2>Create task:</h2>
+                            <h4>What is the task? Give it a straightforward name.</h4>
+                            <input type="text" placeholder="Task name" name="name">
+                            <h4>What are the completion requirements for this task? How will completion be measured, proven, and disproven?</h4>
+                            <input type="text" placeholder="Completion requirements" name="completionRequirements">
+                            <em>You can add a description for this task once you create it.</em>
+                        </div>
+                        <button type="submit">
+                            Submit
+                        </button>
+                    </form>
+                </div>
+            <% } %> -->
+        </li>
+        <hr>
+        <div id="qr">
+            <img src='<%= `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURI(currentHost + currentURL)}&amp;size=100x100` %>' alt="" title="<%= shownLocation.name %>" />
+            <h3>QR Code</h3>
+            <p>This QR code links to this page. Print stickers, add it to fliers, or chalk it onto your driveway.</p>
+        </div>
+        
+    </div>
+    <!-- <a href="<%= `report/location/${shownLocation._id}` %>"><button>Report Project</button></a> -->
+
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="scripts/wiki.js"></script>
+<script src="https://cdn.tiny.cloud/1/f7o04qadc9hhjre2my3ep3ae1qdzax2od04t9ncrm7wold54/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="scripts/TextMerger.js"></script>
+<!-- CSS for Leaflet comes first -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+crossorigin=""></script>
+<script type="text/javascript" src="https://chir.ag/projects/ntc/ntc.js"></script>
+<script src="scripts/minimap.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/node-diff3@3.0/dist/index.iife.min.js"></script>
+<script src="scripts/wikiEditor.js"></script>
+<script src="scripts/projectManager.js"></script>
+<%- include("../partials/footer") %>

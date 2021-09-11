@@ -1,29 +1,116 @@
 <%- include("../partials/mapHeader") %>
 
-<h1>Maps on Magnova</h1>
-
-<!-- <div id="fetch-display">
-    <input id="fetch-target" type="text">
-    <input id="fetch-query" type="text">
-    <div id="fetch-result"></div>
-    <button onclick="fetchThis();">Submit</button>
-</div> -->
+<div id="map-page-title">
+    <h1>Ma <span>&#60;</span></h1>
+    <div>
+        <h1>gnova</h1>
+        <h1>ps</h1>
+    </div>
+</div>
 
 <div id="map-container">
     <div id="map-display"></div>
-    <div id="location-info-display">
-        Here's some info;
+    <div id="location-info-display-container">
+        <div id="location-info-display">
+            <div id="location-info-header">
+                <h2 id="location-name"><span class="location-name">Earth</span></h2>
+                <button onclick="toggleToSublocationList();">List each <span class="subdivision-name">country</span> →</button>
+            </div>
+            <p id="location-geometry-attribution"></p>
+            <h4>A <span id="division-word">planet</span> of <span id="superlocation-name">the Solar System</span></h4>
+            <div id="location-description">
+                <div id="location-description-text"></div>
+                <div id="wiki-button" class="greyed" title="Location not yet registered">Go to wiki</div>
+                <% if(currentUser){ %>
+                    <h4>Change location color: <a id="location-color-name" href="https://chir.ag/projects/ntc/ntc.js" target="_blank" rel="noopener noreferrer"></a></h4>
+                    <input type="color" id="color-editor" class="hidden">
+                <% } %>
+            </div>
+        </div>
+        <div id="sublocation-list-container" class="hidden">
+            <div id="sublocation-header">
+                <h2>Sublocations</h2>
+                <button onclick="toggleToLocationInfo();">← Location Info</button>
+            </div>
+            <div id="sublocation-list"></div>
+        </div>
     </div>
 </div>
-<div id="instructions">
+
+<div id="instructions" class="advice">
     <h3>Controls</h3>
-    <p>Click to focus a place.</p><br>
-    <p>Soon, you'll be able to see local issues, projects, tasks, double click to show sublocations. This is a somewhat glitchy work in progress.</p>
+    <p>Click to focus a place. Double click a place to load its sublocations. Locations you load will be saved until you leave.</p>
+    <p>Soon, you'll be able to see local issues, projects, and tasks. This is a somewhat glitchy work in progress.</p>
+    <p>Log in to add sublocations.</p>
 </div>
+
+<h2>Sublocation submission</h2>
+<% if(currentUser){ %>
+    <div class="advice">
+        <h3>Add new locations to their direct parent</h3>
+        <ol>
+            <li>To upload a new location, you will need geoJSON representing its boundary (with a NAME property), and two pieces of information about how the data is licensed.</li>
+            <li>Only submit data that is free to use.</li>
+            <li>To choose a parent location, navigate to it with the map above. Use the guide below to figure out what this location's parent should be.</li>
+            <li>Add sublocation data level by level. If you want to submit the Dutch city Amsterdam, you'd first need to make sure the provinces of The Netherlands are submitted (or at least Noord-Holland).</li>
+            <li>The batch submission process makes things much easier.</li>
+        </ol>
+        <h3><a href="https://wiki.openstreetmap.org/wiki/Tag:boundary%3Dadministrative">Guide to how each country handles sublocations</a></h3>
+    </div>
+    <div id="sublocations">
+        <form id="new-sublocation-form">
+            <div id="sublocation-submitter">
+                <div style="width: 100%; display: flex; justify-content: space-evenly;">
+                    <h2>Add <span class="subdivision-name">sublocation</span> of <span class="location-name">Earth</span></h2>
+                    <button type="button" id="fetch-toggler" onclick="toggleFetchDisplay();">Batch add direct sublocations →</button>
+                </div>
+                <h4>What is this area named?</h4>
+                <input type="text" name="name" placeholder="Sublocation name">
+                <h4>Paste geojson <em>geometry</em> for the sublocation you want to enter here. (<a href="https://stackoverflow.com/a/24871449/16620488">Tips on obtaining geojson</a>)</h4>
+                <input type="text" name="geojson" placeholder="geoJSON geometry object">
+                <h4>Who published this geoJSON?</h4>
+                <input type="text" name="geo-provider" placeholder="Publisher name">
+                <h4>Enter a URL to the licensing information (e.g. https://naturalearthdata.com )</h4>
+                <input type="text" name="location-attribution" placeholder="License URL">
+                <h4>What color should this place be?</h4>
+                <input type="color" name="location-color">
+                <h4>What is the name for this place's biggest subdivisions?</h4>
+                <p>(e.g. If you were submitting New Jersey as a sublocation of the US, the administrative rank right below "state" is "county".)</p>
+                <input type="text" placeholder="Word for sublocations" name="sublocation-word">
+                <button type="submit">
+                    Submit
+                </button>
+            </div>
+        </form>
+        <div id="fetch-display" class="hidden">
+            <h2>Batch add every <span class="subdivision-name">subdivision</span></h2>
+            
+            <h4>Enter a URL to a geoJSON feature collection</h4>
+            <p>(<a href="https://stackoverflow.com/a/24871449/16620488">Tips on obtaining geojson</a>)</p>
+            <input name="fetch-target" id="fetch-target" type="text" placeholder="Source URL">
+
+            <h4>In the file you've linked, what property is used for location names?</h4>
+            <p>(e.g. NAME, name, or namelsad. Case sensitive!)</p>
+            <input name="fetch-name-property" id="fetch-name-property" type="text" placeholder="Name property for this geoJSON">
+            
+            <h4>Who published this data?</h4>
+            <input name="fetch-provider" id="fetch-provider" type="text" placeholder="Publisher name">
+            
+            <h4>Enter a URL to the licensing information (e.g. https://naturalearthdata.com )</h4>
+            <input name="fetch-attribution-link" id="fetch-attribution-link" type="text" placeholder="License URL">
+            <div id="fetch-result"></div>
+            <button onclick="fetchThis();">Submit</button>
+        </div>
+    </div>
+<% } else { %>
+    <h3>Log in to add sublocations.</h3>
+<% } %>
+
 <div id="bugs">
-    <h3>Known bugs</h4>
+    <h3>Known issues</h4>
     <ol>
         <li>Some parts of locations do not properly change style at certain zoom levels. You will notice Alaska and Russia in particular have this problem. Zoom in to somewhat fix this.</li>
+        <li>Some places have more than one kind of administrative subdivision. We'll be patching in the ability to distinguish a location as something other than what its siblings are (e.g. The US doesn't call Puerto Rico a state, but rather a commonwealth.</li>
     </ol>
 </div>
 
@@ -32,9 +119,17 @@
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
 integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
 crossorigin=""></script>
+<!-- These two scripts allow for tile caching-->
+<script src="https://unpkg.com/pouchdb@^5.2.0/dist/pouchdb.js"></script>
+<script src="https://unpkg.com/leaflet.tilelayer.pouchdbcached@latest/L.TileLayer.PouchDBCached.js"></script>
+<!-- For creating tile layers out of geoJSON -->
 <script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.bundled.js"></script>
+
 <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
 <script src="https://cdn.jsdelivr.net/npm/d3-array@3"></script>
 <script src="https://cdn.jsdelivr.net/npm/d3-geo@3"></script>
+
+<script type="text/javascript" src="https://chir.ag/projects/ntc/ntc.js"></script>
+
 <script src="scripts/map.js"></script>
 <%- include("../partials/footer") %>

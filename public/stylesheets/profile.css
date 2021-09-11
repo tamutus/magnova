@@ -13,6 +13,7 @@ font-weight: 700;
 
 :root {
     --editorHeight: 0px;
+    --bannerURL: url("https://cdn.pixabay.com/photo/2016/04/19/01/04/purple-1337816_960_720.jpg");
 }
 
 h2 {
@@ -20,7 +21,7 @@ h2 {
 }
 
 #banner {
-    background-image: url("https://cdn.pixabay.com/photo/2016/04/19/01/04/purple-1337816_960_720.jpg");
+    background-image: var(--bannerURL);
     position: absolute;
     top: 0;
     left: 0;
@@ -139,7 +140,7 @@ h2 {
     font-family: 'Oxygen', sans-serif;
     font-weight: 700;
     box-sizing: border-box;
-    padding: 0;
+    padding: 0 0 10px 0;
     display: inline-block;
     position: relative;
     left: 0;

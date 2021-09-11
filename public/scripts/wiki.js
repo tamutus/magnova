@@ -1,6 +1,6 @@
 // TO do:
 // Horizontal scrolling (use window.scrollBy(x, y) )
-// Elegant issue searching
+// Elegant logical searching
 
 const baseURL = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/";
 
@@ -18,11 +18,12 @@ let currentUser, userEdgeVotes, userProjectVotes, currentTopicData,
 // Capture topic id
 const   issueIdDiv = d3.select("#hidden-issue-id"),
         projectIdDiv = d3.select("#hidden-project-id"),
-        taskIdDiv = d3.select("#hidden-task-id");
+        taskIdDiv = d3.select("#hidden-task-id"),
+        locationIdDiv = d3.select("#hidden-location-id");
 let topicID,
     routeBase;
 
-let domRoot = document.documentElement; //root is later declared in nav.js
+const domRoot = document.documentElement; //root is later declared in nav.js
 
 // Conditional logic to determine page type
 if(!issueIdDiv.empty()){ 
@@ -33,13 +34,16 @@ else if(!projectIdDiv.empty()){
     topicID = projectIdDiv.text(); 
     routeBase = "project";
     domRoot.style.setProperty("--bodyGradient", "linear-gradient(-10deg, rgb(0, 148, 0), rgb(13, 125, 139), rgb(106, 19, 141), rgb(209, 105, 2))");
-    domRoot.style.setProperty("--headerLinkColor", "rgb(213 31 98)");
-    domRoot.style.setProperty("--linkColor", "rgb(158 231 255)");
-    domRoot.style.setProperty("--linkBGColor", "rgb(250 177 133)");
+    domRoot.style.setProperty("--headerLinkColor", "rgb(206, 255, 255)");
+    domRoot.style.setProperty("--linkColor", "rgb(158, 231, 255)");
+    domRoot.style.setProperty("--linkBGColor", "rgba(82, 227, 203, .44)");
 }
 else if(!taskIdDiv.empty()){
     topicID = taskIdDiv.text();
     routeBase = "task";
+} else if(!locationIdDiv.empty()){
+    topicID = locationIdDiv.text();
+    routeBase = "locations";
 }
 
 function handleErrors(res){
@@ -56,7 +60,9 @@ const   resultsArea = d3.select("#search-results"),
         userResultHeader = resultsArea.select("#user-results-header"),
         userResultDisplay = resultsArea.select("#user-results"),
         projectResultHeader = resultsArea.select("#project-results-header"),
-        projectResultDisplay = resultsArea.select("#project-results");
+        projectResultDisplay = resultsArea.select("#project-results"),
+        locationResultHeader = resultsArea.select("#location-results-header"),
+        locationResultDisplay = resultsArea.select("#location-results");
 
 let searchResults = {},
     issueResultSelection,
@@ -64,7 +70,9 @@ let searchResults = {},
     userResultSelection,
     userResultInfo,
     projectResultSelection,
-    projectResultInfo;
+    projectResultInfo,
+    locationResultSelection,
+    locationResultInfo;
         
 function displayResults(){
     if(searchResults.issues && searchResults.issues.length > 0){
@@ -89,6 +97,13 @@ function displayResults(){
     else{
         projectResultHeader.classed("hidden", true);
         searchResults.projects = [];
+    }
+    if(searchResults.locations && searchResults.locations.length > 0){
+        locationResultHeader.classed("hidden", false);
+    }
+    else{
+        locationResultHeader.classed("hidden", true);
+        searchResults.locations = [];
     }
 
     // Display issue results
@@ -148,10 +163,10 @@ function displayResults(){
         .classed("result-thumbnail-link", true)
             .append("img")
                 .classed("result-thumbnail", true)
-                .attr("src", user => user.pfpLink || "/assets/magnova_favicon.png");
+                .attr("src", user => user.pfpLink || "/assets/default_avatar.png");
     userResultsEnter
         .append("a")
-        .attr("src", user => user.pfpLink || "/assets/magnova_favicon.png")
+        .attr("href", user => `${baseURL}users/${user.username}`)
         .classed("result-name-link", true)
             .append("h4")
                 .classed("result-name", true)
@@ -224,6 +239,58 @@ function displayResults(){
         .remove();
     projectResultSelection = projectResultSelection.merge(projectResultsEnter);
     
+    // Display Location results
+    locationResultSelection = locationResultDisplay.selectAll(".search-result")
+        .data(searchResults.locations, d => d._id);
+    let locationResultsEnter = locationResultSelection
+        .enter()
+        .append("div")
+            .classed("search-result", true);
+    locationResultsEnter
+        .append("a")
+        .attr("href", location => `${baseURL}locations/${location._id}`)
+        .classed("result-thumbnail-link", true)
+            .append("img")
+                .classed("result-thumbnail", true)                
+                .attr("src", "https://cdn.pixabay.com/photo/2014/04/02/17/08/globe-308065_960_720.png");
+    locationResultsEnter
+        .append("a")
+        .attr("href", location => `${baseURL}locations/${location._id}`)
+        .classed("result-name-link", true)
+            .append("h4")
+                .classed("result-name", true)
+                .text(location => {
+                    // copy minimap code to add superlocation name
+                    let childAndParent = "";
+                    if(location?.name.length > 50){
+                        childAndParent += `${location.name.slice(0, 46)}...` ;
+                    }
+                    else{ childAndParent += location.name; }
+                    if(location?.superlocation?.name){
+                        childAndParent += " of ";
+                        if(location.superlocation.name > 50 ){
+                            childAndParent += `${location.superlocation.name.slice(0, 46)}...`;
+                        } else { childAndParent += location.superlocation.name; }
+                    }
+                    return childAndParent;
+                });
+    locationResultsEnter
+        .append("p")
+            .classed("location-info", true)
+            .text(location => {
+                let formattedInfo = location?.info || "";
+                formattedInfo = formattedInfo.replace( /(<([^>]+)>)/ig, '');
+                if(formattedInfo.length > 100){
+                    return `${formattedInfo.slice(0, 96)}...` 
+                }
+                else{ return formattedInfo; }
+            });
+    locationResultSelection.exit()
+        .classed("leaving", true)
+        .transition(0)
+        .delay(500)
+        .remove();
+    locationResultSelection = locationResultSelection.merge(locationResultsEnter);
 }
 function clearSearch(){
     searchResults = {};
@@ -250,12 +317,17 @@ async function searchAll(){
     if(formInput.get("projects") === "true"){
         fetchString += `&projects=true`;
     }
+    if(formInput.get("locations") === "true"){
+        fetchString += `&locations=true`;
+    }
+    console.log(`Sending fetch request ${baseURL + fetchString}`);
     searchResults = await fetch(baseURL + fetchString)
         .then(res => handleErrors(res))
         .then(res => res.json())
         .catch(err => {
             console.log(err)
         });
+    console.log(searchResults.locations);
     displayResults();
 }
 // // Place buttons that run the upvote and downvote functions
@@ -285,36 +357,40 @@ let upvotes = d3.selectAll(".upvote"),
     downvotes = d3.selectAll(".downvote"),
     connectionSelection, projectLinkSelection;
 
-if(topicID){ loadVotes();}
-async function loadVotes(){
+if(topicID){ loadData();}
+
+async function loadData(){
+    // Only load votes on wiki pages for issue templates and project templates
+    if(routeBase !== "project" && routeBase !== "wiki" && routeBase !== "locations"){
+        return;
+    }
+    
     let dataRoute = routeBase;
     if(dataRoute === "wiki"){
         dataRoute = "issue";
     }
-    await fetch(`${dataRoute}/data/${topicID}`)
-    .then(res => handleErrors(res))
-    .then(res => res.json())
-    .then(res => {
-        currentTopicData = res;
-        if(currentTopicData.issues){ updateSubissues(); }
-        if(currentTopicData.projects){ updateProjects(); }
-    })
-    .catch(err => {
-        console.log(err);
-    });
-    if(loggedIn){
-        if(!currentUser){
-            currentUsername = loggedIn.textContent;
-        }
-        await fetch(`users/unpopulated/${currentUsername}`, {
-            method: "GET"
-        })
+    currentTopicData = await fetch(`${dataRoute}/data/${topicID}`)
         .then(res => handleErrors(res))
         .then(res => res.json())
-        .then(res => currentUser = res)
         .catch(err => {
             console.log(err);
         });
+    if(currentTopicData.issues){ updateSubissues(); }
+    if(currentTopicData.projects){ updateProjects(); }
+
+    if(loggedIn && (routeBase === "project" || routeBase === "wiki")){
+        if(!currentUser){
+            currentUsername = loggedIn.textContent;
+        }
+        currentUser = await fetch(`users/unpopulated/${currentUsername}`, {
+            method: "GET"
+        })
+            .then(res => handleErrors(res))
+            .then(res => res.json())
+            // .then(res => currentUser = res)
+            .catch(err => {
+                console.log(err);
+            });
         // Get the current user's votes to issues for this topic
         let edgeVotes = {source: topicID, targets: []};
         if(routeBase === "wiki"){
@@ -333,7 +409,7 @@ async function loadVotes(){
                     });
                 }
                 return acc;
-            }, {source: topicID, targets: []} ); // Empty array is the initial value of the accumulator
+            }, {source: topicID, targets: []} ); // Object with empty array is the initial value of the accumulator
         }
         if(edgeVotes){
             for(edge of edgeVotes.targets){
@@ -341,15 +417,12 @@ async function loadVotes(){
             }
         }
         // Get the current user's votes to projects for this topic
-        let projectVotes = {source: topicID, targets: []};
         if(routeBase === "wiki" && currentUser.projectVotes){
-            projectVotes = currentUser.projectVotes.find(edgeSet => String(edgeSet.issue) == String(topicID));
-        } else if(routeBase === "task"){
-            console.log("You still have to implement this, Lavra");
-        }
-        if(projectVotes){
-            for(edge of projectVotes.targets){
-                reflectUserProjectVote(edge);
+            let projectVotes = currentUser.projectVotes.find(edgeSet => String(edgeSet.issue) === String(topicID));
+            if(projectVotes){
+                for(edge of projectVotes.targets){
+                    reflectUserProjectVote(edge);
+                }
             }
         }
     }
@@ -358,6 +431,10 @@ async function loadVotes(){
 function reflectUserIssueVote(edge){
     let t = "#issue-" + edge.target;
     let toColor = d3.select(t);
+    if(toColor.empty()){
+        console.log("Couldn't find the issue for which you voted on a connection");
+        return;
+    }
     let upvote = toColor.select(".link-votes").select(".upvote"),
         downvote = toColor.select(".link-votes").select(".downvote");
     if(edge.vote){
@@ -376,6 +453,10 @@ function reflectUserIssueVote(edge){
 function reflectUserProjectVote(edge){
     let p = "#project-" + edge.project;
     let toColor = d3.select(p);
+    if(toColor.empty()){
+        console.log("Couldn't find the issue for which you voted on a connection");
+        return;
+    }
     let upvote = toColor.select(".project-votes").select(".upvote"),
         downvote = toColor.select(".project-votes").select(".downvote");
     if(edge.vote){
@@ -395,68 +476,111 @@ function reflectUserProjectVote(edge){
 // updateSubissues();
 
 function updateSubissues(){
-    connectionSelection = d3.select("#issue-connections").selectAll(".connection")
-        .data(currentTopicData.issues.edges, edge => edge.vertex._id);
-    let connectionEnter = connectionSelection
-        .enter()
-            .append("div")
-                .classed("connection", true)
-                .attr("id", edge => `issue-${edge.vertex._id}`);
-    connectionEnter
-        .append("div")
-            .classed("link-info", true)
-            .html(edge => `<a href="wiki/${edge.vertex._id}">${edge.vertex.name}</a>: <span class="link-score">${edge.score}</span>`);
-    let connectionVoteEnter = connectionEnter
-        .append("div")
-            .classed("link-votes", true);
-    if(loggedIn){
-        connectionVoteEnter
-            .append("button")
-                .classed("upvote", true)
-                .text("Sub-issue")
-                .on("click", edge => upvoteIssueLink(topicID, edge.vertex._id));
-        connectionVoteEnter
-            .append("button")
-                .classed("downvote", true)
-                .text("Not")
-                .on("click", edge => downvoteIssueLink(topicID, edge.vertex._id));
+    if(routeBase === "wiki" || routeBase === "project"){
+        connectionSelection = d3.select("#issue-connections").selectAll(".connection")
+           .data(currentTopicData.issues.edges, edge => edge.vertex._id);
+        let connectionEnter = connectionSelection
+           .enter()
+               .append("div")
+                   .classed("connection", true)
+                   .attr("id", edge => `issue-${edge.vertex._id}`);
+       connectionEnter
+           .append("div")
+               .classed("link-info", true)
+               .html(edge => `<a href="wiki/${edge.vertex._id}">${edge.vertex.name}</a>: <span class="link-score">${edge.score}</span>`);
+       let connectionVoteEnter = connectionEnter
+           .append("div")
+               .classed("link-votes", true);
+       if(loggedIn){
+           connectionVoteEnter
+               .append("button")
+                   .classed("upvote", true)
+                   .text("Sub-issue")
+                   .on("click", edge => upvoteIssueLink(topicID, edge.vertex._id));
+           connectionVoteEnter
+               .append("button")
+                   .classed("downvote", true)
+                   .text("Not")
+                   .on("click", edge => downvoteIssueLink(topicID, edge.vertex._id));
+       }
+       connectionSelection.exit().remove();
+       connectionSelection = connectionSelection.merge(connectionEnter);
+    // Locations don't track votes to local issues
+    } else if(routeBase === "locations"){
+        connectionSelection = d3.select("#issue-connections").selectAll(".connection")
+           .data(currentTopicData.issues, issue => issue._id);
+        let connectionEnter = connectionSelection
+           .enter()
+               .append("div")
+                   .classed("connection", true)
+                   .attr("id", issue => `issue-${issue._id}`);
+       connectionEnter
+           .append("div")
+               .classed("link-info", true)
+               .html(issue => `<a href="wiki/${issue._id}">${issue.name}</a>`);
+       
+       connectionSelection.exit().remove();
+       
+       connectionSelection = connectionSelection.merge(connectionEnter);
+    } else { 
+        return; 
     }
-    connectionSelection.exit().remove();
     
-    connectionSelection = connectionSelection.merge(connectionEnter);
     d3.select("#connections-are-empty")
         .classed("hidden", !connectionSelection.empty());
 }
 function updateProjects(){
-    projectLinkSelection = d3.select("#project-list").selectAll(".connection")
-        .data(currentTopicData.projects.edges, edge => edge.vertex._id);
-    let projectLinkEnter = projectLinkSelection
-        .enter()
+    if(routeBase === "wiki" || routeBase === "project"){
+        projectLinkSelection = d3.select("#project-list").selectAll(".connection")
+            .data(currentTopicData.projects.edges, edge => edge.vertex._id);
+        let projectLinkEnter = projectLinkSelection
+            .enter()
+                .append("div")
+                    .classed("connection", true)
+                    .attr("id", edge => `project-${edge.vertex._id}`);
+        projectLinkEnter
             .append("div")
-                .classed("connection", true)
-                .attr("id", edge => `project-${edge.vertex._id}`);
-    projectLinkEnter
-        .append("div")
-            .classed("project-info", true)
-            .html(edge => `<a href="project/${edge.vertex._id}">${edge.vertex.name}</a>: <span class="project-score">${edge.score}</span>`);
-    let projectVoteEnter = projectLinkEnter
-        .append("div")
-            .classed("project-votes", true);
-    if(loggedIn){
-        projectVoteEnter
-            .append("button")
-                .classed("upvote", true)
-                .text("Relevant")
-                .on("click", edge => upvoteProjectLink(edge.vertex._id, topicID));
-        projectVoteEnter
-            .append("button")
-                .classed("downvote", true)
-                .text("Not")
-                .on("click", edge => downvoteProjectLink(edge.vertex._id, topicID));
+                .classed("project-info", true)
+                .html(edge => `<a href="project/${edge.vertex._id}">${edge.vertex.name}</a>: <span class="project-score">${edge.score}</span>`);
+        let projectVoteEnter = projectLinkEnter
+            .append("div")
+                .classed("project-votes", true);
+        if(loggedIn){
+            projectVoteEnter
+                .append("button")
+                    .classed("upvote", true)
+                    .text("Relevant")
+                    .on("click", edge => upvoteProjectLink(edge.vertex._id, topicID));
+            projectVoteEnter
+                .append("button")
+                    .classed("downvote", true)
+                    .text("Not")
+                    .on("click", edge => downvoteProjectLink(edge.vertex._id, topicID));
+        }
+        projectLinkSelection.exit().remove();
+        projectLinkSelection = projectLinkSelection.merge(projectLinkEnter);
+    // Locations are a little different, since they don't store projectGraphs, they just store an array of local projects
+    } else if(routeBase === "locations"){
+        projectLinkSelection = d3.select("#project-list").selectAll(".connection")
+           .data(currentTopicData.projects, project => project._id);
+        let projectLinkEnter = projectLinkSelection
+           .enter()
+               .append("div")
+                   .classed("connection", true)
+                   .attr("id", project => `project-${project._id}`);
+       projectLinkEnter
+           .append("div")
+               .classed("project-info", true)
+               .html(project => `<a href="wiki/${project._id}">${project.name}</a>`);
+       
+       projectLinkSelection.exit().remove();
+       
+       projectLinkSelection = projectLinkSelection.merge(projectLinkEnter);
+    } else {
+        return;
     }
-    projectLinkSelection.exit().remove();
-    
-    projectLinkSelection = projectLinkSelection.merge(projectLinkEnter);
+
+   
     d3.select("#projects-are-empty")
         .classed("hidden", !projectLinkSelection.empty());
 }
@@ -506,7 +630,7 @@ async function issueLinkSearch(){
         .append("div")
             .classed("result", true)
             .text(issue => issue.name)
-            .on("click", issue => upvoteIssueLink(topicID, issue._id));
+            .on("click", issue => routeBase === "locations" ? identifyLocalIssue(topicID, issue._id) : upvoteIssueLink(topicID, issue._id));
     
 }
 
@@ -548,7 +672,6 @@ let projectSearchResults;
 async function projectLinkSearch(){
     let input = String(projectToLink.property("value"));
     let results = await projectSearch(input);
-    console.log(results);
     if(results === "Blocked") {
         return;
     }
@@ -560,7 +683,7 @@ async function projectLinkSearch(){
         .append("div")
             .classed("result", true)
             .text(project => project.name)
-            .on("click", project => upvoteProjectLink(project._id, topicID));
+            .on("click", project => routeBase === "locations" ? identifyLocalIssue(topicID, project._id) : upvoteProjectLink(project._id, topicID));
     projectSearchResults
         .exit()
             .remove();
@@ -643,6 +766,10 @@ function toggleIssueSearchbar(){
 
 // General functions
 
+async function identifyLocalIssue(locationID, issueID){
+
+}
+
 async function upvoteIssueLink(sourceID, targetID) {
     if(String(sourceID) === String(targetID)){
         return;
@@ -664,7 +791,7 @@ async function upvoteIssueLink(sourceID, targetID) {
     .catch(err => {
         return console.log(err);
     });
-    loadVotes();
+    loadData();
 }
 async function downvoteIssueLink(sourceID, targetID){
     let fetchString = "";
@@ -683,7 +810,12 @@ async function downvoteIssueLink(sourceID, targetID){
     .catch(err => {
         return console.log(err);
     });
-    loadVotes();
+    loadData();
+}
+
+// Same logic as identifyLocalIssue but for projects
+async function createLocalProject(locationID, projectID){
+
 }
 
 // Same logic as upvoteLink/downvoteLink but for projects
@@ -692,9 +824,9 @@ async function upvoteProjectLink(projectID, nonProjectID) {
     if(routeBase === "wiki"){
         fetchString = `${baseURL}project/toissue/${projectID}/${nonProjectID}`;
     }
-    else if(routeBase === "task"){
-        console.log("You still need to implement this, Lavra");
-    }
+    // else if(routeBase === "task"){
+    //     console.log("You still need to implement this, Lavra");
+    // }
 
     await fetch(fetchString, {
         method: "PUT"
@@ -705,15 +837,14 @@ async function upvoteProjectLink(projectID, nonProjectID) {
     .catch(err => {
         return console.log(err);
     });
-    loadVotes();
+    loadData();
 }
 async function downvoteProjectLink(projectID, nonProjectID){
     let fetchString = "";
     if(routeBase === "wiki"){
         fetchString = `${baseURL}project/toissue/${projectID}/${nonProjectID}`;
-    }
-    else if(routeBase === "project"){
-        console.log("You still need to implement this, Lavra");
+    } else {
+        return;
     }
     await fetch(fetchString, {
         method: "DELETE"
@@ -724,5 +855,5 @@ async function downvoteProjectLink(projectID, nonProjectID){
     .catch(err => {
         return console.log(err);
     });
-    loadVotes();
+    loadData();
 }

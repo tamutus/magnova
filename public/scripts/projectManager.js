@@ -100,7 +100,6 @@ async function createTask(){
         let formInput = new FormData(newTaskForm);
         let newTask = {
             name: formInput.get("name"),
-            info: formInput.get("info"),
             completionRequirements: formInput.get("completionRequirements"),
         };
         fetch(`/project/addtask/${topicID}`, {
@@ -115,11 +114,11 @@ async function createTask(){
         .then(task => {
             displayTasks(topicID);
             displayThisTask(task);
+            d3.select(newTaskForm).selectAll("input").property("value", "");
         })
         .catch(err => {
-            console.log(err)
+            console.error(err);
         });
-
     }
 }
 
@@ -152,6 +151,7 @@ let taskTinyAppBox;
 
 tinymce.init({
     selector: '#task-info-editor',
+    placeholder: "Describe what must be done and how to do it. Include any resources that might help.",
     plugins: 'emoticons autoresize fullscreen link',
     toolbar: 'fullscreen link',
     max_height: 800,

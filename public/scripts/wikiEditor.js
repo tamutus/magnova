@@ -32,6 +32,10 @@ const nameBox = d3.select("#name-container"),
     topicImage = imageBox.select("#topic-image")
     descriptionText = d3.select("#description-text"),
     dataDisplays = d3.selectAll(".data"),
+    subWordBox = d3.select("#sub-word-container"),
+    subWordEmptyMessage = subWordBox.select("em.empty-message"),
+    sublocationWord = subWordBox.select(".data"),
+    geoBox = d3.select("#geo-container"),
     // Capture Editing buttons;
     editButton = d3.select("#edit-button"),
     cancelButton = d3.select("#cancel-button"),
@@ -45,7 +49,15 @@ const nameBox = d3.select("#name-container"),
 
 let liveVersion,
     editID, 
-    patchData;
+    patchData,
+    // These inputs will only be added on project and issue pages
+    imageInput,
+    // These inputs will only be added on location pages
+    subWordInput,
+    geoInput,
+    geoProviderInput,
+    geoAttributionInput;
+
 const editIdDiv = d3.select("#hidden-patchlist-id");
 if(!editIdDiv.empty()){
     editID = editIdDiv.text();
@@ -63,16 +75,32 @@ const nameInput = d3.select("#name-container")
     .insert("input",":first-child")
         .attr("type", "text")
             .property("value", topicName.text())
-        .classed("issue-name", true)
+        .classed("topic-name", true)
         .classed("mutable", true)
         .classed("hidden", true);
-const imageInput = imageBox.
-    append("input")
-        .attr("type", "text")
-            .property("value", d3.select("#topic-image").attr("src"))
-        .attr("id", "image-input")
-        .classed("mutable", true)
-        .classed("hidden", true);
+
+// For issue and project pages:
+if(!imageBox.empty()){
+    imageInput = imageBox
+        .append("input")
+            .attr("type", "text")
+                .property("value", d3.select("#topic-image").attr("src"))
+            .attr("id", "image-input")
+            .classed("mutable", true)
+            .classed("hidden", true);
+}
+// For location pages: 
+if(!subWordBox.empty()){
+    subWordInput = subWordBox
+        .append("input")
+            .attr("type", "text")
+                .property("value", sublocationWord.text())
+            .classed("sublocation-word", true)
+            .classed("mutable", true)
+            .classed("hidden", true);
+    
+}
+
 // Get one selection for both above inputs
 const inputs = d3.selectAll("input.mutable");
 
@@ -126,19 +154,35 @@ async function toggleEditing(){
     // Save changes
     else{
         
-        // Make an API call to get a live verison of info for a three way merge with what you started editing and your edits, then save, returning and dislaying any error messages.
+        // Make an API call to get a live version of info for a three way merge with what you started editing and your edits, then save, returning and displaying any error messages.
         
         const dataRoute =   routeBase == "wiki" ? "issue" : routeBase;
         liveVersion = await fetch(`/${dataRoute}/data/${topicID}`)
             .then(serverResponse => serverResponse.json())
+            .then(resObject => {
+                console.log(resObject);
+                if(resObject.message){
+                    if(resObject.message === "OK"){
+                        return resObject.content;
+                    }
+                    else {
+                        console.error(resObject.message);
+                        throw resObject.content;
+                    }
+                } else {
+                    return resObject;
+                }
+            })
             .catch(error => {
                 displayMessage("Couldn't get the live data");
                 console.error('Error:', error);
             });
+
+        if(!liveVersion){return;}
         // Three way merge logic
         let oldInfo = descriptionText.html(),
             newInfo = tinymce.get("description-editor").getContent(),
-            liveInfo = liveVersion.info;
+            liveInfo = liveVersion.info || "";
         console.log(`Old: ${oldInfo}, New: ${newInfo}, Live: ${liveInfo}`);
         const merged = Textmerger.get().merge(oldInfo, newInfo, liveInfo);
         console.log(`Merged: ${merged}`);
@@ -153,21 +197,49 @@ async function toggleEditing(){
         // patchData.push(JSON.stringify(patch));
         // displayPatches();
         // return;
-        if(!liveVersion){return;}
         
         // Logic for recording the change.
-        const patch = Diff3.diffPatch(liveInfo, merged);
-        console.log("Patch yields: " + Diff3.patch(liveInfo, patch).join(""));
-        console.log("Inverted patch yields" + Diff3.patch(merged, Diff3.invertPatch(patch)).join(""));
+        const   patch = Diff3.diffPatch(liveInfo, merged),
+                patchYields = Diff3.patch(liveInfo, patch).join(""),
+                invertedPatch = Diff3.invertPatch(patch),
+                invertedPatchYields = Diff3.patch(merged, invertedPatch).join("");
 
         // Collect info to post into an object called topicUpdate
-        topicUpdate = {
-            name: nameInput.property("value"),
-            info: merged,
-            image: imageInput.property("value"),
-            patch: patch,
-            latestVersion: liveVersion.version                                           // *** This needs to be implemented on backend
-        };
+        let topicUpdate;
+        if(routeBase === "project" || routeBase === "wiki"){
+            topicUpdate = {
+                name: nameInput.property("value"),
+                info: merged,
+                image: imageInput.property("value"),
+                patch: patch,
+                latestVersion: liveVersion.version
+            };
+        } 
+        else if(routeBase === "locations"){
+            topicUpdate = {
+                name: nameInput.property("value"),
+                info: merged,
+                sublocationWord: subWordInput.property("value"),
+                patch: patch,
+                latestVersion: liveVersion.version
+            }
+        }
+        if(patchYields !== merged){
+            window.alert("There was an error updating content. A bug has been detected and a report submitted. We've saved your edits. If you were planning to make more, hold onto them until we fix the issue.");
+            reportBug({
+                link: window.location.pathname,
+                text: `The previous version "${liveInfo}" \n\n wasn't updated to ${merged} \n\n because the inverted patch didn't match the live version (but the patched version did match the merge result). \n\n Patch: \n\n ${JSON.stringify(patch, null, 4)} \n\n Yields \n\n ${patchYields} \n\n Inverted Patch:\n\n ${JSON.stringify(invertedPatch, null, 4)} \n\n Yields \n\n ${invertedPatchYields}`
+            });
+            return;
+        }
+        if(liveVersion.info && liveVersion.info !== invertedPatchYields){
+            window.alert("This edit can't be backwards patched and would corrupt the data. A bug has been detected and a report submitted.");
+            reportBug({
+                link: window.location.pathname,
+                text: `The previous version "${liveInfo}" \n\n wasn't updated to ${merged} \n\n because the inverted patch didn't match the live version (but the patched version did match the merge result). \n\n Patch: \n\n ${JSON.stringify(patch, null, 4)} \n\n Yields \n\n ${patchYields} \n\n Inverted Patch:\n\n ${JSON.stringify(invertedPatch, null, 4)} \n\n Yields \n\n ${invertedPatchYields}`
+            });
+            return;
+        }
         let response = await fetch(`/${routeBase}/${topicID}`, {
             method: "PUT",
             headers: {
@@ -193,9 +265,30 @@ async function toggleEditing(){
         // handle.text(`@ ${topicUpdate.username}`);  // username changes need to be implemented
         descriptionText.html(topicUpdate.info);
         
-        topicImage.attr("src", topicUpdate.image);
+        // For issue and project pages, which have a topic image:
+        if(!topicImage.empty()){
+            topicImage.attr("src", topicUpdate.image);
+        }
+        // For locations...
+        if(!sublocationWord.empty()){
+            sublocationWord.text(topicUpdate.sublocationWord);
+            if(topicUpdate.sublocationWord){
+                subWordEmptyMessage.classed("hidden", true);
+            } else {
+                subWordEmptyMessage.classed("hidden", false);
+            }
+        }
+
         stopEditing();
     }
+}
+// When you're viewing a location and want to change the geometry, 
+function submitGeometry(){
+    let geometryUpdate = {
+        geometry: geoInput.property("value"),
+        geometrySource: `©<a href="${geoAttributionInput.property("value")}">${geoProviderInput.property("geo-provider")}</a>`,
+    };
+
 }
 function stopEditing(){
     // Remove event listener for navigating away from page.
@@ -314,7 +407,7 @@ function displayRevisionMetadata(){
     revisionMetadata.html(`<a href="/users/${metadata.editor}">${metadata.editor}</a> submitted this version on ${new Date(metadata.editDate).toLocaleDateString()}`);
 }
 function rollSave(){
-
+    // To be implemented
 }
 function toggleField(id){
     

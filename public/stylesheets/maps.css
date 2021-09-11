@@ -1,3 +1,27 @@
+#map-page-title {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+}
+#map-page-title h1{
+    border: none;
+}
+#map-page-title > h1 > span {
+    opacity: .5;
+    font-size: inherit;
+}
+#map-page-title > div {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    justify-content: center;
+}
+#map-page-title > div > h1 {
+    margin: 0;
+    padding: 0;
+}
 #map-container {
     display: flex;
     flex-flow: row wrap;
@@ -8,15 +32,211 @@
     margin-bottom: 30px;
     transition: height .5s ease-in-out;
 }
-#location-info-display {
+.zoom-out-div, .link-to-maps {
+    background-color: rgba(7, 39, 182, 0.774);
+    padding: 15px;
+    border-radius: 15px;
+}
+.link-to-maps a {
+    color: white !important;
+}
+.link-to-maps a:hover {
+    color: rgb(173, 240, 48) !important;
+}
+#location-info-display-container {
     flex: 1 1 200px;
-    overflow-y: auto;
-    max-height: 700px;
+    height: 700px;
     margin: 0 50px 0 30px;
-    background-color: rgba(50, 218, 224, 0.178);
+    overflow: hidden;
+}
+#sublocation-list-container, #location-info-display {
+    overflow-y: auto;
+    width: calc(100% - 80px);
+    height: calc(100% - 80px);
     padding: 30px 30px 30px 50px;
     border-radius: 30px;
 }
+#location-info-header, #sublocation-header {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+#location-info-header button, #sublocation-header button {
+    height: 50px;
+}
+#sublocation-list-container {
+    transform: translate(0%, -100%);
+    transition: transform .5s ease-in-out;
+    background-color: rgba(125, 50, 224, 0.178);
+}
+#sublocation-list-container.hidden {
+    transform: translate(100%, -100%);
+    visibility: visible;
+}
+#location-info-display {
+    background-color: rgba(50, 218, 224, 0.178);
+    transition: transform .5s ease-in-out;
+}
+#location-info-display.hidden {
+    transform: translateX(-100%);
+    visibility: visible;
+}
+span.location-name {
+    font-size: inherit;
+    color:rgb(50, 218, 224);
+    filter: drop-shadow(0px 0px 7px rgb(2, 112, 48));
+}
+span.subdivision-name {
+    font-size: inherit;
+}
+#wiki-button {
+    background-color: #c898ed;
+    border-radius: 15px;
+    padding: 15px;
+    margin: 30px auto 20px auto;
+    text-shadow: black 0px 2px 4px;
+    cursor: pointer;
+    transition: box-shadow .5s ease-out, filter .5s ease-out;
+}
+#wiki-button a {
+    color: rgb(255, 255, 255);
+}
+#wiki-button.greyed {
+    cursor: not-allowed;
+    filter: grayscale(1);
+    box-shadow: 0 0 30px rgb(168, 168, 168), 0 0 10px rgb(168, 168, 168);
+}
+#instructions {
+    margin-bottom: 50px;
+}
+#sublocations {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    /* align-items: center; */
+    align-content: flex-start;
+    margin: 20px;
+}
+#fetch-toggler {
+    height: 100px;
+    width: 200px;
+}
+#fetch-display {
+    visibility: visible;
+    overflow: hidden;
+    flex: 1 1 400px;
+    height: 630px;
+    margin-bottom: 30px;
+    margin-left: 30px;
+    padding: 30px;
+    background-color: rgba(60, 186, 245, 0.692);
+    border-radius: 20px;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-evenly;
+    align-items: flex-start;
+    transition: flex .5s ease-out, padding .5s ease-out, margin .5s ease-out, height .5s ease-out;
+}
+#fetch-display.hidden {
+    flex: 0 1 0px;
+    height: 0;
+    padding: 0;
+    margin: 0;
+}
+#fetch-display h2 {
+    display: inline;
+    margin: 0;
+}
+#fetch-display p {
+    text-indent: 0;
+}
+#fetch-display input {
+    margin: 5px 0 15px 15px;
+}
+#fetch-display input[type=text] {
+    width: 90%;
+}
+#fetch-display button {
+    align-self: center;
+    padding: 15px;
+}
+#new-sublocation-form {
+    flex: 0 1 800px;
+}
+#sublocation-submitter {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-flow: column nowrap;
+            flex-flow: column nowrap;
+    -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+            align-items: flex-start;
+    -ms-flex-line-pack: flex-start;
+        align-content: flex-start;
+    margin: 0 auto 30px auto;
+    background-color: rgba(59, 228, 7, 0.397);
+    border-radius: 20px;
+    padding: 20px;
+}
+#sublocation-submitter input {
+    margin: 15px 0 25px 25px;
+}
+#sublocation-submitter input[type=text] {
+    width: 90%;
+}
+#sublocation-submitter input[type=color], #color-editor {
+    width: 60px;
+    height: 60px;
+    border: 3px solid white;
+    border-radius: 30%;
+    padding: 10px;
+    overflow: hidden;
+    opacity: 1;
+    transition: width .5s ease-out, height .5s ease-out, opacity .5s ease-out;
+}
+#color-editor {
+    margin: 5px 0;
+}
+#color-editor.hidden {
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+.color-editing-box {
+    background-color: rgba(7, 39, 182, 0.774);
+    border-radius: 10px;
+    width: 123px;
+    height: 190px;
+    padding: 5px;
+}
+#sublocation-submitter button[type=submit]{
+    align-self: center;
+    padding: 15px;
+}
+
+
+#new-parent-search-toggler {
+    margin: 20px 50px;
+}
+#parent-search-bar {
+    height: 500px;
+    opacity: 1;
+    visibility: visible;
+    transition: height .5s ease-out, opacity .5s ease-out;
+}
+#parent-search-bar.hidden {
+    height: 0;
+    opacity: 0;
+}
+
+#parent-search-bar * input {
+    margin-left: 40px;
+}
+
 @media screen and (max-width: 650px){
     #map-display {
         height: 400px;

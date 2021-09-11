@@ -22,6 +22,10 @@ font-weight: 700;
 
  :root {
 	--menutwist: 0deg;
+
+    --loaderXRotation: 0deg;
+    --loaderYRotation: -15deg;
+    --loaderZRotation: 0deg;
 }
 
   /* ========================= */
@@ -43,6 +47,8 @@ body {
 	color: lavender;
 	font-weight: 400;
     min-height: 100vh;
+    /* You can toggle this to test colorblind accessibility */
+    /* filter: grayscale(1);  */
 }
 #allContent {
 	text-align: center;
@@ -224,6 +230,8 @@ h1 {
 	-webkit-transition: all .5s ease-out;
 	-o-transition: all .5s ease-out;
 	transition: all .5s ease-out;
+    border-bottom: 5px solid rgb(160, 100, 216);
+    margin-bottom: 20px;
 }
 h2 {
 	text-align: left;
@@ -237,6 +245,17 @@ h2 em {
 h3 {
 	font-size: 30px;
     margin: 30px auto 30px auto;
+}
+hr {
+    height: 0px;
+    width: 80%;
+    margin: 30px auto 30px auto;
+    padding: 0;
+    border: none;
+    border-top: 5px solid rgba(160, 100, 216, .5);
+    border-radius: 5px;
+    outline: none;
+
 }
 ul {
 	list-style: none;
@@ -273,6 +292,34 @@ li {
  /* style classes */
 /* ============= */
 
+
+.advice {
+    background-color: rgba(145, 0, 109, 0.815);
+    border-radius: 30px 0 30px 0;
+    margin: 15px auto;
+    padding: 25px;
+    width: 600px;
+    opacity: .5;
+    transition: width .5s ease-out, opacity .5s ease-out;
+}
+.advice > * {
+    margin: 0;
+}
+.advice >*:first-child {
+    margin-bottom: 15px;
+}
+.advice:hover {
+    opacity: 1;
+}
+.advice a {
+    color: rgb(107, 196, 255);
+}
+@media screen and (max-width: 700px){
+    .advice {
+        width: 400px;
+    }
+}
+
 .cyber {
 	font-family: 'Orbitron', sans-serif;
 	font-weight: 500;
@@ -291,6 +338,13 @@ li {
 	background-size: contain;
 	color: rgba(135, 227, 134, .5);
 }
+
+img.mockup {
+    max-width: 80%;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
 .notebook {
 	font-family: 'Caveat', cursive;
 	font-weight: 400;
@@ -298,6 +352,108 @@ li {
 .notebook strong {
 	font-weight: 700;
 }
+
+  /* ============= */
+ /* Loading Cubes */
+/* ============= */
+
+.loading-bar {
+    /* display: flex; */
+    /* flex-flow: row nowrap; */
+    perspective: 1000px;
+    /* width: 100%; */
+    /* justify-content: space-evenly; */
+    /* padding-top: 100px; */
+}
+
+div.meta-cube {
+    height: 100px;
+    width: 100px;
+    margin: 25px;
+    transform: rotateX(var(--loaderXRotation)) rotateY(var(--loaderYRotation)) rotateZ(var(--loaderZRotation));
+    transform-style: preserve-3d;
+    transition: transform 1s cubic-bezier(0.415, 0.975, 0.350, 1.35);
+    transform-origin: center;
+}
+.cube {
+    height: 100px;
+    flex: 0 0 100px; 
+    transform-style: preserve-3d;
+    transition: transform .5s cubic-bezier(0.415, 0.975, 0.350, 1.35);
+    transform-origin: center;
+}
+.cube.turned-up {
+    transform: rotateX(90deg);
+}
+.cube .face {
+    background-color: black;
+}
+.face {
+    position: absolute;
+    height: 100px;
+    width: 100px;
+    transform-origin: center;
+    transition: transform .5s ease, height .5s ease, width .5s ease;
+    transform-style: preserve-3d;
+    border-radius: 45%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .face p {
+    transform: rotateZ(calc(var(--loaderZRotation) * -1));
+    transition: transform 1s cubic-bezier(0.415, 0.975, 0.350, 1.175);
+    transform-origin: center;
+    text-align: center;
+    text-indent: 0;
+    color: white;
+    font-family: 'Montserrat', sans-serif;
+  }
+  div.cube .face:nth-child(1) {
+      top: 0px;
+      left: 0px;
+      background-color: rgb(223, 95, 216);
+      transform: translateZ(50px);
+  }
+  div.cube div.face:nth-child(2) {
+      top: 50px;
+      left: 0px;
+      transform: rotateX(-90deg);
+      background-color: rgb(14, 168, 14);
+  }
+  div.cube div.face:nth-child(3) {
+      top: 20px;
+      left: 20px;
+      width: 60px;
+      height: 60px;
+      transform: translateZ(-50px);
+      background-color: rgb(212, 157, 223);
+  }
+  div.cube div.face:nth-child(4) {
+      top: -30px;
+      left: 20px;
+      transform: rotateX(90deg);
+      background-color: rgb(0, 85, 4);
+      width: 60px;
+      height: 60px;
+  }
+  div.cube div.face:nth-child(5) {
+      top: 20px;
+      left: -30px;
+      transform: rotateY(-90deg);
+      background-color: rgb(158, 25, 118);
+      width: 60px;
+      height: 60px;
+  }
+  div.cube div.face:nth-child(6) {
+      top: 20px;
+      left: 70px;
+      transform: rotateY(90deg);
+      background-color: rgb(9, 120, 148);
+      width: 60px;
+      height: 60px;
+  }
+
 
   /* ============= */
  /* sidebar stuff */
@@ -592,6 +748,11 @@ li {
     -o-object-fit: cover;
        object-fit: cover;
     cursor: pointer;
+}
+
+/* for login page */
+#login-form form button {
+    margin-top: 20px;
 }
 
 #header-links {

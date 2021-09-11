@@ -29,6 +29,7 @@
             <p><em>Log in to discuss and edit this issue</em></p>
         <% } %>
         <ul>
+        <hr>
         <li id="about">
             <h2>About</h2>
             <div id="description">
@@ -80,6 +81,7 @@
                 none.
             <% } %>
         </li>
+        <hr>
         <li id="issues">
             <h2>Issues that contribute to <%= issue.name %></h2>
             <% if(issue.issues && issue.issues.edges.length > 0 ) { %>
@@ -91,18 +93,20 @@
                 <% } %>
                 </p>
             <% } %>
-                <div id="connections-are-empty">No links here yet! <% if(!currentUser){ %>Log in to help break this issue down. <% } else { %> Break this issue down by identifying its causes: <% } %> </div>
-                <div id="connections-container">
-                    <div id="issue-connections">
-                    </div>
-                    <% if(currentUser) { %>
-                        <div id="issue-searchbar">
-                            <div class="searchbar-heading">Identify sub-issue of "<span class="link-source-name"><%= issue.name %></span>"</div>
-                            <input type="text">
-                            <div id="found-issue-links"></div>
-                        </div>
-                    <% } %>
+            <div id="connections-are-empty">No links here yet! <% if(!currentUser){ %>Log in to help break this issue down. <% } else { %> Break this issue down by identifying its causes: <% } %> </div>
+            <div id="connections-container">
+                <div id="issue-connections">
                 </div>
+                <% if(currentUser) { %>
+                    <div id="issue-searchbar">
+                        <div class="searchbar-heading">Identify sub-issue of "<span class="link-source-name"><%= issue.name %></span>"</div>
+                        <input type="text">
+                        <div id="found-issue-links"></div>
+                    </div>
+                <% } %>
+            </div>
+        </li>
+        <hr>
         <li id="projects">
             <h2>Projects addressing <%= issue.name %></h2>
             <% if(issue.projects && issue.projects.edges.length > 0){ %>
@@ -135,9 +139,6 @@
                                 <div class="form-group">
                                     <input type="text" placeholder="Image URL" name="project[image]">
                                 </div>
-                                <div class="form-group">
-                                    <textarea placeholder="Description" name="project[info]"></textarea>
-                                </div>
                                 <button type="submit">
                                     Submit
                                 </button>
@@ -147,6 +148,7 @@
                 <% } %>
             </div>
         </li>
+        <hr>
         <li id="locations">
             <h2>Locations</h2>
             <div id="map-container"></div>
@@ -158,6 +160,7 @@
         <% } %>
         <p class="hidden issueID"><%= issue._id %></p>
         </ul> -->
+        <hr>
         <div id="qr">
             <img src=<%= `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURI(currentHost + currentURL)}&amp;size=100x100` %> alt="" title="<%= issue.name %>" />
             <h3>QR Code</h3>

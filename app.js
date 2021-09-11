@@ -34,8 +34,8 @@ const User = require('./api/user/user');
 // Express (app = express()) config
 // ================================
 
-app.use(express.urlencoded({extended: true}));
-app.use(express.json());
+app.use(express.json({limit: "5mb"})); // Limit increased from default of 1Mb to 5 to handle geojson geometry.
+app.use(express.urlencoded({extended: true, limit: "5mb"}));
 
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + '/public'));
@@ -71,11 +71,11 @@ app.use(function(req, res, next){
 });
 
 // Change Views directory dynamically (for if I want to add in the kanban stuff) (i don't understand how this works yet)
-app.use(function(req, res, next){
-	if(req.path.slice(0, 7) === "/kanban") app.set('views', path.join(__dirname, '/views/kanban'));
-	else app.set('views', path.join(__dirname, '/views'));
-	next();
-});
+// app.use(function(req, res, next){
+// 	if(req.path.slice(0, 7) === "/kanban") app.set('views', path.join(__dirname, '/views/kanban'));
+// 	else app.set('views', path.join(__dirname, '/views'));
+// 	next();
+// });
 
 // ====== 
 // Routes

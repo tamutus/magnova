@@ -4,6 +4,7 @@ const	express = require('express'),
 		Issuegraph = require("../api/issue/issue.graph"),
         Project = require("../api/project/project.template"),
         Projectgraph = require("../api/project/project.graph"),
+        Location = require("../api/maps/location.model"),
         Talkpage = require("../api/comments/talkpage.model"),
         Patchlist = require("../api/patchlist.model"),
 		User = require("../api/user/user");
@@ -32,24 +33,26 @@ router.get('/', (req, res) => {
 });
 
 // Useful for creating an index for a given model. 
-router.get("/createIndex", async (req, res) => {
-    User.find({}, async (err, users) => {
-        if(err){console.log(err)}else {
-            for(user of users){
-                if(err){console.log(err)}else{
-                    const username = user.username;
-                    user.username = username;
-                    console.log(username);
-                    user.markModified("username");
-                    await user.save();
-                    // await Issue.findByIdAndUpdate(issue._id, {name: name}, {strict: false});
-                }
-            }
-        }
-    });
-    return res.send("done");
-});
+// router.get("/createIndex", async (req, res) => {
+//     User.find({}, async (err, users) => {
+//         if(err){console.log(err)}else {
+//             for(user of users){
+//                 if(err){console.log(err)}else{
+//                     const username = user.username;
+//                     user.username = username;
+//                     console.log(username);
+//                     user.markModified("username");
+//                     await user.save();
+//                     // await Issue.findByIdAndUpdate(issue._id, {name: name}, {strict: false});
+//                 }
+//             }
+//         }
+//     });
+//     return res.send("done");
+// });
 
+
+// Refactor to not send all location info? or refactor to add a d3 rendering of the shape
 router.get("/search", async (req, res) => {
     let searchTerm = "";
     let results = {};
@@ -75,10 +78,45 @@ router.get("/search", async (req, res) => {
         });
         // results["projects"] = results["projects"].filter(project => project.confidenceScore > 10);
     }
+    if(req.query.locations === "true"){
+        results["locations"] = await Location.fuzzySearch(searchTerm).catch(err => {            
+            console.error(err);
+            return res.send("Error fuzzy searching: " + err);
+        });
+        
+        // results["projects"] = results["projects"].filter(project => project.confidenceScore > 10);
+    }
     Object.keys(results).forEach(key => {
         results[key] = results[key].filter(item => JSON.parse(JSON.stringify(item)).confidenceScore > 5); // https://stackoverflow.com/a/36522374 and https://stackoverflow.com/a/35038179 explain why this JSON conversion is necessary.
     });
-    // console.log(results);
+
+    if(req.query.locations === "true"){
+        let trimmedLocations = [];
+        for(let locationIndex = 0; locationIndex < results.locations.length; locationIndex++){
+            let fullLocation = results.locations[locationIndex],
+                trimmedLocation = {
+                    name: fullLocation.name,
+                    _id: fullLocation._id,
+                    confidenceScore: JSON.parse(JSON.stringify(fullLocation)).confidenceScore,
+                    info: fullLocation.info
+                };
+            if(fullLocation.superlocation){
+                await Location.findById(fullLocation.superlocation, (err, parent) => {
+                    if(err){
+                        console.log(err);
+                        return res.send(`Error loading ${fullLocation.name}'s superlocation (id: ${fullLocation.superlocation})`);
+                    } else if(parent) {
+                        trimmedLocation.superlocation = {
+                            name: parent.name,
+                            _id: parent._id
+                        };
+                    }
+                });
+            }
+            trimmedLocations.push(trimmedLocation);
+        }
+        results.locations = trimmedLocations;
+    }
     return res.send(results);
 });
 
@@ -220,7 +258,7 @@ router.put("/:id", isLoggedIn, (req, res) => {
                 console.log(err);
             }
             else{
-                let returnMessage = `Update not needed`;
+                let returnMessage = "Update ";
                 if(issue.name != name || issue.info != info || issue.image != image){
                     if(!issue.version){
                         issue.version = 0;
@@ -231,7 +269,10 @@ router.put("/:id", isLoggedIn, (req, res) => {
                     }
                     if(!issue.edits){
                         Patchlist.create({root: issue._id, rootType: "IssueTemplate"}, (err, patchlist) => {
-                            if(err){console.log(err);}
+                            if(err){
+                                console.log(err);
+                                return res.send("No patch list for edits, and an error creating a new one: " + err);
+                            }
                             else{
                                 issue.edits = patchlist;
                                 issue.markModified("edits");
@@ -239,6 +280,7 @@ router.put("/:id", isLoggedIn, (req, res) => {
                         });
                     }
                     if(issue.info != info){
+                        returnMessage += "to this issue's info, ";
                         issue.edits.patches.push({
                             editor: req.user._id,
                             patch: patch
@@ -260,11 +302,19 @@ router.put("/:id", isLoggedIn, (req, res) => {
                         issue.markModified("editors");
                     }
 
-                    issue.name = name;
-                    issue.image = image;
+                    if(issue.name != name){
+                        returnMessage += "to this issue's name, ";
+                        issue.name = name;
+                    }
+                    if(issue.image != image){
+                        returnMessage += "to this issue's image, ";
+                        issue.image = image;
+                    }
 
+                    returnMessage += "Successful!";
                     issue.save();
-                    returnMessage = `Update successful!`;
+                } else {
+                    returnMessage += "not needed.";
                 }
                 return res.send(returnMessage);
             }

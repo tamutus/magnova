@@ -29,13 +29,14 @@
                 <a onclick="document.querySelector('#tags').scrollIntoView({behavior: 'smooth'});">Tags</a>
                 <a onclick="document.querySelector('#harms').scrollIntoView({behavior: 'smooth'});">Harms</a>
             </div>
-            <div>
+            <div id="wiki-overview">
                 <h3><em>Exchange valuable information with other activists on the issues you care about. </em></h3>
                 <p>Magnova's core is a map of what's wrong with the world—a map of "issues". We believe that humanity is more than possible of creating ingenious solutions to large-scale problems, and the problem is the lack of coordination and organization. Magnova transforms broad, conceptual challenges such as "Lack of Clean Drinking Water" or "Homelessness" from austere monoliths into beacons for activism. By recursively breaking these issues down to their causes and components, Magnova creates a map from large-scale to small-scale, from effect to cause.</p>
                 <p>Every problem is unique, and each way of framing the issues sets the stage for different kinds of discourse. Thus, every issue has its own wiki page, a place for sharing data, explanations of why the world is a certain way, why we should do something about it, and anything else you think is relevant. For broad, controversial, or friendly discussion about a topic, go to its page and click the Discuss button to reach the talk page.</p>
             </div>
         </div>
     </section>
+    <hr>
     <div id="search">
         <form>
             <div id="search-form">
@@ -44,6 +45,7 @@
                     <h2><input type="checkbox" name="issues" value="true" checked="true">Issues </h2>
                     <h2><input type="checkbox" name="users" value="true" checked="true">Users </h2>
                     <h2><input type="checkbox" name="projects" value="true" checked="true">Projects</h2>
+                    <h2><input type="checkbox" name="locations" value="true" checked="true">Locations</h2>
                 </div>
                 <div class="search-bar">
                     <input name="target" type="text" id="search-query"><button type="submit">Search Magnova</button><button type="button" onclick="clearSearch();">Clear results</button>
@@ -57,8 +59,11 @@
             <div id="user-results"></div>
             <h2 class="hidden" id="project-results-header">Projects</h2>
             <div id="project-results"></div>
+            <h2 class="hidden" id="location-results-header">Locations</h2>
+            <div id="location-results"></div>
         </div>
     </div>
+    <hr>
     <div id="submission">
         <div id="issue-submission">
             <h2>
@@ -71,9 +76,6 @@
                     </div>
                     <div class="form-group">
                         <input type="text" placeholder="Image URL" name="issue[image]">
-                    </div>
-                    <div class="form-group">
-                        <textarea placeholder="Description" name="issue[info]"></textarea>
                     </div>
                     <button type="submit">
                         Submit
@@ -93,9 +95,6 @@
                     <div class="form-group">
                         <input type="text" placeholder="Image URL" name="project[image]">
                     </div>
-                    <div class="form-group">
-                        <textarea placeholder="Description" name="project[info]"></textarea>
-                    </div>
                     <button type="submit">
                         Submit
                     </button>
@@ -103,6 +102,7 @@
             </div>
         </div>
     </div>
+    <hr>
     <section id="issues">
 		<% if(topIssues?.length > 0){%>
             <h2>Know: Recently Identified Issues</h2>
@@ -125,6 +125,7 @@
             </div>
         <% } %>
 	</section>
+    <hr>
 	<section id="projects">
 		<h2>Organize: Projects</h2>
 
@@ -150,33 +151,42 @@
         <% } %>
         <br><p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
+    <hr>
 	<section id="tasks">
 		<h2>Act: Tasks</h2>
         <p>Magnova reenvisions human labor as not a set of 9–5 jobs that people are trapped by, but a set of fun things to do that also make society function smoothly. A Task on Magnova is a chunk of action that an individual person can do. The more accessible you make a task, the more people will want to do it. Some tasks will require special expertise or access, and that can be specified. When you complete a task, a verified community member will sign off on the hours you put in. The process of verifying community members will be functionally akin to promoting users to mod status, but the goal is expanding the community rather than selecting elite police officers. Anybody who establishes themselves as trustworthy will be able to get verified. Eventually, we will also develop a Skill and Badge system to make the Task system more personally meaningful and help track levels of expertise.</p>
         <br><p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
+    <hr>
     <section id="maps">
-        <h2>Maps</h2>
-        <p>Issues and projects will need to adapt to their locations, and so we plan to integrate an open-source map system with the existing issue-navigation framework. You will be able to split issues and projects into local instances to ensure that large-scale issues get taken care of around the world. Local communities will be able to discuss the unique characteristics of how an issue plays out in their area, as well as how a project demands a different set of tasks.</p>
-        <p>Our tentative plan is to integrate the <a href="https://leafletjs.com/">Leaflet</a> API and <a href="https://www.openstreetmap.org/about"> OpenStreetMap data</a>. Data that's attached with locations based on OSM data will be governed by the <a href="https://creativecommons.org/licenses/by-sa/2.0/">Creative Commons Attribution-ShareAlike 2.0 license (CC BY-SA 2.0)</a>.</p>
-        <br><p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
+        <a href="/locations"><h2>Maps</h2></a>
+        <p>Problems and their solutions are not the same everywhere in the world, but they do have common features. To allow for regional diversity in Issues and Projects, Magnova is developing an API and UI for uploading geographic information about locations and their sub-divisions. so we plan to integrate an open-source map system with the existing issue-navigation framework. You will soon be able to split issues and projects into local instances to ensure that large-scale issues get taken care of around the world. Local communities will be able to discuss the unique characteristics of how an issue plays out in their area, as well as how a project demands a different set of tasks.</p>
+        <p>We have currently integrated the <a href="https://leafletjs.com/">Leaflet</a> API, map tiles from <a href="https://www.mapbox.com/">Mapbox</a> (possibly to transition to <a href="https://www.openstreetmap.org/about"> OpenStreetMap data</a>), and an ergonomic UI for submitting open source boundary data (geoJSON) for locations.
+            <!-- Data that's attached with locations based on OSM data will be governed by the <a href="https://creativecommons.org/licenses/by-sa/2.0/">Creative Commons Attribution-ShareAlike 2.0 license (CC BY-SA 2.0)</a>. -->
+        </p>
+        <a href="/locations"><img class="mockup" src="/assets/Leaflet demo wip 3.jpg"></a>
+        <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
     </section>
+    <hr>
     <section id="resources">
 		<h2>Resources</h2>
         <p>We aspire to create a system of goods production with social profit—where people have the right to the things they make, and surplus is donated compassionately and intelligently to members of the community. Magnova will make this possible by providing a virtual library of physical goods, a catalogue of Resources and goods that our community produces and uses. Users will be able to donate tools, raw materials, parts, and the like to be shared by the Magnova community, registering those things and their location in our catalogue. Tasks and Formulas will be able to store references to Resources, paving the way for automation of dynamically allocating resources to where they're needed. Social ownership of the means of production will reduce the barrier to entry for individuals who want to create things or change in the world.</p>
         <br>
         <p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
+    <hr>
     <section id="formulas">
 		<h2>Formulas</h2>
         <p>Socializing the means of production means making it easier to get involved with producing things. And so Magnova will house a repository of guides on how to create things. Formulas will allow the community to establish best practices for transforming one set of resources to another. Knowledge about how to make things belongs to everyone!</p>
         <br><p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
+    <hr>
     <section id="tags">
 		<h2>Tags</h2>
         <p>Magnova will employ a tag system.</p>
         <br><p><em>Under construction... Please <a href="https://www.patreon.com/magnova">donate to our Patreon</a> to help support the continued development of Magnova!</em></p>
 	</section>
+    <hr>
     <section id="harms">
 		<h2>Harms</h2>
         <p>Issues describe general problems with the world, whereas Harms will quantify them. When we implement Harm metrics, users will be able to plug in numbers to issues and projects for how much bad exists and how much good can be done. Quantifying problems will make it possible to bring attention to which issues are most pressing. Not everybody needs to navigate the whole issue map; some just want to do the most good they can. Harms will also provide a way of showing locational variance in issue severity.</p>
