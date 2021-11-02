@@ -103,15 +103,17 @@
 <h2>
     Recent forum activity (<%= shownUser.comments.length %> comments made)
 </h2>
-    <% for(let i = 0; i < 10 && i < shownUser.comments.length; i++) { let thisComment = shownUser.comments[shownUser.comments.length - i -1 ]; %>
-        <a href=<%= `/talk/comment/${thisComment._id}` %>>
-            <div class="comment"><div class="comment-text">
+    <% for(let i = j = shownUser.comments.length; j - i < 10 && i > 0; i--) { %>
+        <% let thisComment = shownUser.comments[i - 1]; %>
+        <div class="comment">
+            <a href="<%= `/talk/comment/${thisComment._id}` %>"><button type="button">Context</button></a>
+            <div class="comment-text">
                 <% if(thisComment.text.length <= 300) { %>
                     <%- thisComment.text %>
                 <% } else { %>
                     <%- thisComment.text.slice(0, 298) + "..." %>
                 <% } %>
-            </div></div>
-        </a>
+            </div>
+        </div>
     <% } %>
 <%- include("../partials/footer") %>

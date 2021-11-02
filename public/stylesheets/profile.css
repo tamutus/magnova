@@ -438,6 +438,11 @@ h2 {
     border-radius: 20px;
     display: flex;
     flex-flow: row nowrap;
-    cursor: pointer;
     color: lavender;
+}
+.comment a {
+    margin-right: 30px;
+}
+.comment a button {
+    padding: 10px;
 }

@@ -139,6 +139,20 @@ router.get("/edits/:id", isLoggedIn, (req, res) => {
         });
 });
 
+router.get("/all", (req, res) => {
+    Issue.find({}, (err, issues) => {
+        if(err){
+            console.log(err);
+            res.send(`Erorr finding all issues: ${err}`);
+        } else {
+            res.render("wiki/allissues", {
+                title: "All Issues on Magnova",
+                issues: issues
+            });
+        }
+    });
+});
+
 // To do: check whether req.params.id is mongoose objectid by this method, https://stackoverflow.com/a/29231016/6096923 , and if it's not look up at the path. refactor to have stable paths.
 router.get('/:id', (req, res) => {
 	Issue.findById(req.params.id)

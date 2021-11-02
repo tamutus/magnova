@@ -75,9 +75,11 @@ async function initializeMiniMap(){
             },
             type: "Feature"
         };
-        colorEditor.property("value", staticLocation.color);
-        colorEditor.style("background-color", staticLocation.color);
-        colorName.text(`(${ntc.name(staticLocation.color)[1]})`);
+        if(colorEditor){
+            colorEditor.property("value", staticLocation.color);
+            colorEditor.style("background-color", staticLocation.color);
+            colorName.text(`(${ntc.name(staticLocation.color)[1]})`);
+        }
     } else {
         thisGeo = {
             geometry: JSON.parse(d3.select("#hidden-geojson").text()),

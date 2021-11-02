@@ -561,6 +561,19 @@ router.delete("/toissue/:projectid/:issueid", isLoggedIn, async (req, res) => {
         });
 });
 
+router.get("/all", (req, res) => {
+    Project.find({}, (err, projects) => {
+        if(err){
+            console.log(err);
+            res.send(`Erorr finding all projects: ${err}`);
+        } else {
+            res.render("wiki/allprojects", {
+                title: "All Projects on Magnova",
+                projects: projects
+            });
+        }
+    });
+});
 
 router.get("/:id", (req, res) => {
     Project.findById(req.params.id)

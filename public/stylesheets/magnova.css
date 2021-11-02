@@ -36,7 +36,6 @@ font-weight: 700;
 	margin: 0;
 	padding: 0;
 	/* transition: all .5s; */
-	font-size: 20px;
 }
 
 body {
@@ -46,6 +45,7 @@ body {
     font-family: 'Poppins', sans-serif;
 	color: lavender;
 	font-weight: 400;
+    font-size: 20px;
     min-height: 100vh;
     /* You can toggle this to test colorblind accessibility */
     /* filter: grayscale(1);  */
