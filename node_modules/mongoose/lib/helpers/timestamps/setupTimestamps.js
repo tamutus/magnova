@@ -51,7 +51,7 @@ module.exports = function setupTimestamps(schema, timestamps) {
       (this.ownerDocument ? this.ownerDocument() : this).constructor.base.now();
     const auto_id = this._id && this._id.auto;
 
-    if (!skipCreatedAt && createdAt && !this.get(createdAt) && this.isSelected(createdAt)) {
+    if (!skipCreatedAt && createdAt && !this.get(createdAt) && this.$__isSelected(createdAt)) {
       this.$set(createdAt, auto_id ? this._id.getTimestamp() : defaultTimestamp);
     }
 
@@ -86,6 +86,7 @@ module.exports = function setupTimestamps(schema, timestamps) {
   _setTimestampsOnUpdate[symbols.builtInMiddleware] = true;
 
   const opts = { query: true, model: false };
+  schema.pre('findOneAndReplace', opts, _setTimestampsOnUpdate);
   schema.pre('findOneAndUpdate', opts, _setTimestampsOnUpdate);
   schema.pre('replaceOne', opts, _setTimestampsOnUpdate);
   schema.pre('update', opts, _setTimestampsOnUpdate);
@@ -96,6 +97,12 @@ module.exports = function setupTimestamps(schema, timestamps) {
     const now = currentTime != null ?
       currentTime() :
       this.model.base.now();
+
+    // Replacing with null update should still trigger timestamps
+    if (this.op === 'findOneAndReplace' && this.getUpdate() == null) {
+      this.setUpdate({});
+    }
+
     applyTimestampsToUpdate(now, createdAt, updatedAt, this.getUpdate(),
       this.options, this.schema);
     applyTimestampsToChildren(now, this.getUpdate(), this.model.schema);
