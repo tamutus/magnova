@@ -1,4 +1,4 @@
-// To do: encrypt messages
+// To do before implementing: encrypt messages
 // https://attacomsian.com/blog/nodejs-encrypt-decrypt-data
 
 const mongoose = require("mongoose"),
