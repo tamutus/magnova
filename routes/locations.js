@@ -24,6 +24,11 @@ router.get("/", (req, res) => {
     });
 });
 
+router.get("/nowhere", (req, res) => {
+    return res.status(404).render("locations/nowhere", {
+        title: "Magnova — Nowhere"
+    });
+})
 // Since the front-end is using the library Name That Color, Magnova will store hex values instead of rgb. This code converts all locations with rgb colors to hex.
 // router.put("/updatecolors", (req, res) => {
 //     Location.find({}, (err, all) => {
@@ -199,183 +204,212 @@ router.post("/", isLoggedIn, (req, res) => {
 // });
 
 router.get("/data/:id", (req, res) => {
-    Location.findById(req.params.id)
-        .populate("sublocations", "name")
-        .populate("superlocation", "name sublocationWord")
-        // .populate("tags")
-        // .populate("resources")
-        // .populate("harms")
-        // .populate("issues")
-        // .populate("projects")
-        // .populate("tasks")
-        .exec((err, location) => {
-            if(err){
-                console.log(err);
-                return res.send({
-                    message: "Error finding the location",
-                    content: err
-                });
-            } else {
-                res.send({
-                    message: "OK",
-                    content: location
-                });
-            }
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Location.findById(req.params.id)
+            .populate("sublocations", "name")
+            .populate("superlocation", "name sublocationWord")
+            // .populate("tags")
+            // .populate("resources")
+            // .populate("harms")
+            // .populate("issues")
+            // .populate("projects")
+            // .populate("tasks")
+            .exec((err, location) => {
+                if(err){
+                    console.log(err);
+                    return res.send({
+                        message: "Error finding the location",
+                        content: err
+                    });
+                } else {
+                    return res.send({
+                        message: "OK",
+                        content: location
+                    });
+                }
+            });
+    } else {
+        return res.send({
+            message: "Tried to get data for a location using an invalid ID",
+            content: {}
         });
+    }
 });
 
 router.get("/sublocations/:id", (req, res) => {
-    Location.findById(req.params.id)
-        .populate("sublocations")
-        .exec((err, superLocation) => {
-            if(err){
-                console.log(err);
-                return res.send({
-                    message: "Error finding and populating this location",
-                    content: err
-                });
-            } else {
-                res.send({
-                    message: "OK",
-                    content: superLocation.sublocations
-                });
-            }
-        })
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Location.findById(req.params.id)
+            .populate("sublocations")
+            .exec((err, superLocation) => {
+                if(err){
+                    console.log(err);
+                    return res.send({
+                        message: "Error finding and populating this location",
+                        content: err
+                    });
+                } else {
+                    return res.send({
+                        message: "OK",
+                        content: superLocation.sublocations
+                    });
+                }
+            })
+    } else {
+        return res.send({
+            message: "Tried to get sublocations for a location with an invalid ID",
+            content: {}
+        });
+    }
 })
 router.put("/geometry/:id", isLoggedIn, (req, res) => {
-    const {geometry, geometrySource, name, info, sublocationWord, patch, latestVersion} = req.body;
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        const {geometry, geometrySource, name, info, sublocationWord, patch, latestVersion} = req.body;
+    } else {
+        return res.send("Tried to edit geometry for a location with an invalid ID");
+    }
 });
 router.put("/color/:id", isLoggedIn, (req, res) => {
-    Location.findById(req.params.id, (err, location) => {
-        if(err){
-            console.log(err);
-            return res.send(err);
-        } else {
-            if(location){
-                location.color = req.body.color;
-                location.markModified("color");
-                location.save();
-                return res.send(location.color);
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Location.findById(req.params.id, (err, location) => {
+            if(err){
+                console.log(err);
+                return res.send(err);
+            } else {
+                if(location){
+                    location.color = req.body.color;
+                    location.markModified("color");
+                    location.save();
+                    return res.send(location.color);
+                }
+                else return res.send("No location");
             }
-            else return res.send("No location");
-        }
-    })
+        });
+    } else {
+        return res.send("Tried coloring a location using an Invalid ID");
+    }
 })
 router.put("/adopt/:newParent/:child", isLoggedIn, (req, res) => {
     const   childID = req.params.child,
             parentID = req.params.newParent;
-    Location.findById(parentID, (err, parent) => {
-        if(err){
-            console.log(err);
-            return res.send({
-                message: `Error finding a parent with the ID ${parentID}`,
-                content: err
-            });
-        } else if(parent) {
-            Location.findById(childID, (err, child) => {
-                if(err){
-                    console.log(err);
-                    return res.send({
-                        message: `Error finding a child location with the ID ${childID}`,
-                        content: err
-                    });
-                } else if(child) {
-                    Location.find({sublocations: child._id}, (err, exParents) => {
-                        if(err){
-                            console.log(err);
-                            return res.send({
-                                message: `Found the locations you were interested in, but error trying to find parents`,
-                                content: err
-                            });
-                        } else {
-                            if(exParents.length > 0) {
-                                for(exParent of exParents){
-                                    const exChildIndex = exParent.sublocations.find(ex => ex === child._id);
-                                    exParent.sublocations.splice(exChildIndex, 1);
-                                    exParent.markModified("sublocations");
-                                    exParent.save();
+    if(childID.match(/^[0-9a-fA-F]{24}$/) && parentID.match(/^[0-9a-fA-F]{24}$/)){
+        Location.findById(parentID, (err, parent) => {
+            if(err){
+                console.log(err);
+                return res.send({
+                    message: `Error finding a parent with the ID ${parentID}`,
+                    content: err
+                });
+            } else if(parent) {
+                Location.findById(childID, (err, child) => {
+                    if(err){
+                        console.log(err);
+                        return res.send({
+                            message: `Error finding a child location with the ID ${childID}`,
+                            content: err
+                        });
+                    } else if(child) {
+                        Location.find({sublocations: child._id}, (err, exParents) => {
+                            if(err){
+                                console.log(err);
+                                return res.send({
+                                    message: `Found the locations you were interested in, but error trying to find parents`,
+                                    content: err
+                                });
+                            } else {
+                                if(exParents.length > 0) {
+                                    for(exParent of exParents){
+                                        const exChildIndex = exParent.sublocations.find(ex => ex === child._id);
+                                        exParent.sublocations.splice(exChildIndex, 1);
+                                        exParent.markModified("sublocations");
+                                        exParent.save();
+                                    }
                                 }
+                                parent.sublocations.push(child);
+                                parent.markModified("sublocations");
+                                parent.save();
+                                
+                                child.superlocation = parent;
+                                child.markModified("superlocation");
+                                child.save();
+                                return res.send({
+                                    message: "OK",
+                                    content: parent
+                                });
                             }
-                            parent.sublocations.push(child);
-                            parent.markModified("sublocations");
-                            parent.save();
-                            
-                            child.superlocation = parent;
-                            child.markModified("superlocation");
-                            child.save();
-                            return res.send({
-                                message: "OK",
-                                content: parent
-                            });
-                        }
-                    });
-                } else {
-                    return res.send({message: `Found the parent, but didn't find a child location with the ID ${childID}`});
-                }
-            });
-        } else {
-            return res.send({message: `Didn't find a parent with the ID ${parentID}`});
-        }
-    });
+                        });
+                    } else {
+                        return res.send({message: `Found the parent, but didn't find a child location with the ID ${childID}`});
+                    }
+                });
+            } else {
+                return res.send({message: `Didn't find a parent with the ID ${parentID}`});
+            }
+        });
+    } else {
+        return res.send({message: "Either the parent or child location had an incorrect ID"});
+    }
 });
 
 router.put("/:id", isLoggedIn, (req, res) => {
-    const {name, info, sublocationWord, patch, latestVersion} = req.body;
-    
-    Location.findById(req.params.id)
-        .populate("edits")
-        .exec(async (err, location) => {
-            if(err){
-                console.log(err);
-                return res.send("Error finding the location and populating its edits");
-            } else {
-                let returnMessage = "Update: ";
-                if(location.name != name || location.info != info || location.sublocationWord != sublocationWord){
-                    if(!location.version){
-                        location.version = 0;
-                        location.markModified("version");
-                    }
-                    if(location.version != latestVersion){
-                        return res.send("Latest version changed while you were creating a patch. Try again now.");
-                    }
-                    if(!location.edits){
-                        Patchlist.create({root: location._id, rootType: "Location"}, (err, patchlist) => {
-                            if(err){
-                                console.log(err);
-                                return res.send("No patch list for edits, and an error creating a new one: " + err);
-                            }
-                            else {
-                                location.edits = patchlist;
-                                location.markModified("edits");
-                            }
-                        });
-                    }
-                    if(location.sublocationWord != sublocationWord){
-                        location.sublocationWord = sublocationWord;
-                        returnMessage += "Successful for this place's word for its sublocations. "
-                    }
-                    if(location.info != info){
-                        location.edits.patches.push({
-                            editor: req.user._id,
-                            patch: patch
-                        });
-                        location.edits.markModified("patches");
-                        location.edits.save();
-
-                        location.version++;
-                        location.markModified("version");
-                        location.info = info;
-
-                        returnMessage += "Successful for this place's info. ";
-                    }
-                    location.save();                    
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        const {name, info, sublocationWord, patch, latestVersion} = req.body;
+        
+        Location.findById(req.params.id)
+            .populate("edits")
+            .exec(async (err, location) => {
+                if(err){
+                    console.log(err);
+                    return res.send("Error finding the location and populating its edits");
                 } else {
-                    returnMessage += " not needed.";
+                    let returnMessage = "Update: ";
+                    if(location.name != name || location.info != info || location.sublocationWord != sublocationWord){
+                        if(!location.version){
+                            location.version = 0;
+                            location.markModified("version");
+                        }
+                        if(location.version != latestVersion){
+                            return res.send("Latest version changed while you were creating a patch. Try again now.");
+                        }
+                        if(!location.edits){
+                            Patchlist.create({root: location._id, rootType: "Location"}, (err, patchlist) => {
+                                if(err){
+                                    console.log(err);
+                                    return res.send("No patch list for edits, and an error creating a new one: " + err);
+                                }
+                                else {
+                                    location.edits = patchlist;
+                                    location.markModified("edits");
+                                }
+                            });
+                        }
+                        if(location.sublocationWord != sublocationWord){
+                            location.sublocationWord = sublocationWord;
+                            returnMessage += "Successful for this place's word for its sublocations. "
+                        }
+                        if(location.info != info){
+                            location.edits.patches.push({
+                                editor: req.user._id,
+                                patch: patch
+                            });
+                            location.edits.markModified("patches");
+                            location.edits.save();
+
+                            location.version++;
+                            location.markModified("version");
+                            location.info = info;
+
+                            returnMessage += "Successful for this place's info. ";
+                        }
+                        location.save();                    
+                    } else {
+                        returnMessage += " not needed.";
+                    }
+                    return res.send(returnMessage);
                 }
-                return res.send(returnMessage);
-            }
-        })
-    
+            });
+    } else {
+        return res.send("Tried editing a location using an incorrect ID");
+    }
 });
 
 // router.put("/:id", isLoggedIn, (req, res) => {
@@ -442,29 +476,46 @@ router.put("/:id", isLoggedIn, (req, res) => {
 // })
 
 router.get("/:id", (req, res) => {
-    Location.findById(req.params.id)
-        .populate("superlocation", "name sublocationWord")
-        .populate("sublocations", "name")
-        .populate("tags")
-        .populate("resources")
-        .populate("harms")
-        .populate("issues", "name")
-        .populate("projects", "name")
-        .populate("tasks", "name")
-        .exec((err, location) => {
-            if(err){
-                console.log(err);
-                // Replace this and the one below with a 404 page
-                res.redirect("back");
-            } else if(!location){
-                res.redirect("back");
-            } else {
-                res.render("locations/view", {
-                    title: location.name + " on Magnova",
-                    shownLocation: location
-                });
-            }
-        });
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Location.findById(req.params.id)
+            .populate("superlocation", "name sublocationWord")
+            .populate("sublocations", "name")
+            .populate("tags")
+            .populate("resources")
+            .populate("harms")
+            .populate("issues", "name")
+            .populate("projects", "name")
+            .populate("tasks", "name")
+            .exec((err, location) => {
+                if(err){
+                    console.log(err);
+                    // Replace this and the one below with a 404 page
+                    res.redirect("back");
+                } else if(!location){
+                    res.redirect("back");
+                } else {
+                    res.render("locations/view", {
+                        title: location.name + " on Magnova",
+                        shownLocation: location
+                    });
+                }
+            });
+    } else {
+        return res.redirect("/locations/nowhere");
+    }
+});
+
+router.get("/*", (req, res) => {
+    res.status(404).redirect("/locations/nowhere");
+});
+router.put("/*", (req, res) => {
+    res.status(404).redirect("/locations/nowhere");
+});
+router.post("/*", (req, res) => {
+    res.status(404).redirect("/locations/nowhere");
+});
+router.delete("/*", (req, res) => {
+    res.status(404).redirect("/locations/nowhere");
 });
 
 module.exports = router;

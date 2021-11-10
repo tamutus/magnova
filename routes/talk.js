@@ -11,232 +11,284 @@ const	express = require('express'),
 		User = require("../api/user/user");
 
 const { isLoggedIn } = require("../middleware");
-        
-router.post("/newthread/:talkpageid", isLoggedIn, async (req, res) => {
-    Talkpage.findById(req.params.talkpageid, async (err, page) => {
-        if(err){
-            console.log(err);
-            return res.redirect("back");
-        }
-        else{
-            if(!page.threads.find(thread => {
-                return thread.subject == req.body.subject
-            })){
-                page.threads.push({subject: req.body.subject, lastActivity: Date.now(), comments: []});
-                page.save();
-            }
-            return res.redirect(`/talk/${req.params.talkpageid}`);
-        }
+
+router.get("/silence", (req, res) => {
+    return res.status(404).render("talk/silence", {
+        title: "Magnova — Silence (404)"
     });
 });
+
+router.post("/newthread/:talkpageid", isLoggedIn, async (req, res) => {
+    if(req.params.talkpageid.match(/^[0-9a-fA-F]{24}$/)){
+        Talkpage.findById(req.params.talkpageid, async (err, page) => {
+            if(err){
+                console.log(err);
+                return res.redirect("back");
+            }
+            else{
+                if(!page.threads.find(thread => {
+                    return thread.subject == req.body.subject
+                })){
+                    page.threads.push({subject: req.body.subject, lastActivity: Date.now(), comments: []});
+                    page.save();
+                }
+                return res.redirect(`/talk/${req.params.talkpageid}`);
+            }
+        });
+    } else {
+        return res.send("Tried to add a thread to a talkpage using an invalid talkpage ID");
+    }
+});
 router.post("/comment/:talkpageid/:threadindex", isLoggedIn, (req, res) => {
-    Talkpage.findById(req.params.talkpageid, (err, page) => {
-        if(err){
-            console.log(err);
-            return res.send({});
-        }
-        else{
-            User.findById(req.user._id, (err, user) => {
+    if(req.params.talkpageid.match(/^[0-9a-fA-F]{24}$/)){
+        Talkpage.findById(req.params.talkpageid, (err, page) => {
+            if(err){
+                console.log(err);
+                return res.send({});
+            }
+            else{
+                User.findById(req.user._id, (err, user) => {
+                    if(err){
+                        console.log(err);
+                        return res.send({});
+                    }
+                    else if(user){
+                        Comment.create({
+                            text: req.body.comment,
+                            author: user._id,
+                            topic: req.params.talkpageid,
+                            threadIndex: req.params.threadindex
+                        }, (err, comment) => {
+                            if(err){
+                                console.log(err);
+                                return res.send({});
+                            }
+                            else{
+                                user.comments.push(comment);
+                                user.save();
+                                page.threads[req.params.threadindex].comments.push(comment);
+                                page.threads[req.params.threadindex].lastActivity = Date.now();
+                                page.save();
+                                comment = comment.populate("author", c => res.send(comment));
+                                return res.send(comment);
+                            }
+                        });
+                        
+                        // console.log(`Reached the post comment route successfully! User ID is ${user._id}, and talkpage ID is ${page._id}. You are inserting ${req.body.comment}`);
+                    } else {
+                        return res.send({});
+                    }
+                })
+            }
+        });
+    } else {
+        return res.send({});
+    }
+});
+router.get("/comment/:id", (req, res) => {
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Comment.findById(req.params.id)
+            .populate("topic")
+            .exec((err, comment) => {
+                if(err){
+                    console.log(err);
+                    return res.send("Error finding that comment: " + err);
+                }
+                else if(comment){
+                    return res.redirect(`/talk/${comment.topic._id}?thread=${comment.threadIndex}&comment=${comment.topic.threads[comment.threadIndex].comments.findIndex(c => String(comment._id) == String(c))}`)
+                } else {
+                    return res.send("Didn't find that comment");
+                }
+            });
+    } else {
+        return res.send("The server received a request for a comment with an invalid ID");
+    }
+});
+router.get("/commentdata/:id", (req, res) => {
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Comment.findById(req.params.id)
+            .populate("author")
+            .exec((err, comment) => {
                 if(err){
                     console.log(err);
                     return res.send({});
-                }
-                else if(user){
-                    Comment.create({
-                        text: req.body.comment,
-                        author: user._id,
-                        topic: req.params.talkpageid,
-                        threadIndex: req.params.threadindex
-                    }, (err, comment) => {
-                        if(err){
-                            console.log(err);
-                            return res.send({});
-                        }
-                        else{
-                            user.comments.push(comment);
-                            user.save();
-                            page.threads[req.params.threadindex].comments.push(comment);
-                            page.threads[req.params.threadindex].lastActivity = Date.now();
-                            page.save();
-                            comment = comment.populate("author", c => res.send(comment));
-                        }
-                    });
-                    
-                    // console.log(`Reached the post comment route successfully! User ID is ${user._id}, and talkpage ID is ${page._id}. You are inserting ${req.body.comment}`);
+                } else if(!comment){
+                    return res.send({});
                 } else {
-                    res.send({});
+                    return res.send(comment);
                 }
-            })
-        }
-    });
-});
-router.get("/comment/:id", (req, res) => {
-    Comment.findById(req.params.id)
-        .populate("topic")
-        .exec((err, comment) => {
-            if(err){
-                console.log(err);
-                res.send("Error finding that comment: " + err);
-            }
-            else if(comment){
-                res.redirect(`/talk/${comment.topic._id}?thread=${comment.threadIndex}&comment=${comment.topic.threads[comment.threadIndex].comments.findIndex(c => String(comment._id) == String(c))}`)
-            } else {
-                res.send("Didn't find that comment");
-            }
-        });
-});
-router.get("/commentdata/:id", (req, res) => {
-    Comment.findById(req.params.id)
-        .populate("author")
-        .exec((err, comment) => {
-            if(err){
-                console.log(err);
-                res.send({});
-            } else if(!comment){
-                res.send({});
-            } else {
-                res.send(comment);
-            }
-        });
+            });
+    } else {
+        return res.send({});
+    }
 })
 router.delete("/comment/:id", isLoggedIn, (req, res) => {
-    Comment.findById(req.params.id)
-        .populate("author")
-        .populate("topic")
-        .exec((err, comment) => {
-        if(err){
-            console.log(err);
-            res.send(`Error finding comment to delete: ${err}`);
-        } else if(comment){
-            if(String(comment.author._id) == String(req.user._id)){
-                let userCommentsIndex = comment.author.comments.findIndex(c => String(comment._id) == String(c));
-                let threadCommentsIndex = comment.topic.threads[comment.threadIndex].comments.findIndex(c => String(comment._id) == String(c));
-                let stringResponse = `You'll be deleting comment ${comment._id}, made by ${comment.author.username}. Index in the user's comments is ${userCommentsIndex}, and index in thread comments is ${threadCommentsIndex}`;
-                comment.author.comments.splice(userCommentsIndex, 1);
-                comment.topic.threads[comment.threadIndex].comments.splice(threadCommentsIndex, 1);
-                comment.author.markModified("comments");
-                comment.author.save();
-                comment.topic.markModified("threads");
-                comment.topic.save();
-                Comment.findByIdAndDelete(comment._id, (err, deadComment) => {
-                    if(err){
-                        console.log(err);
-                        stringResponse = `Error deleting the comment... ${err}`;
-                    } else if(deadComment){
-                        stringResponse = "Success";
-                    } else {
-                        stringResponse = "Couldn't find a comment to delete...";
-                    }
-                    res.send(stringResponse);
-                });
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Comment.findById(req.params.id)
+            .populate("author")
+            .populate("topic")
+            .exec((err, comment) => {
+            if(err){
+                console.log(err);
+                return res.send(`Error finding comment to delete: ${err}`);
+            } else if(comment){
+                if(String(comment.author._id) == String(req.user._id)){
+                    let userCommentsIndex = comment.author.comments.findIndex(c => String(comment._id) == String(c));
+                    let threadCommentsIndex = comment.topic.threads[comment.threadIndex].comments.findIndex(c => String(comment._id) == String(c));
+                    let stringResponse = `You'll be deleting comment ${comment._id}, made by ${comment.author.username}. Index in the user's comments is ${userCommentsIndex}, and index in thread comments is ${threadCommentsIndex}`;
+                    comment.author.comments.splice(userCommentsIndex, 1);
+                    comment.topic.threads[comment.threadIndex].comments.splice(threadCommentsIndex, 1);
+                    comment.author.markModified("comments");
+                    comment.author.save();
+                    comment.topic.markModified("threads");
+                    comment.topic.save();
+                    Comment.findByIdAndDelete(comment._id, (err, deadComment) => {
+                        if(err){
+                            console.log(err);
+                            stringResponse = `Error deleting the comment... ${err}`;
+                        } else if(deadComment){
+                            stringResponse = "Success";
+                        } else {
+                            stringResponse = "Couldn't find a comment to delete...";
+                        }
+                        return res.send(stringResponse);
+                    });
+                }
+            } else {
+                return res.send("Couldn't find comment of yours to delete");
             }
-        } else {
-            res.send("Couldn't find comment of yours to delete");
-        }
-    });
+        });
+    } else {
+        return res.send("Tried deleting a comment with an invalid ID");
+    }
 });
 router.get("/pagedata/:talkpageid", (req, res) => {
-    Talkpage.findById(req.params.talkpageid)
-        .populate({
-            path: "threads.comments",
-            populate: { 
-                path: "author",
-                select: "username pfpLink"
-            }
-        })
-        .exec((err, page) => {
-            if(err){
-                console.log(err);
-                return res.send(err);
-            } else{
-                res.send(page);
-            }
-        });
+    if(req.params.talkpageid.match(/^[0-9a-fA-F]{24}$/)){
+        Talkpage.findById(req.params.talkpageid)
+            .populate({
+                path: "threads.comments",
+                populate: { 
+                    path: "author",
+                    select: "username pfpLink"
+                }
+            })
+            .exec((err, page) => {
+                if(err){
+                    console.log(err);
+                    return res.send(err);
+                } else{
+                    return res.send(page);
+                }
+            });
+    } else {
+        return res.send("Tried to get data for talkpage with an invalid ID");
+    }
 });
 router.get("/threaddata/:talkpageid/:threadindex", (req, res) => {
-    Talkpage.findById(req.params.talkpageid)
-        .populate({
-            path: "threads.comments",
-            populate: { 
-                path: "author",
-                select: "username pfpLink"
-            }
-        })
-        .exec((err, page) => {
-            if(err){
-                console.log(err);
-                return res.send(err);
-            } else{
-                res.send(page.threads[req.params.threadindex]);
-            }
-        });
+    if(req.params.talkpageid.match(/^[0-9a-fA-F]{24}$/)){
+        Talkpage.findById(req.params.talkpageid)
+            .populate({
+                path: "threads.comments",
+                populate: { 
+                    path: "author",
+                    select: "username pfpLink"
+                }
+            })
+            .exec((err, page) => {
+                if(err){
+                    console.log(err);
+                    return res.send(err);
+                } else{
+                    res.send(page.threads[req.params.threadindex]);
+                }
+            });
+    } else {
+        return res.send("The server received a request for threaddata on a talkpage with an invalid ID");
+    }
 });
 router.get("/:id", async (req, res) => {
-    Talkpage.findById(req.params.id, async (err, page) => {
-        if(err){
-            console.log(err);
-            return res.send(`Trouble finding talkpage: ${err}`);
-        }
-        let title = "",
-            rootLink = "";
-        if(page.rootType == "IssueTemplate"){
-            await Issue.findById(page.root, (err, issue) => {
-                if(err){
-                    console.log(err);
-                    return res.send(`Trouble finding talkpage: ${err}`);
-                }
-                else{
-                    title = issue.name;
-                    rootLink = `/wiki/${issue._id}`;
-                    let startScript = "<script>";
-                    if(req.query.thread){
-                        startScript += `openThreadAtIndex(${req.query.thread}`
-                        if(req.query.comment){
-                            startScript += `, ${req.query.comment}`
-                        }
-                        startScript += ");"
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Talkpage.findById(req.params.id, async (err, page) => {
+            if(err){
+                console.log(err);
+                return res.send(`Trouble finding talkpage: ${err}`);
+            }
+            let title = "",
+                rootLink = "";
+            if(page.rootType == "IssueTemplate"){
+                await Issue.findById(page.root, (err, issue) => {
+                    if(err){
+                        console.log(err);
+                        return res.send(`Trouble finding talkpage: ${err}`);
                     }
-                    startScript += "</script>"
-                    return res.render("talk/page", {
-                        title: title,
-                        rootLink: rootLink,
-                        page: page,
-                        startScript: startScript
-                    });
-                }
-            });
-        }
-        else if(page.rootType == "ProjectTemplate"){
-            await Project.findById(page.root, (err, project) => {
-                if(err){
-                    console.log(err);
-                    return res.send(`Trouble finding talkpage: ${err}`);
-                }
-                else{
-                    title = project.name;
-                    rootLink = `/project/${project._id}`;
-                    let startScript = "<script>";
-                    if(req.query.thread){
-                        startScript += `openThreadAtIndex(${req.query.thread}`
-                        if(req.query.comment){
-                            startScript += `, ${req.query.comment}`
+                    else{
+                        title = issue.name;
+                        rootLink = `/wiki/${issue._id}`;
+                        let startScript = "<script>";
+                        if(req.query.thread){
+                            startScript += `openThreadAtIndex(${req.query.thread}`
+                            if(req.query.comment){
+                                startScript += `, ${req.query.comment}`
+                            }
+                            startScript += ");"
                         }
-                        startScript += ");"
+                        startScript += "</script>"
+                        return res.render("talk/page", {
+                            title: title,
+                            rootLink: rootLink,
+                            page: page,
+                            startScript: startScript
+                        });
                     }
-                    startScript += "</script>"
-                    return res.render("talk/page", {
-                        title: title,
-                        rootLink: rootLink,
-                        page: page,
-                        startScript: startScript
-                    });
-                }
-            });
-        }
-        else {
-            res.redirect("back");
-        }
-    });
+                });
+            }
+            else if(page.rootType == "ProjectTemplate"){
+                await Project.findById(page.root, (err, project) => {
+                    if(err){
+                        console.log(err);
+                        return res.send(`Trouble finding talkpage: ${err}`);
+                    }
+                    else{
+                        title = project.name;
+                        rootLink = `/project/${project._id}`;
+                        let startScript = "<script>";
+                        if(req.query.thread){
+                            startScript += `openThreadAtIndex(${req.query.thread}`
+                            if(req.query.comment){
+                                startScript += `, ${req.query.comment}`
+                            }
+                            startScript += ");"
+                        }
+                        startScript += "</script>"
+                        return res.render("talk/page", {
+                            title: title,
+                            rootLink: rootLink,
+                            page: page,
+                            startScript: startScript
+                        });
+                    }
+                });
+            }
+            else {
+                res.redirect("back");
+            }
+        });
+    } else {
+        return res.redirect("/talk/silence");
+    }
+});
+
+router.get("/*", (req, res) => {
+    res.status(404).redirect("/talk/silence");
+});
+router.put("/*", (req, res) => {
+    res.status(404).redirect("/talk/silence");
+});
+router.post("/*", (req, res) => {
+    res.status(404).redirect("/talk/silence");
+});
+router.delete("/*", (req, res) => {
+    res.status(404).redirect("/talk/silence");
 });
 
 module.exports = router;

@@ -123,336 +123,347 @@ router.post("/", isLoggedIn, (req, res) => {
 //     });
 // });
 router.put("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
-	// First, make sure the issues are in the database.
-	if(req.params.rootid === req.params.targetid){
-        return res.send("Those are the same issue!");
-    }
-    Issue.findById(req.params.rootid)
-		.populate("issues")
-		.exec(async (err, rootFound) => {
-			if(err){
-				console.log("On upvote request, mongoose error with finding root issue: " + err);
-				return res.send(err);
-			}
-			if(!rootFound){
-				console.log(`User tried upvoting from ${req.params.rootid}, which wasn't able to be found`)
-				return res.send("Can't find a root issue with the given id.");
-			}
-			else {
-				// Create an issuegraph if there is none already
-				if(!rootFound.issues){
-					Issuegraph.create({ root: rootFound._id, rootType: "Issue" }, async (err, issuegraph) => {
-						if (err) {
-							console.log("On upvote request, issue had no issuegraph and there was an error creating a new one:" + err);
-							return res.send(err);
-						}
-						else {
-							rootFound.issues = issuegraph;
-							await rootFound.save(); // Save returns a promise, so the containing function is async and I use await here.
-						}
-					});
-				}
-				Issue.findById(req.params.targetid)
-					.exec((err, targetFound) => {
-						if(err){
-							console.log(`On upvote request, mongoose error with finding target issue with id ${req.params.targetid}: ${err}`);
-							return res.send(err)
-						}
-						if(!targetFound){
-							console.log("On upvote request, couldn't find issue with id " + req.params.targetid);
-							return res.send("Can't find a target issue with the given id . Weird...");
-						}
-						else {
-							User.findById(req.user._id)
-								.exec(async (err, currentUser) => {
-									if(err){
-										console.log(err);
-									} else {
-                                        // Keep track of whether a vote exists, or is in a false (downvote) state, while navigating the edgeVotes array:
-                                        let scoreChange = 0;
-                                        // If for some reason the edgevotes array is missing, add it
-                                        if(!currentUser.edgeVotes){
-                                            currentUser.edgeVotes = [];
-                                            await currentUser.save();
-                                        }
-                                        // Because edgeVotes are pushed but unsorted, they will always be listed in the order they were added, making the index a deterministic variable for queries.
-                                        let sourceIndex = currentUser.edgeVotes.findIndex(vote => {
-                                            return String(vote.source) == String(rootFound._id);
-                                        });
-                                        // // Error checking - each user's edgeVotes array should have one object for each source issue
-                                        // if(sourceIndex > -1){
-                                        // 	console.log("somebody has a source duplicated in their edgevotes when there should only be one for each issue");
-                                        // }
-                                        // If no votes from source exist, push and save a new edgeVote object with a new nested array that has one entry: an edge to the target issue in question.
-                                        if(sourceIndex === -1){
-                                            scoreChange = 1;
-                                            currentUser.edgeVotes.push({
-                                                source: rootFound._id,
-                                                targets: [{
-                                                    target: targetFound._id,
-                                                    vote: true
-                                                }]
+	// First, make sure the ids are valid
+    if(req.params.rootid.match(/^[0-9a-fA-F]{24}$/) && req.params.targetid.match(/^[0-9a-fA-F]{24}$/)){
+        // Then, check if they're the same
+        if(req.params.rootid === req.params.targetid){
+            return res.send("Those are the same issue!");
+        }
+        // Make sure the issues are in the database.
+        Issue.findById(req.params.rootid)
+            .populate("issues")
+            .exec(async (err, rootFound) => {
+                if(err){
+                    console.log("On upvote request, mongoose error with finding root issue: " + err);
+                    return res.send(err);
+                }
+                if(!rootFound){
+                    console.log(`User tried upvoting from ${req.params.rootid}, which wasn't able to be found`)
+                    return res.send("Can't find a root issue with the given id.");
+                }
+                else {
+                    // Create an issuegraph if there is none already
+                    if(!rootFound.issues){
+                        Issuegraph.create({ root: rootFound._id, rootType: "Issue" }, async (err, issuegraph) => {
+                            if (err) {
+                                console.log("On upvote request, issue had no issuegraph and there was an error creating a new one:" + err);
+                                return res.send(err);
+                            }
+                            else {
+                                rootFound.issues = issuegraph;
+                                await rootFound.save(); // Save returns a promise, so the containing function is async and I use await here.
+                            }
+                        });
+                    }
+                    Issue.findById(req.params.targetid)
+                        .exec((err, targetFound) => {
+                            if(err){
+                                console.log(`On upvote request, mongoose error with finding target issue with id ${req.params.targetid}: ${err}`);
+                                return res.send(err)
+                            }
+                            if(!targetFound){
+                                console.log("On upvote request, couldn't find issue with id " + req.params.targetid);
+                                return res.send("Can't find a target issue with the given id . Weird...");
+                            }
+                            else {
+                                User.findById(req.user._id)
+                                    .exec(async (err, currentUser) => {
+                                        if(err){
+                                            console.log(err);
+                                        } else {
+                                            // Keep track of whether a vote exists, or is in a false (downvote) state, while navigating the edgeVotes array:
+                                            let scoreChange = 0;
+                                            // If for some reason the edgevotes array is missing, add it
+                                            if(!currentUser.edgeVotes){
+                                                currentUser.edgeVotes = [];
+                                                await currentUser.save();
+                                            }
+                                            // Because edgeVotes are pushed but unsorted, they will always be listed in the order they were added, making the index a deterministic variable for queries.
+                                            let sourceIndex = currentUser.edgeVotes.findIndex(vote => {
+                                                return String(vote.source) == String(rootFound._id);
                                             });
-                                            await currentUser.save();
-                                        }
-                                        // Logic for when the user has at least one vote from the source issue in question, and thus a "targets" array
-                                        else{
-                                            // Get an index for links to the target in the targets array
-                                            let targetIndex = currentUser.edgeVotes[sourceIndex].targets.findIndex(vote => {
-                                                return String(vote.target) == String(targetFound._id);
-                                            });
-                                            if(targetIndex === -1){
-                                                // No votes to the target from the given source exist, so add one and save.
+                                            // // Error checking - each user's edgeVotes array should have one object for each source issue
+                                            // if(sourceIndex > -1){
+                                            // 	console.log("somebody has a source duplicated in their edgevotes when there should only be one for each issue");
+                                            // }
+                                            // If no votes from source exist, push and save a new edgeVote object with a new nested array that has one entry: an edge to the target issue in question.
+                                            if(sourceIndex === -1){
                                                 scoreChange = 1;
-                                                currentUser.edgeVotes[sourceIndex].targets.push({
-                                                    target: targetFound._id,
-                                                    vote: true
+                                                currentUser.edgeVotes.push({
+                                                    source: rootFound._id,
+                                                    targets: [{
+                                                        target: targetFound._id,
+                                                        vote: true
+                                                    }]
                                                 });
                                                 await currentUser.save();
                                             }
+                                            // Logic for when the user has at least one vote from the source issue in question, and thus a "targets" array
                                             else{
-                                                // A vote has been found, but it could be true (an upvote) or false (a downvote).
-                                                if(currentUser.edgeVotes[sourceIndex].targets[targetIndex].vote === true){
-                                                    // The vote is already in an upvote state. Do nothing but return, so the force graph code in the client's browser can visualize a link.
-                                                    return res.send("You have upvoted this before.")
-                                                }
-                                                else {
-                                                    // The vote is in a downvote state. Change it to upvote, save, and add TWO to the edge score.
-                                                    currentUser.edgeVotes[sourceIndex].targets[targetIndex].vote = true;
-                                                    currentUser.save();
-                                                    scoreChange = 2;
-                                                }
-                                            }
-                                        }
-                                        // If needed, change the value of the edge in the issue's issuegraph
-                                        if(scoreChange > 0){
-                                            Issuegraph.findById(rootFound.issues._id, (err, rootGraph) => {
-                                                if(err){
-                                                    console.log(err);
-                                                    return res.send("Couldn't find the issuegraph");
+                                                // Get an index for links to the target in the targets array
+                                                let targetIndex = currentUser.edgeVotes[sourceIndex].targets.findIndex(vote => {
+                                                    return String(vote.target) == String(targetFound._id);
+                                                });
+                                                if(targetIndex === -1){
+                                                    // No votes to the target from the given source exist, so add one and save.
+                                                    scoreChange = 1;
+                                                    currentUser.edgeVotes[sourceIndex].targets.push({
+                                                        target: targetFound._id,
+                                                        vote: true
+                                                    });
+                                                    await currentUser.save();
                                                 }
                                                 else{
-                                                    let found = false;
-                                                    for(edge of rootGraph.edges){
-                                                        if(String(edge.vertex) == String(targetFound._id)){
-                                                            found = true;
-                                                            edge.score += scoreChange;
-                                                            for(let i = rootGraph.edges.findIndex(e => String(e._id) == String(edge._id)) -1; i >= 0; i--){
-                                                                if(edge.score > rootGraph.edges[i].score){
-                                                                    [ rootGraph.edges[i], rootGraph.edges[i+1] ] = [ rootGraph.edges[i+1], rootGraph.edges[i] ];
-                                                                }
-                                                                else {
-                                                                    break;
-                                                                }
-                                                            }
-                                                            rootGraph.markModified("edges"); // CRITICAL!!! https://stackoverflow.com/questions/35733647/mongoose-instance-save-not-working
-                                                            rootGraph.save();
-                                                            break;
-                                                        }
+                                                    // A vote has been found, but it could be true (an upvote) or false (a downvote).
+                                                    if(currentUser.edgeVotes[sourceIndex].targets[targetIndex].vote === true){
+                                                        // The vote is already in an upvote state. Do nothing but return, so the force graph code in the client's browser can visualize a link.
+                                                        return res.send("You have upvoted this before.")
                                                     }
-                                                    if(!found){
-                                                        rootGraph.edges.push({
-                                                            score: scoreChange,
-                                                            vertex: targetFound._id
-                                                        });
-                                                        rootGraph.markModified("edges"); // CRITICAL!!! 
-                                                        rootGraph.save();
+                                                    else {
+                                                        // The vote is in a downvote state. Change it to upvote, save, and add TWO to the edge score.
+                                                        currentUser.edgeVotes[sourceIndex].targets[targetIndex].vote = true;
+                                                        currentUser.save();
+                                                        scoreChange = 2;
                                                     }
                                                 }
-                                            });
+                                            }
+                                            // If needed, change the value of the edge in the issue's issuegraph
+                                            if(scoreChange > 0){
+                                                Issuegraph.findById(rootFound.issues._id, (err, rootGraph) => {
+                                                    if(err){
+                                                        console.log(err);
+                                                        return res.send("Couldn't find the issuegraph");
+                                                    }
+                                                    else{
+                                                        let found = false;
+                                                        for(edge of rootGraph.edges){
+                                                            if(String(edge.vertex) == String(targetFound._id)){
+                                                                found = true;
+                                                                edge.score += scoreChange;
+                                                                for(let i = rootGraph.edges.findIndex(e => String(e._id) == String(edge._id)) -1; i >= 0; i--){
+                                                                    if(edge.score > rootGraph.edges[i].score){
+                                                                        [ rootGraph.edges[i], rootGraph.edges[i+1] ] = [ rootGraph.edges[i+1], rootGraph.edges[i] ];
+                                                                    }
+                                                                    else {
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                rootGraph.markModified("edges"); // CRITICAL!!! https://stackoverflow.com/questions/35733647/mongoose-instance-save-not-working
+                                                                rootGraph.save();
+                                                                break;
+                                                            }
+                                                        }
+                                                        if(!found){
+                                                            rootGraph.edges.push({
+                                                                score: scoreChange,
+                                                                vertex: targetFound._id
+                                                            });
+                                                            rootGraph.markModified("edges"); // CRITICAL!!! 
+                                                            rootGraph.save();
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                            // console.log(`${rootFound} has the following edges: ${rootFound.issues.edges}`);
+                                            return res.send("Transmission of upvote complete.");
                                         }
-                                        // console.log(`${rootFound} has the following edges: ${rootFound.issues.edges}`);
-                                        return res.send("Transmission of upvote complete.");
-                                    }
-								});
-						}
-					});
-			}
-		});
+                                    });
+                            }
+                        });
+                }
+            });
+    } else {
+        return res.send("Either the root or target issue's ID was invalid");
+    }
 });
 router.delete("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
 	// Mostly same logic as in PUT route above, with numbers inverted
-	// First, make sure the issues are in the database.
-	Issue.findById(req.params.rootid)
-		.populate("issues")
-		.exec(async (err, rootFound) => {
-			if(err){
-				console.log("On downvote request, mongoose error with finding root issue: " + err);
-				return res.send(err);
-			}
-			if(!rootFound){
-				console.log(`User tried downvoting from ${req.params.rootid}, which wasn't able to be found`)
-				return res.send("Can't find a root issue with the given id.");
-			}
-			else {
-				// Create an issuegraph if there is none already
-				if(!rootFound.issues){
-					Issuegraph.create({ root: rootFound._id, rootType: "Issue" }, async (err, issuegraph) => {
-						if (err) {
-							console.log("On upvote request, issue had no issuegraph and there was an error creating a new one:" + err);
-							return res.send(err);
-						}
-						else {
-							rootFound.issues = issuegraph;
-							await rootFound.save(); // Save returns a promise, so make sure to make the containing function async and use await here.
-						}
-					});
-				}
-				Issue.findById(req.params.targetid)
-					.exec((err, targetFound) => {
-						if(err){
-							console.log(`On upvote request, mongoose error with finding target issue with id ${req.params.targetid}: ${err}`);
-							return res.send(err)
-						}
-						if(!targetFound){
-							console.log("On upvote request, couldn't find issue with id " + req.params.targetid);
-							return res.send("Can't find a target issue with the given id . Weird...");
-						}
-						else {
-							User.findById(req.user._id)
-								.exec(async (err, currentUser) => {
-									if(err){
-										console.log(err);
-									} else {
-                                        // Keep track of whether a vote exists, or is in a false (downvote) state, while navigating the edgeVotes array:
-                                        let scoreChange = 0;
-                                        // If for some reason the edgevotes array is missing, add it
-                                        if(!currentUser.edgeVotes){
-                                            currentUser.edgeVotes = [];
-                                            await currentUser.save();
-                                        }
-                                        // Because edgeVotes are pushed but unsorted, they will always be listed in the order they were added, making the index a deterministic variable for queries.
-                                        let sourceIndex = currentUser.edgeVotes.findIndex(vote => {
-                                            return String(vote.source) == String(rootFound._id);
-                                        });
-                                        // // Error checking - each user's edgeVotes array should have one object for each source issue
-                                        // if(sourceIndex > -1){
-                                        // 	console.log("somebody has a source duplicated in their edgevotes when there should only be one for each issue");
-                                        // }
-                                        // If no votes from source exist, push and save a new edgeVote object with a new nested array that has one entry: an edge to the target issue in question.
-                                        if(sourceIndex === -1){
-                                            scoreChange = -1;
-                                            currentUser.edgeVotes.push({
-                                                source: rootFound._id,
-                                                targets: [{
-                                                    target: targetFound._id,
-                                                    vote: false
-                                                }]
+    // First, make sure the ids are valid
+    if(req.params.rootid.match(/^[0-9a-fA-F]{24}$/) && req.params.targetid.match(/^[0-9a-fA-F]{24}$/)){
+        // Make sure the issues are in the database.
+        Issue.findById(req.params.rootid)
+            .populate("issues")
+            .exec(async (err, rootFound) => {
+                if(err){
+                    console.log("On downvote request, mongoose error with finding root issue: " + err);
+                    return res.send(err);
+                }
+                if(!rootFound){
+                    console.log(`User tried downvoting from ${req.params.rootid}, which wasn't able to be found`)
+                    return res.send("Can't find a root issue with the given id.");
+                }
+                else {
+                    // Create an issuegraph if there is none already
+                    if(!rootFound.issues){
+                        Issuegraph.create({ root: rootFound._id, rootType: "Issue" }, async (err, issuegraph) => {
+                            if (err) {
+                                console.log("On upvote request, issue had no issuegraph and there was an error creating a new one:" + err);
+                                return res.send(err);
+                            }
+                            else {
+                                rootFound.issues = issuegraph;
+                                await rootFound.save(); // Save returns a promise, so make sure to make the containing function async and use await here.
+                            }
+                        });
+                    }
+                    Issue.findById(req.params.targetid)
+                        .exec((err, targetFound) => {
+                            if(err){
+                                console.log(`On upvote request, mongoose error with finding target issue with id ${req.params.targetid}: ${err}`);
+                                return res.send(err)
+                            }
+                            if(!targetFound){
+                                console.log("On upvote request, couldn't find issue with id " + req.params.targetid);
+                                return res.send("Can't find a target issue with the given id . Weird...");
+                            }
+                            else {
+                                User.findById(req.user._id)
+                                    .exec(async (err, currentUser) => {
+                                        if(err){
+                                            console.log(err);
+                                        } else {
+                                            // Keep track of whether a vote exists, or is in a false (downvote) state, while navigating the edgeVotes array:
+                                            let scoreChange = 0;
+                                            // If for some reason the edgevotes array is missing, add it
+                                            if(!currentUser.edgeVotes){
+                                                currentUser.edgeVotes = [];
+                                                await currentUser.save();
+                                            }
+                                            // Because edgeVotes are pushed but unsorted, they will always be listed in the order they were added, making the index a deterministic variable for queries.
+                                            let sourceIndex = currentUser.edgeVotes.findIndex(vote => {
+                                                return String(vote.source) == String(rootFound._id);
                                             });
-                                            await currentUser.save();
-                                        }
-                                        // Logic for when the user has at least one vote from the source issue in question, and thus a "targets" array
-                                        else{
-                                            // Get an index for links to the target in the targets array
-                                            let targetIndex = currentUser.edgeVotes[sourceIndex].targets.findIndex(vote => {
-                                                return String(vote.target) == String(targetFound._id);
-                                            });
-                                            if(targetIndex === -1){
-                                                // No votes to the target from the given source exist, so add one and save.
+                                            // // Error checking - each user's edgeVotes array should have one object for each source issue
+                                            // if(sourceIndex > -1){
+                                            // 	console.log("somebody has a source duplicated in their edgevotes when there should only be one for each issue");
+                                            // }
+                                            // If no votes from source exist, push and save a new edgeVote object with a new nested array that has one entry: an edge to the target issue in question.
+                                            if(sourceIndex === -1){
                                                 scoreChange = -1;
-                                                currentUser.edgeVotes[sourceIndex].targets.push({
-                                                    target: targetFound._id,
-                                                    vote: false
+                                                currentUser.edgeVotes.push({
+                                                    source: rootFound._id,
+                                                    targets: [{
+                                                        target: targetFound._id,
+                                                        vote: false
+                                                    }]
                                                 });
                                                 await currentUser.save();
                                             }
+                                            // Logic for when the user has at least one vote from the source issue in question, and thus a "targets" array
                                             else{
-                                                // A vote has been found, but it could be true (an upvote) or false (a downvote).
-                                                if(currentUser.edgeVotes[sourceIndex].targets[targetIndex].vote === false){
-                                                    // The vote is already in a downvote state. Do nothing but return, so the force graph code in the client's browser can visualize a link.
-                                                    return res.send("You have downvoted this before.")
-                                                }
-                                                else {
-                                                    // The vote is in a upvote state. Change it to downvote, save, and subtract TWO from the edge score.
-                                                    currentUser.edgeVotes[sourceIndex].targets[targetIndex].vote = false;
-                                                    scoreChange = -2;
+                                                // Get an index for links to the target in the targets array
+                                                let targetIndex = currentUser.edgeVotes[sourceIndex].targets.findIndex(vote => {
+                                                    return String(vote.target) == String(targetFound._id);
+                                                });
+                                                if(targetIndex === -1){
+                                                    // No votes to the target from the given source exist, so add one and save.
+                                                    scoreChange = -1;
+                                                    currentUser.edgeVotes[sourceIndex].targets.push({
+                                                        target: targetFound._id,
+                                                        vote: false
+                                                    });
                                                     await currentUser.save();
                                                 }
-                                            }
-                                        }
-                                        // If needed, change the value of the edge in the issue's issuegraph
-                                        if(scoreChange < 0){
-                                            
-                                            // let found = false;
-                                            // for(let edgeIndex = 0; edgeIndex < rootFound.issues.edges.length; edgeIndex++){
-                                            //     let edge = rootFound.issues.edges[edgeIndex];
-                                            //     found = String(edge.vertex) == String(targetFound._id);
-                                            //     if(found){
-                                            //         console.log("found the edge...");
-                                            //         console.log(`edge score is ${edge.score }...`);
-                                            //         rootFound.issues.edges[edgeIndex].score += scoreChange;
-                                            //         console.log(`Now it's ${edge.score}`);
-                                            //         let startIndex = rootFound.issues.edges.findIndex(e => String(e._id) == String(edge._id));
-                                            //         console.log("starting at " + startIndex);
-                                            //         for(let i = startIndex + 1; i < rootFound.issues.edges.length; i++){
-                                            //             if(edge.score < rootFound.issues.edges[i].score){
-                                            //                 [ rootFound.issues.edges[i], rootFound.issues.edges[i-1] ] = [ rootFound.issues.edges[i-1], rootFound.issues.edges[i] ];
-                                            //             }
-                                            //             else {
-                                            //                 break;
-                                            //             }
-                                            //         }
-                                            //         await rootFound.issues.save();
-                                            //         await rootFound.save();
-                                            //         console.log("saved (?)");
-                                            //         break;
-                                            //     }
-                                                
-                                            // }
-                                            // if(!found){
-                                            //     rootFound.issues.edges.push({
-                                            //         score: scoreChange,
-                                            //         vertex: targetFound._id
-                                            //     });
-                                            //     await rootFound.issues.save();
-                                            //     await rootFound.save();
-                                            // }
-                                            
-                                            Issuegraph.findById(rootFound.issues._id, async (err, rootGraph) => {
-                                                if(err){
-                                                    console.log(err);
-                                                    return res.send("Couldn't find the issuegraph");
-                                                }
                                                 else{
-                                                    let found = false;
-                                                    for(edge of rootGraph.edges){
-                                                        if(String(edge.vertex) == String(req.params.targetid)){
-                                                            found = true;
-                                                            edge.score += scoreChange;
-                                                            let startIndex = rootGraph.edges.findIndex(e => String(e._id) == String(edge._id));
-                                                            for(let i = startIndex + 1; i < rootGraph.edges.length; i++){
-                                                                if(edge.score < rootGraph.edges[i].score){
-                                                                    [ rootGraph.edges[i], rootGraph.edges[i-1] ] = [ rootGraph.edges[i-1], rootGraph.edges[i] ];
+                                                    // A vote has been found, but it could be true (an upvote) or false (a downvote).
+                                                    if(currentUser.edgeVotes[sourceIndex].targets[targetIndex].vote === false){
+                                                        // The vote is already in a downvote state. Do nothing but return, so the force graph code in the client's browser can visualize a link.
+                                                        return res.send("You have downvoted this before.")
+                                                    }
+                                                    else {
+                                                        // The vote is in a upvote state. Change it to downvote, save, and subtract TWO from the edge score.
+                                                        currentUser.edgeVotes[sourceIndex].targets[targetIndex].vote = false;
+                                                        scoreChange = -2;
+                                                        await currentUser.save();
+                                                    }
+                                                }
+                                            }
+                                            // If needed, change the value of the edge in the issue's issuegraph
+                                            if(scoreChange < 0){
+                                                
+                                                // let found = false;
+                                                // for(let edgeIndex = 0; edgeIndex < rootFound.issues.edges.length; edgeIndex++){
+                                                //     let edge = rootFound.issues.edges[edgeIndex];
+                                                //     found = String(edge.vertex) == String(targetFound._id);
+                                                //     if(found){
+                                                //         console.log("found the edge...");
+                                                //         console.log(`edge score is ${edge.score }...`);
+                                                //         rootFound.issues.edges[edgeIndex].score += scoreChange;
+                                                //         console.log(`Now it's ${edge.score}`);
+                                                //         let startIndex = rootFound.issues.edges.findIndex(e => String(e._id) == String(edge._id));
+                                                //         console.log("starting at " + startIndex);
+                                                //         for(let i = startIndex + 1; i < rootFound.issues.edges.length; i++){
+                                                //             if(edge.score < rootFound.issues.edges[i].score){
+                                                //                 [ rootFound.issues.edges[i], rootFound.issues.edges[i-1] ] = [ rootFound.issues.edges[i-1], rootFound.issues.edges[i] ];
+                                                //             }
+                                                //             else {
+                                                //                 break;
+                                                //             }
+                                                //         }
+                                                //         await rootFound.issues.save();
+                                                //         await rootFound.save();
+                                                //         console.log("saved (?)");
+                                                //         break;
+                                                //     }
+                                                    
+                                                // }
+                                                // if(!found){
+                                                //     rootFound.issues.edges.push({
+                                                //         score: scoreChange,
+                                                //         vertex: targetFound._id
+                                                //     });
+                                                //     await rootFound.issues.save();
+                                                //     await rootFound.save();
+                                                // }
+                                                
+                                                Issuegraph.findById(rootFound.issues._id, async (err, rootGraph) => {
+                                                    if(err){
+                                                        console.log(err);
+                                                        return res.send("Couldn't find the issuegraph");
+                                                    }
+                                                    else{
+                                                        let found = false;
+                                                        for(edge of rootGraph.edges){
+                                                            if(String(edge.vertex) == String(req.params.targetid)){
+                                                                found = true;
+                                                                edge.score += scoreChange;
+                                                                let startIndex = rootGraph.edges.findIndex(e => String(e._id) == String(edge._id));
+                                                                for(let i = startIndex + 1; i < rootGraph.edges.length; i++){
+                                                                    if(edge.score < rootGraph.edges[i].score){
+                                                                        [ rootGraph.edges[i], rootGraph.edges[i-1] ] = [ rootGraph.edges[i-1], rootGraph.edges[i] ];
+                                                                    }
+                                                                    else {
+                                                                        break;
+                                                                    }
                                                                 }
-                                                                else {
-                                                                    break;
-                                                                }
+                                                                rootGraph.markModified("edges");
+                                                                await rootGraph.save();
+                                                                break;
                                                             }
+                                                        }
+                                                        if(!found){
+                                                            rootGraph.edges.push({
+                                                                score: scoreChange,
+                                                                vertex: targetFound._id
+                                                            });
                                                             rootGraph.markModified("edges");
                                                             await rootGraph.save();
-                                                            break;
                                                         }
                                                     }
-                                                    if(!found){
-                                                        rootGraph.edges.push({
-                                                            score: scoreChange,
-                                                            vertex: targetFound._id
-                                                        });
-                                                        rootGraph.markModified("edges");
-                                                        await rootGraph.save();
-                                                    }
-                                                }
-                                            });
+                                                });
 
+                                            }
+                                            // console.log(`${rootFound} has the following edges: ${rootFound.issues.edges}`);
+                                            return res.send("Transmission of downvote complete.");
                                         }
-                                        // console.log(`${rootFound} has the following edges: ${rootFound.issues.edges}`);
-                                        return res.send("Transmission of downvote complete.");
-                                    }
-								});
-						}
-					});
-			}
-		});
+                                    });
+                            }
+                        });
+                }
+            });
+    } else {
+        return res.send("Either the root or target issue's ID was invalid");
+    }
 });
 
 // router.get("/delete/:id", isLoggedIn, async (req, res) => {
@@ -477,47 +488,55 @@ router.get("/all", (req, res) => {
 
 // Modify this to synthesize the user's edgevotes with popular connections.
 router.get("/toplinks/:number/:id/", async (req, res) => {
-	Issue.findById(req.params.id)
-		.populate({
-			path: "issues",
-			populate: { path: "edges" }
-		})
-		.exec((err, issue)=> {
-			if(err){
-				console.log(err);
-			}
-			// console.log("GET/toplinks for issue" + issue);
-			return res.send(issue.issues.edges.slice(0, req.params.number));
-		});
+	if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Issue.findById(req.params.id)
+            .populate({
+                path: "issues",
+                populate: { path: "edges" }
+            })
+            .exec((err, issue)=> {
+                if(err){
+                    console.log(err);
+                }
+                // console.log("GET/toplinks for issue" + issue);
+                return res.send(issue.issues.edges.slice(0, req.params.number));
+            });
+    } else {
+        return res.send("Tried to get the top links from an issue with an invalid ID");
+    }
 });
 
 router.get("/data/:id", async (req, res) => {
-	Issue.findById(req.params.id)
-		.populate({
-			path: "issues",
-			populate: { 
-                path: "edges",
-                populate: {
-                    path: "vertex"
+	if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Issue.findById(req.params.id)
+            .populate({
+                path: "issues",
+                populate: { 
+                    path: "edges",
+                    populate: {
+                        path: "vertex"
+                    }
                 }
-            }
-		})
-        .populate({
-			path: "projects",
-			populate: { 
-                path: "edges",
-                populate: {
-                    path: "vertex"
+            })
+            .populate({
+                path: "projects",
+                populate: { 
+                    path: "edges",
+                    populate: {
+                        path: "vertex"
+                    }
                 }
-            }
-		})
-        .populate("identifier", "username")
-		.exec((err, issue) => {
-			if(err){
-				console.log(`Error while loading data for issue ${req.params.id}: ${err}`);
-			}
-			return res.send(issue);
-		});
+            })
+            .populate("identifier", "username")
+            .exec((err, issue) => {
+                if(err){
+                    console.log(`Error while loading data for issue ${req.params.id}: ${err}`);
+                }
+                return res.send(issue);
+            });
+    } else {
+        return res.send("Tried getting an issue using an invalid ID");
+    }
 })
 // If anything messes up with an issuegraph's score, you can rebuild those scores with this function, which queries all users for their edgevotes and corrects all issues' issuegraphs.
 // Not deployed because it will become a server-intensive task that regular users shouldn't be performing.
@@ -580,6 +599,19 @@ router.get("/data/:id", async (req, res) => {
 //         });
 // });
 
+
+router.get("/*", (req, res) => {
+    res.status(404).redirect("/wiki/nothing");
+});
+router.put("/*", (req, res) => {
+    res.status(404).redirect("/wiki/nothing");
+});
+router.post("/*", (req, res) => {
+    res.status(404).redirect("/wiki/nothing");
+});
+router.delete("/*", (req, res) => {
+    res.status(404).redirect("/wiki/nothing");
+});
 
 // Need sub-edit routes for mods, which do verification of role:
 // https://developerhandbook.com/passport.js/passport-role-based-authorisation-authentication/

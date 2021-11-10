@@ -61,5 +61,16 @@ router.get("/:name", (req, res) => {
             }
         });
 });
-
+router.get("/*", (req, res) => {
+    res.status(404).redirect("/users/nobody");
+});
+router.put("/*", (req, res) => {
+    res.status(404).redirect("/users/nobody");
+});
+router.post("/*", (req, res) => {
+    res.status(404).redirect("/users/nobody");
+});
+router.delete("/*", (req, res) => {
+    res.status(404).redirect("/users/nobody");
+});
 module.exports = router;

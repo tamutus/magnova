@@ -32,6 +32,12 @@ router.get('/', (req, res) => {
 	});
 });
 
+router.get("/nothing", (req, res) => {
+    return res.render("wiki/nothing", {
+        title: "Magnova - the 404 page"
+    });
+});
+
 // Useful for creating an index for a given model. 
 // router.get("/createIndex", async (req, res) => {
 //     User.find({}, async (err, users) => {
@@ -121,22 +127,29 @@ router.get("/search", async (req, res) => {
 });
 
 router.get("/edits/:id", isLoggedIn, (req, res) => {
-    Patchlist.findById(req.params.id)
-        .populate("patches.editor", "username")
-        .exec((err, patchlist) => {
-            const packet = {
-                message: "Success!",
-                content: {}
-            };
-            if(err){
-                console.log(err);
-                packet.message = "Couldn't find the patch list";  
-            }
-            else {
-                packet.content = patchlist;
-            }
-            return res.send(packet);
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Patchlist.findById(req.params.id)
+            .populate("patches.editor", "username")
+            .exec((err, patchlist) => {
+                const packet = {
+                    message: "Success!",
+                    content: {}
+                };
+                if(err){
+                    console.log(err);
+                    packet.message = "Couldn't find the patch list";  
+                }
+                else {
+                    packet.content = patchlist;
+                }
+                return res.send(packet);
+            });
+    } else {
+        return res.send({
+            message: "The server received a request for a patchlist with an improper id.",
+            content: {}
         });
+    }
 });
 
 router.get("/all", (req, res) => {
@@ -153,186 +166,210 @@ router.get("/all", (req, res) => {
     });
 });
 
-// To do: check whether req.params.id is mongoose objectid by this method, https://stackoverflow.com/a/29231016/6096923 , and if it's not look up at the path. refactor to have stable paths.
+// Check whether req.params.id is mongoose objectid by this method, https://stackoverflow.com/a/29231016/6096923 , and if it's not look up at the path. refactor to have stable paths.
 router.get('/:id', (req, res) => {
-	Issue.findById(req.params.id)
-		.populate("identifier", "username")
-        .populate("editors", "username")
-		.populate({
-			path: "issues",
-			populate: { path: "edges.vertex" }
-		})
-        .populate({
-            path: "projects",
-            populate: { path: "edges.vertex" }
-        })
-        .populate("tags")
-        .populate("resources.resource")
-		.populate("instances")
-        .populate({
-            path: "projects",
-            populate: { path: "edges.vertex" }
-        })
-		.exec((err, issue) => {
-			if(err){
-				console.log(err);
-				return res.redirect("back");
-			}
-			if(!issue.issues){
-				Issuegraph.create({root: issue._id, rootType: "Issue"}, (err, issuegraph) => {
-					if(err){
-						console.log(err);
-					}
-                    else{
-                        Issue.findByIdAndUpdate(issue._id, {issues: issuegraph._id})
-                    }
-				});
-			}
-            if(!issue.projects){
-                Projectgraph.create({root: issue._id, rootType: "IssueTemplate"}, (err, projectgraph) => {
-                    if(err){
-                        console.log(err);
-                    }
-                    else{
-                        Issue.findByIdAndUpdate(issue._id, {projects: projectgraph._id}, {strict: false}, (err, updatedIssue) => {
-                            if(err){console.log(err)}
-                            else{
-                                issue.projects=updatedIssue.projects;
-                            }
-                        });
-                    }
-                });
-            }
-            if(!issue.talkpage){
-                Talkpage.create({root: issue._id, rootType: "IssueTemplate"}, (err, talkpage) => {
-                    if(err){
-                        console.log(err);
-                    } else{
-                        Issue.findByIdAndUpdate(issue._id, {talkpage: talkpage._id}, {strict: false}, (err, updatedIssue) => {
-                            if(err){ console.log(err); }
-                            else{ issue.talkpage = updatedIssue.talkpage; }
-                        });
-                    }
-                });
-            }
-            if(!issue.identifier){
-                User.findOne({issues: issue._id}, (err, person)=> {
-                    if(err){console.log(err)}
-                    else {
-                        let idToAdd;
-                        if(person){
-                            idToAdd = person._id;
-                        } else {
-                            idToAdd = "6064d749949511722c878e26";
+	if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Issue.findById(req.params.id)
+            .populate("identifier", "username")
+            .populate("editors", "username")
+            .populate({
+                path: "issues",
+                populate: { path: "edges.vertex" }
+            })
+            .populate({
+                path: "projects",
+                populate: { path: "edges.vertex" }
+            })
+            .populate("tags")
+            .populate("resources.resource")
+            .populate("instances")
+            .populate({
+                path: "projects",
+                populate: { path: "edges.vertex" }
+            })
+            .exec((err, issue) => {
+                if(err){
+                    console.log(err);
+                    return res.redirect("back");
+                }
+                else if(!issue){
+                    res.status(404).redirect("/wiki/nowhere");
+                }
+                if(!issue.issues){
+                    Issuegraph.create({root: issue._id, rootType: "Issue"}, (err, issuegraph) => {
+                        if(err){
+                            console.log(err);
                         }
-                        Issue.findByIdAndUpdate(issue._id, {identifier: idToAdd}, {strict: false}, (err, updatedIssue) => {
-                            if(err) {console.log(err); }
-                            else{ issue.identifier = updatedIssue.identifier }
-                        });
-                    }
+                        else{
+                            Issue.findByIdAndUpdate(issue._id, {issues: issuegraph._id})
+                        }
+                    });
+                }
+                if(!issue.projects){
+                    Projectgraph.create({root: issue._id, rootType: "IssueTemplate"}, (err, projectgraph) => {
+                        if(err){
+                            console.log(err);
+                        }
+                        else{
+                            Issue.findByIdAndUpdate(issue._id, {projects: projectgraph._id}, {strict: false}, (err, updatedIssue) => {
+                                if(err){console.log(err)}
+                                else{
+                                    issue.projects=updatedIssue.projects;
+                                }
+                            });
+                        }
+                    });
+                }
+                if(!issue.talkpage){
+                    Talkpage.create({root: issue._id, rootType: "IssueTemplate"}, (err, talkpage) => {
+                        if(err){
+                            console.log(err);
+                        } else{
+                            Issue.findByIdAndUpdate(issue._id, {talkpage: talkpage._id}, {strict: false}, (err, updatedIssue) => {
+                                if(err){ console.log(err); }
+                                else{ issue.talkpage = updatedIssue.talkpage; }
+                            });
+                        }
+                    });
+                }
+                if(!issue.identifier){
+                    User.findOne({issues: issue._id}, (err, person)=> {
+                        if(err){console.log(err)}
+                        else {
+                            let idToAdd;
+                            if(person){
+                                idToAdd = person._id;
+                            } else {
+                                idToAdd = "6064d749949511722c878e26";
+                            }
+                            Issue.findByIdAndUpdate(issue._id, {identifier: idToAdd}, {strict: false}, (err, updatedIssue) => {
+                                if(err) {console.log(err); }
+                                else{ issue.identifier = updatedIssue.identifier }
+                            });
+                        }
+                    });
+                }
+                if(!issue.edits){
+                    Patchlist.create({root: issue._id, rootType: "IssueTemplate"}, (err, patchlist) => {
+                        if(err){console.log(err);}
+                        else{
+                            Issue.findByIdAndUpdate(issue._id, {edits: patchlist}, {omitUndefined: true, strict: false}, (err, updatedIssue) => {
+                                if(err){ console.log(err); }
+                                else{ issue.edits = updatedIssue.edits; }
+                            });
+                        }
+                    });
+                }
+                if(!issue.version){
+                    Issue.findByIdAndUpdate(issue._id, {version: 0}, {omitUndefined: true, strict: false}, (err, updatedIssue) => {
+                        if(err){console.log(err);}
+                        else { issue.version = 0; }
+                    })
+                }
+                if(issue.creator || issue.creationDate){
+                    Issue.findByIdAndUpdate(issue._id, {creator: undefined, creationDate: undefined}, {omitUndefined: true, strict: false}, (err, updatedIssue) => {
+                        if(err){console.log(err);}
+                    });
+                }
+                return res.render("wiki/view", {
+                    title: `${issue.name} - Magnova Wiki`,
+                    issue: issue
                 });
-            }
-            if(!issue.edits){
-                Patchlist.create({root: issue._id, rootType: "IssueTemplate"}, (err, patchlist) => {
-                    if(err){console.log(err);}
-                    else{
-                        Issue.findByIdAndUpdate(issue._id, {edits: patchlist}, {omitUndefined: true, strict: false}, (err, updatedIssue) => {
-                            if(err){ console.log(err); }
-                            else{ issue.edits = updatedIssue.edits; }
-                        });
-                    }
-                });
-            }
-            if(!issue.version){
-                Issue.findByIdAndUpdate(issue._id, {version: 0}, {omitUndefined: true, strict: false}, (err, updatedIssue) => {
-                    if(err){console.log(err);}
-                    else { issue.version = 0; }
-                })
-            }
-            if(issue.creator || issue.creationDate){
-                Issue.findByIdAndUpdate(issue._id, {creator: undefined, creationDate: undefined}, {omitUndefined: true, strict: false}, (err, updatedIssue) => {
-                    if(err){console.log(err);}
-                });
-            }
-			return res.render("wiki/view", {
-				title: `${issue.name} - Magnova Wiki`,
-				issue: issue
-			});
-		});
+            });
+    } else {
+        return res.status(404).redirect("/wiki/nothing");
+    }
 });
 router.put("/:id", isLoggedIn, (req, res) => {
-	const {name, info, image, patch, latestVersion} = req.body;
-    if(name.length == 0){
-        res.send("You sent in a blank name!");
-    }
-    Issue.findById(req.params.id)
-        .populate("edits")
-        .exec(async (err, issue) => {
-            if(err){
-                console.log(err);
-            }
-            else{
-                let returnMessage = "Update ";
-                if(issue.name != name || issue.info != info || issue.image != image){
-                    if(!issue.version){
-                        issue.version = 0;
-                        issue.markModified("version");
-                    }
-                    if(issue.version != latestVersion){
-                        return res.send("Latest version changed while you were creating a patch. Try again now.")
-                    }
-                    if(!issue.edits){
-                        Patchlist.create({root: issue._id, rootType: "IssueTemplate"}, (err, patchlist) => {
-                            if(err){
-                                console.log(err);
-                                return res.send("No patch list for edits, and an error creating a new one: " + err);
-                            }
-                            else{
-                                issue.edits = patchlist;
-                                issue.markModified("edits");
-                            }
-                        });
-                    }
-                    if(issue.info != info){
-                        returnMessage += "to this issue's info, ";
-                        issue.edits.patches.push({
-                            editor: req.user._id,
-                            patch: patch
-                        });
-                        issue.edits.markModified("patches");
-                        issue.edits.save();
-                        
-                        issue.version++;
-                        issue.markModified("version");
-                        issue.info = info;
-                    }
-                    
-                    if(!issue.editors){
-                        issue.editors = [];
-                        issue.markModified("editors");
-                    }
-                    if(!issue.editors.find(e => String(e) == String(req.user._id))){
-                        issue.editors.push(req.user._id);
-                        issue.markModified("editors");
-                    }
-
-                    if(issue.name != name){
-                        returnMessage += "to this issue's name, ";
-                        issue.name = name;
-                    }
-                    if(issue.image != image){
-                        returnMessage += "to this issue's image, ";
-                        issue.image = image;
-                    }
-
-                    returnMessage += "Successful!";
-                    issue.save();
-                } else {
-                    returnMessage += "not needed.";
+	if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        const {name, info, image, patch, latestVersion} = req.body;
+        if(name.length == 0){
+            res.send("You sent in a blank name!");
+        }
+        Issue.findById(req.params.id)
+            .populate("edits")
+            .exec(async (err, issue) => {
+                if(err){
+                    console.log(err);
                 }
-                return res.send(returnMessage);
-            }
-        });
-})
+                else{
+                    let returnMessage = "Update ";
+                    if(issue.name != name || issue.info != info || issue.image != image){
+                        if(!issue.version){
+                            issue.version = 0;
+                            issue.markModified("version");
+                        }
+                        if(issue.version != latestVersion){
+                            return res.send("Latest version changed while you were creating a patch. Try again now.")
+                        }
+                        if(!issue.edits){
+                            Patchlist.create({root: issue._id, rootType: "IssueTemplate"}, (err, patchlist) => {
+                                if(err){
+                                    console.log(err);
+                                    return res.send("No patch list for edits, and an error creating a new one: " + err);
+                                }
+                                else{
+                                    issue.edits = patchlist;
+                                    issue.markModified("edits");
+                                }
+                            });
+                        }
+                        if(issue.info != info){
+                            returnMessage += "to this issue's info, ";
+                            issue.edits.patches.push({
+                                editor: req.user._id,
+                                patch: patch
+                            });
+                            issue.edits.markModified("patches");
+                            issue.edits.save();
+                            
+                            issue.version++;
+                            issue.markModified("version");
+                            issue.info = info;
+                        }
+                        
+                        if(!issue.editors){
+                            issue.editors = [];
+                            issue.markModified("editors");
+                        }
+                        if(!issue.editors.find(e => String(e) == String(req.user._id))){
+                            issue.editors.push(req.user._id);
+                            issue.markModified("editors");
+                        }
+
+                        if(issue.name != name){
+                            returnMessage += "to this issue's name, ";
+                            issue.name = name;
+                        }
+                        if(issue.image != image){
+                            returnMessage += "to this issue's image, ";
+                            issue.image = image;
+                        }
+
+                        returnMessage += "Successful!";
+                        issue.save();
+                    } else {
+                        returnMessage += "not needed.";
+                    }
+                    return res.send(returnMessage);
+                }
+            });
+    } else {
+        return res.send("The server received a PUT request for an issue with an improper ID");
+    }
+});
+
+router.get("/*", (req, res) => {
+    res.status(404).redirect("/wiki/nothing");
+});
+router.put("/*", (req, res) => {
+    res.status(404).redirect("/wiki/nothing");
+});
+router.post("/*", (req, res) => {
+    res.status(404).redirect("/wiki/nothing");
+});
+router.delete("/*", (req, res) => {
+    res.status(404).redirect("/wiki/nothing");
+});
 
 module.exports = router;

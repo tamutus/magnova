@@ -19,35 +19,40 @@ const 	User = require('../api/user/user'),
 const taskTemplate = require("../api/task/task.template");
 
 router.put("/:id", isLoggedIn, async (req, res) => {
-    const {name, info, completionRequirements} = req.body;
-    if(name.length == 0){
-        res.send("You sent in a blank name!");
-    }
-    Task.findById(req.params.id, async (err, task) => {
-        if(err){
-            console.log(err);
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        const {name, info, completionRequirements} = req.body;
+        if(name.length == 0){
+            res.send("You sent in a blank name!");
         }
-        else{
-            // user.username = username; implementing username changes will require some modification of the middleware for serializing users
-            let returnMessage = `Update not needed`;
-            if(task.name != name || task.info != info || task.completionRequirements != completionRequirements){
-                task.name = name;
-                task.info = info;
-                task.completionRequirements = completionRequirements;
-                if(!task.designers){
-                    task.designers = [];
-                    task.markModified("designers");
-                }
-                if(!task.designers.find(e => String(e) == String(req.user._id))){
-                    task.designers.push(req.user._id);
-                    task.markModified("designers");
-                }
-                task.save();
-                returnMessage = `Update successful!`;
+        Task.findById(req.params.id, async (err, task) => {
+            if(err){
+                console.log(err);
+                return res.send(err);
             }
-            res.send(returnMessage);
-        }
-    });
+            else{
+                // user.username = username; implementing username changes will require some modification of the middleware for serializing users
+                let returnMessage = `Update not needed`;
+                if(task.name != name || task.info != info || task.completionRequirements != completionRequirements){
+                    task.name = name;
+                    task.info = info;
+                    task.completionRequirements = completionRequirements;
+                    if(!task.designers){
+                        task.designers = [];
+                        task.markModified("designers");
+                    }
+                    if(!task.designers.find(e => String(e) == String(req.user._id))){
+                        task.designers.push(req.user._id);
+                        task.markModified("designers");
+                    }
+                    task.save();
+                    returnMessage = `Update successful!`;
+                }
+                res.send(returnMessage);
+            }
+        });
+    } else {
+        return res.send("Tried to edit a task using an invalid task ID");
+    }
 });
 
 module.exports = router;
