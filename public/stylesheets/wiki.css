@@ -415,13 +415,13 @@ h4.result-name {
             align-items: flex-start;
     -ms-flex-line-pack: end;
         align-content: flex-end;
-    -webkit-box-pack: start;
-        -ms-flex-pack: start;
-            justify-content: flex-start;
+    -webkit-box-pack: end;
+        -ms-flex-pack: end;
+            justify-content: flex-end;
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
-        -ms-flex-flow: row wrap-reverse;
-            flex-flow: row wrap-reverse;
+        -ms-flex-flow: row-reverse wrap-reverse;
+            flex-flow: row-reverse wrap-reverse;
     overflow-y: auto;
     border-radius: 15px;    
 }
@@ -482,6 +482,7 @@ input.topic-name {
 }
 #table-of-contents a {
     font-size: 35px;
+    cursor: s-resize;
 }
 
 #image-container, #wiki-overview {

@@ -70,8 +70,9 @@ body {
 	-ms-flex-line-pack: center;
 	    align-content: center;
 	height: 70px;
-	width: 50%;
-	margin: 0 auto 50px auto;
+    max-width: 800px;
+	margin: 24px auto 50px auto;
+    padding-left: 10px;
 	border-radius: 1.5% / 40%;
 	display: -webkit-box;
 	display: -ms-flexbox;
@@ -95,6 +96,8 @@ body {
 }
 .bio-link {
 	height: 40px;
+    padding: 5px;
+    margin-right: 10px;
 	-webkit-box-flex: 0;
 	    -ms-flex: 0 1 150px;
 	        flex: 0 1 150px;
@@ -547,6 +550,10 @@ div.meta-cube {
 #sidebar a:visited {
 	color: white;
 }
+#sidebar a:hover {
+    color: rgb(119, 201, 255);
+    transform: translateX(8px);
+}
 #sidebar-toggler {
 	position: fixed;
 	left: 15px;
@@ -572,6 +579,7 @@ div.meta-cube {
 	-webkit-transform-origin: top left;
 	    -ms-transform-origin: top left;
 	        transform-origin: top left;
+    cursor: cell;
 }
 #sidebar-toggler:hover {
 	-webkit-box-shadow: -4px -4px rgb(97, 12, 52);
@@ -876,7 +884,6 @@ div.meta-cube {
 		-webkit-transform: rotate(var(--menutwist));
 		    -ms-transform: rotate(var(--menutwist));
 		        transform: rotate(var(--menutwist));
-		margin-top: 100px;
 		/* margin-bottom: 0; */
 	}
 }
@@ -955,27 +962,29 @@ div.meta-cube {
     }
 }
 @media screen and (max-height: 400px){
-	#sidebar {
-		height: 100%;
-	}
+	
 }
-@media screen and (max-height: 450px){
-	#sidebar ul li a {
+@media screen and (max-height: 500px){
+    #sidebar ul li a {
 		font-size: 1rem;
 		width: 100%;
 		height: 27px;
 		color: white; 
 	}
 }
-@media screen and (max-height: 300px){
+@media screen and (max-height: 340px){
 	#sidebar-toggler {
 		-webkit-transform: scale(.5) translate(-25px, -25px);
 		    -ms-transform: scale(.5) translate(-25px, -25px);
 		        transform: scale(.5) translate(-25px, -25px);
 	}
 	#sidebar {
-		width: 150px;
+		width: 200px;
+        height: 100%;
 	}
+    #sidebar ul {
+        margin-top: 100px;
+    }
 	#sidebar ul li {
 		margin-bottom: 5px;
 	}
