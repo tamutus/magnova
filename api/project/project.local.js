@@ -19,7 +19,11 @@ const LocalProjectSchema = new Schema({
     }],
     harms: [{
         form: {type: Schema.Types.ObjectId, ref: "Harm"},
-        degree: Number
+        records: [{
+            degree: Number,
+            citation: String,
+            when: Date
+        }]
     }],
     resources: [{
         form: {type: Schema.Types.ObjectId, ref: "Resource"}, 

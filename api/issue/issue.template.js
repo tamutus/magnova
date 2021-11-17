@@ -15,7 +15,11 @@ const IssueTemplateSchema = new Schema({
     talkpage: {type: Schema.Types.ObjectId, ref: "Talkpage"},
     harms: [{
         form: {type: Schema.Types.ObjectId, ref: "Harm"},
-        degree: Number
+        records: [{
+            degree: Number,
+            citation: String,
+            when: Date
+        }]
     }],
     resources: [{
         form: {type: Schema.Types.ObjectId, ref: "Resource"}, 

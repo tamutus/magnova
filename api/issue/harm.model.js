@@ -20,37 +20,65 @@ const HarmSchema = new Schema({
     issues: {
         general: [{
             issue: {type: Schema.Types.ObjectId, ref: "IssueTemplate"},
-            degree: Number
+            records: [{
+                degree: Number,
+                citation: String,
+                when: Date
+            }]
         }],
         local: [{
             issue: {type: Schema.Types.ObjectId, ref: "LocalIssue"},
-            degree: Number
+            records: [{
+                degree: Number,
+                citation: String,
+                when: Date
+            }]
         }]
     },
     projects: {
         general: [{
-            issue: {type: Schema.Types.ObjectId, ref: "ProjectTemplate"},
-            degree: Number
+            project: {type: Schema.Types.ObjectId, ref: "ProjectTemplate"},
+            records: [{
+                degree: Number,
+                citation: String,
+                when: Date
+            }]
         }],
         local: [{
-            issue: {type: Schema.Types.ObjectId, ref: "LocalProject"},
-            degree: Number
+            project: {type: Schema.Types.ObjectId, ref: "LocalProject"},
+            records: [{
+                degree: Number,
+                citation: String,
+                when: Date
+            }]
         }]
     },
     tasks: {
         general: [{
-            issue: {type: Schema.Types.ObjectId, ref: "TaskTemplate"},
-            degree: Number
+            task: {type: Schema.Types.ObjectId, ref: "TaskTemplate"},
+            records: [{
+                degree: Number,
+                citation: String,
+                when: Date
+            }]
         }],
         local: [{
-            issue: {type: Schema.Types.ObjectId, ref: "LocalTask"},
-            degree: Number
+            task: {type: Schema.Types.ObjectId, ref: "LocalTask"},
+            records: [{
+                degree: Number,
+                citation: String,
+                when: Date
+            }]
         }]
     },
     geo: [{ 
-        // Sort by degree in the update routes
+        // Sort by degree for in the update routes
         location: {type: Schema.Types.ObjectId, ref: "Location"},
-        degree: Number
+        records: [{
+            degree: Number,
+            citation: String,
+            when: Date
+        }]
     }]
 });
 

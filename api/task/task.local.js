@@ -22,7 +22,11 @@ const LocalTaskSchema = new Schema({
     }],
     harms: [{
         form: {type: Schema.Types.ObjectId, ref: "Harm"},
-        degree: Number
+        records: [{
+            degree: Number,
+            citation: String,
+            when: Date
+        }]
     }],
     talkpage: {type: Schema.Types.ObjectId, ref: "Talkpage"},
     precursors: [{type: Schema.Types.ObjectId, ref: "LocalTask"}],
