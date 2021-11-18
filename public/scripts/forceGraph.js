@@ -12,18 +12,12 @@ const baseURL = window.location.protocol + "//" + window.location.hostname + ":"
 
 // Fetch all issues                 //* This will need to be refactored, obviously, to do specific searches on a fetch performed during 
 let nodes = [],
-    issues = [],
+    projects = [],
     loggedIn = document.querySelector("#username"),
     currentUser,
-    userEdgevotes = [];
+    userEdgevotes = [],
+    userProjectvotes = [];
 
-fetch(baseURL + "issue/all")
-    .then(res => handleErrors(res))
-    .then(res => res.json())
-    .then(res => issues = res)
-    .catch(err => {
-        console.log(err)
-    });
 let links = [];
 
 // Load graph from cookies
@@ -35,33 +29,11 @@ let nodeSize = 50,
     nodeFontSize = 20,
     arrowSize = 20;
 
-let backupNodes = [
-    { name: "red", color: "red", size: 50},
-    { name: "red", color: "orange", size: 20},
-    { name: "red", color: "yellow", size: 25},
-    { name: "red", color: "green", size: 30},
-    { name: "red", color: "blue", size: 35},
-    { name: "red", color: "purple", size: 40}
-];
-
 // Keeps track of which node has been clicked, for which the tool wheel shall open
 let activeNode = null;   
 // Keeps track of which link was most recently clicked, so its center can be tracked and the link buttons can be moved. Both of theses things happen in the tick function.
 let activeLink = null,
     activeLinkCoords = {x: 0, y: 0};
-
-
-
-// Links between nodes, using color as id (defined later, in nodeSelection build calls)
-let backupLinks = [
-    { source: "red", target: "orange"},
-    { source: "orange", target: "yellow"},
-    { source: "yellow", target: "green"},
-    { source: "green", target: "blue"},
-    { source: "blue", target: "purple"},
-    { source: "purple", target: "red"},
-    { source: "green", target: "red"}
-];
 
 
   //==============//
@@ -75,25 +47,43 @@ const svg = d3.select("#force-graph"),
     linkUpvoter = svg.select("#link-upvote"),
     linkDownvoter = svg.select("#link-downvote"),
     issueSearchbar = d3.select("#issue-searchbar"),
+    projectSearchbar = d3.select("#project-searchbar"),
     issueToLink = issueSearchbar.select("input"),
-    loadButton = d3.select("#fg-utilities").select("#load-button"),
+    projectToLink = projectSearchbar.select("input"),
+    issueLoadButton = d3.select("#fg-utilities").select("#load-issue-button"),
+    projectLoadButton = d3.select("#fg-utilities").select("#load-project-button"),
     clearButton = d3.select("#fg-utilities").select("#clear-button"),
     createButton = d3.select("#fg-utilities").select("#create-button"),
     issueLoader = d3.select("#issue-loader"),
     issueLoaderPrompt = issueLoader.select("#issue-loader-prompt"),
     issueToLoad = issueLoader.select("#issue-to-load"),
     loadedIssues = issueLoader.select("#loaded-issues");
+    projectLoader = d3.select("#project-loader"),
+    projectLoaderPrompt = projectLoader.select("#project-loader-prompt"),
+    projectToLoad = projectLoader.select("#project-to-load"),
+    loadedProjects = projectLoader.select("#loaded-projects"),
+    issueSource = d3.selectAll(".issue-source"),
+    projectSource = d3.selectAll(".project-source");
 
   //================================//
  // Attach functions to DOM events //
 //================================//
 
-loadButton.on("click", () => {
+issueLoadButton.on("click", () => {
+    projectLoader.classed("hidden", true);
+    projectLoadButton.classed("pressed", false);
     issueLoader.classed("hidden", !issueLoader.classed("hidden"));
-    loadButton.classed("pressed", !loadButton.classed("pressed"));
+    issueLoadButton.classed("pressed", !issueLoadButton.classed("pressed"));
+});
+projectLoadButton.on("click", () => {
+    issueLoader.classed("hidden", true);
+    issueLoadButton.classed("pressed", false);
+    projectLoader.classed("hidden", !projectLoader.classed("hidden"));
+    projectLoadButton.classed("pressed", !projectLoadButton.classed("pressed"));
 });
 clearButton.on("click", () => {
     issueSearchbar.classed("hidden", true);
+    projectSearchbar.classed("hidden", true);
     linkButtons.classed("hidden", true);
     toolwheel.classed("hidden", true);
     activeNode = null;
@@ -111,6 +101,8 @@ createButton.on("click", () => {
 
 issueToLink.on("change", issueLinkSearch);
 issueToLoad.on("change", issueLoadSearch);
+projectToLink.on("change", projectLinkSearch);
+projectToLoad.on("change", projectLoadSearch);
 
   //==============================//
  // Node and link handling logic //
@@ -164,6 +156,7 @@ function updateNodes(){
     nodeGroupEnter
         .append("circle")
             .classed("node", true)
+            .classed("project", d => d.type == "project")
             // .style("fill", d => colorNode(d))
             .call(d3.drag()
                 .on("start", dragStart)
@@ -195,7 +188,7 @@ function updateNodes(){
 }   
 function updateNodeSelections(){
     nodeGroupSelection = nodeArea.selectAll("g.node-group")
-        .data(nodes, d => d.name);
+        .data(nodes, d => d._id);
     nodeSelection = nodeGroupSelection.selectAll("circle.node");
     nodeTextSelection = nodeGroupSelection.selectAll("foreignObject");
 }
@@ -226,48 +219,60 @@ function fitNodeText(){
 let toolLength = 110;
 let toolSize = 45;
 
-let tools = [
-    { name: "Expand", f: showLinks, class: "show-links"},
-    { name: "Add Link", f: addLink, class: "add-link"},
-    // { name: "Location", f: heatmap},
-    // { name: "Projects", f: showProjects},
+let issueTools = [
+    { name: "Causes", f: showLinks, class: "show-links"},
+    { name: "Link Issue", f: linkIssue, class: "add-link"},
+    { name: "Projects", f: showProjects, class: "show-links"},
+    { name: "Unload", f: unload, class: "unloader"},
     { name: "Wiki", f: goToWiki, class: "wiki-link"},
-    { name: "Unload", f: unload, class: "unloader"}
+    { name: "Link Project", f: linkProject, class: "add-link"}
+    // { name: "Location", f: heatmap},
 ];
-toolwheel
-    .classed("hidden", true);
+let projectTools = [
+    { name: "Issues", f: showLinks, class: "show-links"},
+    // { name: "Location", f: heatmap},
+    { name: "Link Issue", f: linkIssue, class: "add-link"},
+    { name: "Unload", f: unload, class: "unloader"},
+    { name: "Wiki", f: goToWiki, class: "wiki-link"}
+]
 
+toolwheel.classed("hidden", true);
     
-let toolGroupSelection = toolwheel.selectAll(".tool")
-    .data(tools);
-let toolBubbles = toolGroupSelection.selectAll("circle");
-let toolTexts = toolGroupSelection.selectAll("foreignObject");
+let toolGroupSelection,
+    toolBubbles,
+    toolTexts;
+updateTools(issueTools);
 
-updateTools();
-function updateTools(){
-    let toolGroupEnter = toolGroupSelection
-        .enter()
-            .append("g")
-            .attr("class", d => d.class)
-            .classed("tool", true)
-            .on("click", d => d.f());
-    let toolBubbleEnter = toolGroupEnter.append("circle")
-        .attr("fill", "lavender")
-    let toolTextEnter = toolGroupEnter
-        .append("foreignObject")
-            .attr("pointer-events", "none");
-    toolTextEnter
-        .append("xhtml:div")    // https://stackoverflow.com/questions/13848039/svg-foreignobject-contents-do-not-display-unless-plain-text
-            .classed("tool-text", true)
-            .attr("xmlns", "http://www.w3.org/1999/xhtml")
-            .text(d => d.name)
-            .attr("pointer-events", "none");
-    toolGroupSelection = toolGroupEnter.merge(toolGroupSelection);
-    toolTexts = toolTextEnter.merge(toolTexts);
-    toolBubbles = toolBubbleEnter.merge(toolBubbles);
-    
+function updateTools(toolset){
+    if(toolset){
+        toolGroupSelection = toolwheel.selectAll(".tool").data(toolset, d => d.name);
+        
+        let toolGroupEnter = toolGroupSelection
+            .enter()
+                .append("g")
+                .attr("class", d => d.class)
+                .classed("tool", true)
+                .on("click", d => d.f());
+        
+        let toolBubbleEnter = toolGroupEnter.append("circle")
+            .attr("fill", "lavender");
+        
+        let toolTextEnter = toolGroupEnter
+            .append("foreignObject")
+                .attr("pointer-events", "none");
+        toolTextEnter
+            .append("xhtml:div")    // https://stackoverflow.com/questions/13848039/svg-foreignobject-contents-do-not-display-unless-plain-text
+                .classed("tool-text", true)
+                .attr("xmlns", "http://www.w3.org/1999/xhtml")
+                .text(d => d.name)
+                .attr("pointer-events", "none");
+
+        toolGroupSelection.exit().remove();
+        toolGroupSelection = toolGroupSelection.merge(toolGroupEnter);
+        toolTexts = toolGroupSelection.select("foreignObject");     // important to select instead of selectAll, to inherit data properly
+        toolBubbles = toolGroupSelection.select("circle");
+    }
     let coords = getRadialCoordinates(toolBubbles.size(), toolLength);
-
     toolBubbles
         .attr("cx", (d, i) => coords[i].x)
         .attr("cy", (d, i) => coords[i].y)
@@ -285,6 +290,8 @@ function updateTools(){
 
 let width = parseInt(svg.style("width"));
 let height = parseInt(svg.style("height"));
+console.log(width);
+console.log(height);
 let sim;
 initializeSim();
 function initializeSim(){
@@ -303,20 +310,20 @@ function initializeSim(){
 }
 function ticked(){
     nodeSelection
-        .attr("cx", d => constrain(d.x, 0, width))
+        .attr("cx", d => constrain(d.x, 0, width + 2 * nodeSize))
         .attr("cy", d => constrain(d.y, 0, height));
     nodeTextSelection
-        .attr("x", d => constrain(d.x - nodeSize, 0 - nodeSize, width - nodeSize))
+        .attr("x", d => constrain(d.x - nodeSize, 0 - nodeSize, width + nodeSize))
         .attr("y", d => constrain(d.y - nodeSize, 0 - nodeSize, height - nodeSize));
     linkBoxes
-        .attr("x1", d => constrain(d.source.x, 0, width))
+        .attr("x1", d => constrain(d.source.x, 0, width + 2 * nodeSize))
         .attr("y1", d => constrain(d.source.y, 0, height))
-        .attr("x2", d => constrain(d.target.x, 0, width))
+        .attr("x2", d => constrain(d.target.x, 0, width + 2 * nodeSize))
         .attr("y2", d => constrain(d.target.y, 0, height));
     linkPaths
-        .attr("x1", d => constrain(d.source.x, 0, width))
+        .attr("x1", d => constrain(d.source.x, 0, width + 2 * nodeSize))
         .attr("y1", d => constrain(d.source.y, 0, height))
-        .attr("x2", d => constrain(d.target.x, 0, width))
+        .attr("x2", d => constrain(d.target.x, 0, width + 2 * nodeSize))
         .attr("y2", d => constrain(d.target.y, 0, height));
     linkArrows
         .attr("points", d => placeArrow(d));
@@ -453,6 +460,7 @@ function dragStart(d) {
     d.fx = d.x;
     d.fy = d.y;
     issueSearchbar.classed("hidden",true);
+    projectSearchbar.classed("hidden",true);
 }
 function drag(d) {
     // console.log("dragging");
@@ -479,6 +487,7 @@ function toggleTools(d) {
     if (d3.event.defaultPrevented) return;
     sim.alphaTarget(0);
     issueSearchbar.classed("hidden", true);
+    projectSearchbar.classed("hidden", true);
     linkButtons.classed("hidden", true);
 
     if(this === activeNode){
@@ -495,6 +504,11 @@ function toggleTools(d) {
         d.fx = d.x;
         d.fy = d.y;
         activeNode = this;
+        if(d.type == "project"){
+            updateTools(projectTools);
+        } else {
+            updateTools(issueTools);
+        }
         let toolWidth = parseInt(toolwheel.style("width"));
         let toolHeight = parseInt(toolwheel.style("height"));
         toolwheel.classed("hidden", false)
@@ -541,6 +555,7 @@ function toggleLinkTools(link){
     if (d3.event.defaultPrevented) return;
     sim.alphaTarget(0);
     issueSearchbar.classed("hidden", true);
+    projectSearchbar.classed("hidden",true);
     toolwheel.classed("hidden", true);
 
     if(link === activeLink){
@@ -551,8 +566,13 @@ function toggleLinkTools(link){
         activeLink = link;
         colorVote();
         linkButtons.classed("hidden", false);
-        linkUpvoter.on("click", d => upvoteIssueLink(activeLink.source._id, activeLink.target._id));
-        linkDownvoter.on("click", d => downvoteIssueLink(activeLink.source._id, activeLink.target._id));
+        if(activeLink.source.type === "issue" && activeLink.target.type === "issue"){
+            linkUpvoter.on("click", d => upvoteIssueLink(activeLink.source._id, activeLink.target._id));
+            linkDownvoter.on("click", d => downvoteIssueLink(activeLink.source._id, activeLink.target._id));
+        } else if(activeLink.source.type ==="issue" && activeLink.target.type === "project"){
+            linkUpvoter.on("click", d => upvoteProjectLink(activeLink.source._id, activeLink.target._id));
+            linkDownvoter.on("click", d => downvoteProjectLink(activeLink.source._id, activeLink.target._id));
+        }
         activeLinkCoords.x = (activeLink.source.x + activeLink.target.x) / 2;
         activeLinkCoords.y = (activeLink.source.y + activeLink.target.y) / 2;
         linkButtons.attr("transform", `translate(${activeLinkCoords.x}, ${activeLinkCoords.y})`);
@@ -585,32 +605,51 @@ async function issueLoadSearch(){
         .append("div")
             .classed("result", true)
             .text(issue => issue.name)
-            .on("click", issue => tryLoad(issue._id));    
+            .on("click", issue => tryLoad(issue._id));
+}
+async function projectLoadSearch(){
+    let input = String(projectToLoad.property("value"));
+    let results = await projectSearch(input);
+    if(results === "Blocked"){
+        return;
+    }
+    if(results.length > 0){
+        loadedProjects.classed("hidden", false);
+    } else {
+        loadedProjects.classed("hidden", true);
+    }
+    let projectSearchResults = loadedProjects.selectAll(".result")
+        .data(results, project => project._id);
+    projectSearchResults.sort((a, b) => d3.descending(a.confidenceScore, b.confidenceScore));
+    projectSearchResults
+        .exit()
+            .remove();
+    projectSearchResults
+        .enter()
+        .append("div")
+            .classed("result", true)
+            .text(project => project.name)
+            .on("click", project => tryProjectLoad(project._id));
 }
 async function tryLoad(issueID){
     // console.log(issueID);
     const alreadyLoaded = nodes.findIndex(node => {
-        return node._id == issueID;
+        return String(node._id) === String(issueID);
     });
     if(alreadyLoaded === -1){
         // console.log(issues);
         // refactoring to run a search
-        let addedIssue = issues.find(node => node._id == issueID);
-        if(!addedIssue){
-            await fetch(baseURL + `issue/data/${nodeID}`)
-                .then(res => handleErrors(res))
-                .then(res => res.json())
-                .then(res => addedIssue = res)
-                .catch(err => {
-                    console.log(err)
-                });
-        }
+        let addedIssue = await fetch(baseURL + `issue/data/${issueID}`)
+            .then(res => handleErrors(res))
+            .then(res => res.json())
+            .catch(console.error);
         // Set the spawn point on the forcegraph here
         // if(activeNode){
         //     console.log(d3.select(activeNode).attr("cx"));
         // }
         addedIssue.x = parseInt(svg.style("width"))/3;
         addedIssue.y = parseInt(svg.style("height"))/3;
+        addedIssue.type = "issue";
         nodes.push(addedIssue); // transition this to a call to the API.
         updateNodes();
         updateSimData();
@@ -619,37 +658,93 @@ async function tryLoad(issueID){
     loadedIssues.classed("hidden", true);
     saveNodesToCookie(); // in "cookie handling"
 }
+async function tryProjectLoad(projectID){
+    const alreadyLoaded = nodes.findIndex(node => {
+        return String(node._id) === String(projectID);
+    });
+    if(alreadyLoaded === -1){
+        // refactoring to run a search
+        let addedProject = await fetch(baseURL + `project/data/${projectID}`)
+            .then(res => handleErrors(res))
+            .then(res => res.json())
+            .catch(console.error);
+        // Set the spawn point on the forcegraph here
+        // if(activeNode){
+        //     console.log(d3.select(activeNode).attr("cx"));
+        // }
+        addedProject.x = parseInt(svg.style("width"))/3;
+        addedProject.y = parseInt(svg.style("height"))/3;
+        addedProject.type = "project";
+        nodes.push(addedProject); // transition this to a call to the API.
+        updateNodes();
+        updateSimData();
+    }
+    projectToLoad.property("value", "");
+    loadedProjects.classed("hidden", true);
+    saveNodesToCookie(); // in "cookie handling"
+}
 
 function heatmap() {
     displayTest("HEATMAP");
 }
-// Adds link to force graph without sending anything to the server
+// Adds link to issues on force graph without posting changes to the server
 async function showLinks(){
-    const root = d3.select(activeNode).datum()
-    let topLinks = await linkSearch(root._id);
+    const root = d3.select(activeNode).datum();
+    let topLinks = await getTopLinks(root._id);
     // console.log(topLinks);
     if(topLinks && topLinks.length > 0){
         for(link of topLinks){
-            showLink(root._id, link.vertex);
-        };
+            if(root.type === "issue"){
+                showLink(root._id, link.vertex, "issue");
+            }
+            else if(root.type === "project"){
+                showLink(link.vertex, root._id, "project");
+            }    
+        }
     }
     //add in logic to add links to anything present if it's in the top ?% of the links
 }
-async function linkSearch(sourceID){
+async function showProjects(){
+    const root = d3.select(activeNode).datum();
+    let topProjects = await topProjectSearch(root._id);
+    if(topProjects && topProjects.length > 0){
+        for(project of topProjects){
+            showLink(root._id, project.vertex, "project");
+        }
+    }
+}
+async function getTopLinks(sourceID){
     // TO DO: expand gets new links, up to X?
-    let topFiveLinks = await fetch(baseURL + `issue/toplinks/5/${sourceID}`)
+    const nodeData = d3.select(activeNode).datum();
+    // This assumes it's either a project or issue. 
+    const fetchURL = nodeData.type === "project" ? baseURL + `project/topissues/5/${sourceID}` : baseURL + `issue/toplinks/5/${sourceID}`;
+    let topFiveLinks = await fetch(fetchURL)
         .then(res => handleErrors(res))
         .then(res => res.json())
         .catch(err => {
-            console.log(err);
+            console.error(err);
         });
-    // console.log(topFiveLinks);
     return topFiveLinks;
 }
-function addLink() {
+async function topProjectSearch(sourceID){
+    let topFiveProjects = await fetch(baseURL + `issue/topprojects/5/${sourceID}`)
+        .then(res => handleErrors(res))
+        .then(res => res.json())
+        .catch(err => {
+            console.error(err);
+        });
+    return topFiveProjects;
+}
+function linkIssue() {
     toggleIssueSearchbar();
     document.querySelector("#issue-searchbar input").focus();
-    d3.select("#link-source")
+    d3.select("#link-source-to-issue")
+        .text(d3.select(activeNode).datum().name);
+}
+function linkProject() {
+    toggleProjectSearchbar();
+    document.querySelector("#project-searchbar input").focus();
+    d3.select("#link-source-to-project")
         .text(d3.select(activeNode).datum().name);
 }
 function tryLink(){
@@ -661,15 +756,25 @@ async function setLink(sourceID, targetID) {
     await fetch(`${baseURL}issue/link/${sourceID}/${targetID}`, {
         method: "PUT"
     })
-    .then(res => handleErrors(res))
-    .then(res => res.text())
-    .then(res => handleVoteResponse(res))
-    .catch(err => {
-        return console.log(err);
-    });
-    showLink(sourceID, targetID);
+        .then(handleErrors)
+        .then(res => res.text())
+        .then(res => handleVoteResponse(res))
+        .catch(console.error);
+    showLink(sourceID, targetID, "issue");
     loadVotes();
 }
+async function setProjectLink(issueID, projectID){
+    await fetch(`${baseURL}project/toissue/${projectID}/${issueID}`, {
+        method: "PUT"
+    })
+        .then(handleErrors)
+        .then(res => res.text())
+        .then(res => handleVoteResponse(res))
+        .catch(console.error);
+    showLink(issueID, projectID, "project");
+    loadVotes();
+}
+
 loadVotes();
 async function loadVotes(){
     if(loggedIn){
@@ -682,12 +787,11 @@ async function loadVotes(){
         .then(res => handleErrors(res))
         .then(res => res.json())
         .then(res => currentUser = res)
-        .catch(err => {
-            console.log(err);
-        });
+        .catch(console.error);
         // Get the current user's edgevotes for this issue
         
         userEdgevotes = currentUser.edgeVotes;
+        userProjectvotes = currentUser.projectVotes;
     }
     
 }
@@ -696,6 +800,24 @@ function colorVote(){
         let votesFromSource = userEdgevotes.find(voteSet => voteSet.source == activeLink.source._id);
         if(votesFromSource){
             let voteToTarget = votesFromSource.targets.find(v => v.target == activeLink.target._id);
+            if(voteToTarget){
+                if(voteToTarget.vote){
+                    linkUpvoter.classed("upvoted", true);
+                    linkDownvoter.classed("downvoted", false);
+                    return;
+                }
+                else{
+                    linkDownvoter.classed("downvoted", true);
+                    linkUpvoter.classed("upvoted", false);
+                    return;
+                }
+            }
+        }
+    }
+    if(activeLink && userProjectvotes.length > 0){
+        let votesFromSource = userProjectvotes.find(voteSet => voteSet.issue == activeLink.source._id);
+        if(votesFromSource){
+            let voteToTarget = votesFromSource.targets.find(v => v.project == activeLink.target._id);
             if(voteToTarget){
                 if(voteToTarget.vote){
                     linkUpvoter.classed("upvoted", true);
@@ -719,10 +841,8 @@ async function upvoteIssueLink(sourceID, targetID) {
     })
     .then(res => handleErrors(res))
     .then(res => res.text())
-    .then(res => console.log(res))
-    .catch(err => {
-        return console.log(err);
-    });
+    .then(console.log)
+    .catch(console.error);
     await loadVotes();
     colorVote();
     if(!links.find(link => {
@@ -742,16 +862,58 @@ async function downvoteIssueLink(sourceID, targetID){
     await fetch(`${baseURL}issue/link/${sourceID}/${targetID}`, {
         method: "DELETE"
     })
-    .then(res => handleErrors(res))
-    .then(res => res.text())
-    .then(res => console.log(res))
-    .catch(err => {
-        return console.log(err);
-    });
+        .then(res => handleErrors(res))
+        .then(res => res.text())
+        .then(console.log)
+        .catch(console.error);
     await loadVotes();
     colorVote();
-    console.log(`${sourceID}, ${targetID}`);
     let toRemove = links.findIndex(link => link.source._id == sourceID && link.target._id == targetID);
+    if(toRemove != -1){    
+        links.splice(toRemove, 1);
+        updateLinks();
+        updateSimData();
+        saveLinksToCookie(); // in "cookie handling"
+    } else {
+        console.log("Couldn't find that link in the links array for some reason");
+    }
+
+}
+//     /toissue/:projectid/:issueid
+async function upvoteProjectLink(issueID, projectID) {
+    await fetch(`${baseURL}project/toissue/${projectID}/${issueID}`, {
+        method: "PUT"
+    })
+    .then(res => handleErrors(res))
+    .then(res => res.text())
+    .then(console.log)
+    .catch(console.error);
+    await loadVotes();
+    colorVote();
+    if(!links.find(link => {
+        return (link.source._id == issueID && link.target._id == projectID);
+    })){
+        let toAddBack = {
+            source: issueID,
+            target: projectID
+        };
+        links.push(toAddBack);
+        updateLinks();
+        updateSimData();
+        saveLinksToCookie(); // in "cookie handling"
+    }
+}
+async function downvoteProjectLink(issueID, projectID){
+    await fetch(`${baseURL}project/toissue/${projectID}/${issueID}`, {
+        method: "DELETE"
+    })
+        .then(res => handleErrors(res))
+        .then(res => res.text())
+        .then(console.log)
+        .catch(console.error);
+    await loadVotes();
+    colorVote();
+    let toRemove = links.findIndex(link => link.source._id == issueID && link.target._id == projectID);
     if(toRemove != -1){    
         links.splice(toRemove, 1);
         updateLinks();
@@ -765,37 +927,43 @@ async function downvoteIssueLink(sourceID, targetID){
 function handleVoteResponse(response){
     console.log(response);
 }
-function showLink(sourceID, targetID){
+async function showLink(sourceID, targetID, targetType){
+    // console.log(`Trying to link ${sourceID} to ${targetType} ${targetID}`);
     if(sourceID === targetID){
         return;
     }
-    tryLoad(targetID);
+    if(targetType === "project"){
+        await tryLoad(sourceID);
+        await tryProjectLoad(targetID);
+    } else {
+        await tryLoad(targetID);
+    }
     let newLink = {
         source: sourceID, 
         target: targetID
     };
     if(!links.some(link => {
-        
-        return ((link.source._id === newLink.source && link.target._id === newLink.target) || (link.source._id === newLink.target && link.target._id === newLink.source));
+        return ((String(link.source._id) === String(newLink.source) && String(link.target._id) === String(newLink.target)) || (String(link.source._id) === String(newLink.target) && String(link.target._id) === String(newLink.source)));
     })){
         links.push(newLink);
         updateLinks();
         updateSimData();
         saveLinksToCookie(); // in "cookie handling"
     } else {
-        console.log("Those two are already linked!");
+        console.log(`${sourceID} is already linked to ${targetType} ${targetID}`);
     }
 }
-function showProjects(){
-    displayTest("PROJECTS");
-}
 function goToWiki(){
-    window.open(`/wiki/${d3.select(activeNode).datum()._id}`, '_blank');
+    const d = d3.select(activeNode).datum();
+    if(d.type === "issue"){
+        window.open(`/wiki/${d._id}`, '_blank');
+    } else if(d.type === "project"){
+        window.open(`/project/${d._id}`, '_blank');
+    }
 }
 function unload(){
     let toUnload = d3.select(activeNode).datum().name;
     links = links.filter(link => link.source.name != toUnload && link.target.name != toUnload);
-    console.log(links);
     toolwheel.classed("hidden", true);
     activeNode = null;
     nodes = nodes.filter(node => node.name != toUnload);
@@ -834,9 +1002,36 @@ async function issueFetch(fetchString){
                 return res.issues;
             }
         })
-        .catch(err => {
-            console.log(err)
-        });
+        .catch(console.error);
+    return results;
+}
+async function projectSearch(input){
+    if(input){
+        let fetchString = `wiki/search?target=${encodeURIComponent(input)}&projects=true`;
+        if(pendingSearch !== ""){
+            pendingSearch = fetchString.slice(0);
+            return "Blocked";
+        }
+        pendingSearch = fetchString.slice(0);
+        let results = await projectFetch(fetchString);
+        return results;
+    }
+    else return [];
+}
+async function projectFetch(fetchString){
+    let results = await fetch(baseURL + fetchString)
+        .then(res => handleErrors(res))
+        .then(res => res.json())
+        .then(res => {
+            // If at least one other search was run after your initial call, you should run a new search with the latest one.
+            if(pendingSearch !== fetchString){
+                return projectFetch(pendingSearch);
+            } else {
+                pendingSearch = "";
+                return res.projects;
+            }
+        })
+        .catch(console.error);
     return results;
 }
 
@@ -858,10 +1053,51 @@ async function issueLinkSearch(){
         .append("div")
             .classed("result", true)
             .text(issue => issue.name)
-            .on("click", issue => setLink(d3.select(activeNode).datum()._id, issue._id));
+            .on("click", issue => {
+                const nodeData = d3.select(activeNode).datum();
+                if(nodeData.type === "issue"){
+                    return setLink(nodeData._id, issue._id);
+                } else if(nodeData.type === "project"){
+                    return setProjectLink(issue._id, nodeData._id);
+                }
+            });
+}
+
+let projectSearchResults;
+async function projectLinkSearch(){
+    let input = String(projectToLink.property("value"));
+    let results = await projectSearch(input);
+    if(results === "Blocked"){
+        return;
+    }
+    results = results.filter(project => project._id != d3.select(activeNode).datum()._id);
+    projectSearchResults = d3.select("#found-link-projects").selectAll(".result")
+        .data(results, project => project.name);
+    projectSearchResults
+        .exit()
+            .remove();
+    projectSearchResults
+        .enter()
+        .append("div")
+            .classed("result", true)
+            .text(project => project.name)
+            .on("click", project => setProjectLink(d3.select(activeNode).datum()._id, project._id));
 }
 function toggleIssueSearchbar(){
+    projectSearchbar.classed("hidden", true);
+    if(d3.select(activeNode).datum().type === "issue"){
+        projectSource.classed("hidden", true);
+        issueSource.classed("hidden", false);
+    }
+    else if(d3.select(activeNode).datum().type === "project"){
+        issueSource.classed("hidden", true);
+        projectSource.classed("hidden", false);
+    }
     issueSearchbar.classed("hidden", !issueSearchbar.classed("hidden"));
+}
+function toggleProjectSearchbar(){
+    issueSearchbar.classed("hidden", true);
+    projectSearchbar.classed("hidden", !projectSearchbar.classed("hidden"));
 }
 function displayTest(str){
     d3.selectAll(".test").remove();
@@ -885,7 +1121,7 @@ function saveLinksToCookie(){
 function saveNodesToCookie(){
     let nodesString = "";
     for (node of nodes){
-        nodesString += `#${node._id}`;
+        nodesString += `#${node.type === "project" ? "p" : "i"}${node._id}`;
     }
     document.cookie = `nodes=${nodesString}`;
 }
@@ -894,6 +1130,7 @@ async function loadGraphFromCookie(){
     // Cookies are given by document cookie, which returns a string of all cookies separated by semicolons. This function parses the cookies for nodes and links.
     let cookieString = document.cookie,
         nodesIndexInCookies = cookieString.indexOf("nodes=");
+    const nodePromises = [];
     // Parse nodes from cookies
     if(nodesIndexInCookies >= 0){
         let nodesEndInCookies = cookieString.indexOf(";", nodesIndexInCookies);
@@ -908,32 +1145,48 @@ async function loadGraphFromCookie(){
         }
         // And use those objectIDs to load the data from the server.
         for(nodeID of nodeIDArray){
-            await tryLoad(nodeID);
-        }
-    } 
-    // Parse links from cookies
-    let linksIndexInCookies = cookieString.indexOf("links=");
-    if(linksIndexInCookies >= 0){
-        let linksEndInCookies = cookieString.indexOf(";", linksIndexInCookies);
-        if(linksEndInCookies < 0){
-            linksEndInCookies = cookieString.length;
-        }
-        let linksString = cookieString.slice(linksIndexInCookies + 6, linksEndInCookies),
-            linksStaging = [];
-        if(linksString.length > 0){
-            linksString = linksString.slice(1);
-            linksStaging = linksString.split("#");
-            for(link of linksStaging){
-                let newLink = link.split("@");
-                links.push({
-                    source: newLink[0],
-                    target: newLink[1]
-                });
-                updateSimData();
+            if(nodeID.length === 24){
+                nodePromises.push(
+                    tryLoad(nodeID)
+                );
+            } else if(nodeID.length ===25) {
+                if(nodeID.charAt(0) === 'i'){
+                    nodePromises.push(
+                        tryLoad(nodeID.slice(1))
+                    );
+                } else if(nodeID.charAt(0) === 'p'){
+                    nodePromises.push(
+                        tryProjectLoad(nodeID.slice(1))
+                    );
+                }
             }
         }
-        
-    }   
+    } 
+    await Promise.all(nodePromises).then(() => {
+        // Parse links from cookies
+        let linksIndexInCookies = cookieString.indexOf("links=");
+        if(linksIndexInCookies >= 0){
+            let linksEndInCookies = cookieString.indexOf(";", linksIndexInCookies);
+            if(linksEndInCookies < 0){
+                linksEndInCookies = cookieString.length;
+            }
+            let linksString = cookieString.slice(linksIndexInCookies + 6, linksEndInCookies),
+                linksStaging = [];
+            if(linksString.length > 0){
+                linksString = linksString.slice(1);
+                linksStaging = linksString.split("#");
+                for(link of linksStaging){
+                    let newLink = link.split("@");
+                    links.push({
+                        source: newLink[0],
+                        target: newLink[1]
+                    });
+                    updateSimData();
+                }
+            }
+            
+        }
+    });
 }
   //=====================//
  // Sub-window handling //

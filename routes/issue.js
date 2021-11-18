@@ -486,9 +486,40 @@ router.get("/all", (req, res) => {
 	});
 });
 
-// Modify this to synthesize the user's edgevotes with popular connections.
 router.get("/toplinks/:number/:id/", async (req, res) => {
 	if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        const topResults = [];
+        const limit = parseInt(req.params.number);
+        const blocks = [];
+        if(!limit){
+            return res.send("Didn't send a proper limit to the API. The format for the top links API is /issue/toplinks/:number/:sourceID .");
+        }
+        if(req.user){
+            User.findById(req.user._id, (err, user) => {
+                if(err){
+                    console.error(err);
+                    return res.send(`Problem finding the user you were logged in as: ${err}`);
+                } else if(user){
+                    const userVotesFromSource = user.edgeVotes.find(votes => {
+                        return votes.source == req.params.id;
+                    });
+                    for(let i = 0; userVotesFromSource && topResults.length < limit && i < userVotesFromSource.targets.length; i++){
+                        if(userVotesFromSource.targets[i].vote){
+                            topResults.push({
+                                vertex: userVotesFromSource.targets[i].target
+                            });
+                        } else {
+                            blocks.push(userVotesFromSource.targets[i].target);
+                        }
+                    }
+                } else {
+                    return res.send("For some reason your user ID didn't turn up a user.");
+                }
+            });
+        }
+        if(topResults.length == limit){
+            return res.send(topResults);
+        }
         Issue.findById(req.params.id)
             .populate({
                 path: "issues",
@@ -497,9 +528,93 @@ router.get("/toplinks/:number/:id/", async (req, res) => {
             .exec((err, issue)=> {
                 if(err){
                     console.log(err);
+                    return res.send("Error finding the issue you were trying to get top links for: " + err);
                 }
                 // console.log("GET/toplinks for issue" + issue);
-                return res.send(issue.issues.edges.slice(0, req.params.number));
+                for(let i = 0; topResults.length < limit && i < issue.issues.edges.length; i++){
+                    const edge = issue.issues.edges[i];
+                    if(!blocks.some(
+                        e => String(e) === String(edge.vertex)
+                    )){
+                        let userVoteIndex = topResults.findIndex(e => {
+                            return String(e.vertex) === String(edge.vertex);
+                        });
+                        if(userVoteIndex === -1){
+                            topResults.push(edge);
+                        } else {    
+                            topResults[userVoteIndex] = edge;
+                        }
+                    }
+                }
+                return res.send(topResults);
+            });
+    } else {
+        return res.send("Tried to get the top links from an issue with an invalid ID");
+    }
+});
+
+router.get("/topprojects/:number/:id/", async (req, res) => {
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        const topResults = [];
+        const limit = parseInt(req.params.number);
+        const blocks = [];
+        if(!limit){
+            return res.send("Didn't send a proper limit to the API. The format for the top links API is /toplinks/:number/:sourceID .");
+        }
+        if(req.user){
+            User.findById(req.user._id, (err, user) => {
+                if(err){
+                    console.error(err);
+                    return res.send(`Problem finding the user you were logged in as: ${err}`);
+                } else if(user){
+                    const userVotesFromSource = user.projectVotes.find(votes => {
+                        return votes.issue == req.params.id;
+                    });
+                    for(let i = 0; userVotesFromSource && topResults.length < limit && i < userVotesFromSource.targets.length; i++){
+                        if(userVotesFromSource.targets[i].vote){
+                            topResults.push({
+                                vertex: userVotesFromSource.targets[i].project
+                            });
+                        } else {
+                            console.log(userVotesFromSource.targets[i].project)
+                            blocks.push(userVotesFromSource.targets[i].project);
+                        }
+                    }
+                    if(topResults.length == limit){
+                        return res.send(topResults);
+                    }
+                } else {
+                    return res.send("For some reason your user ID didn't turn up a user.");
+                }
+            });
+        }
+        Issue.findById(req.params.id)
+            .populate({
+                path: "projects",
+                populate: { path: "edges" }
+            })
+            .exec((err, issue)=> {
+                if(err){
+                    console.log(err);
+                }
+                // console.log("GET/topprojects for " + issue);
+                for(let i = 0; topResults.length < limit && i < issue.projects.edges.length; i++){
+                    const edge = issue.projects.edges[i];
+                    
+                    if(!blocks.some(
+                        e => String(e) === String(edge.vertex)
+                    )){
+                        let userVoteIndex = topResults.findIndex(e => {
+                            return String(e.vertex) === String(edge.vertex);
+                        });
+                        if(userVoteIndex === -1){
+                            topResults.push(edge);
+                        } else {    
+                            topResults[userVoteIndex] = edge;
+                        }
+                    }                
+                }
+                return res.send(topResults);
             });
     } else {
         return res.send("Tried to get the top links from an issue with an invalid ID");

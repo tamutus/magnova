@@ -16,7 +16,8 @@
 <div id="allContent" class="expanded">
 	<div id="fg-utilities">
 		<div id="fg-buttons" class="">
-			<button id="load-button">Load</button>
+			<button id="load-issue-button">Load Issue</button>
+            <button id="load-project-button">Load Project</button>
 			<button id="clear-button">Clear</button>
 			<!-- <button id="create-button">Create</button> -->
 		</div>
@@ -24,11 +25,20 @@
 			<input type="text" id="issue-to-load" placeholder="Load an issue"></span>
 			<div id="loaded-issues" class="hidden"></div>
 		</div>
+        <div id="project-loader" class="hidden">
+			<input type="text" id="project-to-load" placeholder="Load a project"></span>
+			<div id="loaded-projects" class="hidden"></div>
+		</div>
 	</div>
 	<div id="issue-searchbar" class="hidden">
-		<div>Add sub-issue of <span id="link-source"></span></div>
+		<div>Add <span class="issue-source">sub-issue of </span><span class="project-source">issue that </span><span id="link-source-to-issue"></span><span class="project-source"> addresses</span></div>
 		<input type="text">
 		<div id="found-link-issues"></div>
+	</div>
+    <div id="project-searchbar" class="hidden">
+		<div>Connect project to <span id="link-source-to-project"></span></div>
+		<input type="text">
+		<div id="found-link-projects"></div>
 	</div>
 	<div id="issue-submitter" class="hidden">
 		<h2>

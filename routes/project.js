@@ -104,6 +104,72 @@ router.get("/nothing", (req, res) => {
     });
 });
 
+router.get("/topissues/:number/:id/", async (req, res) => {
+	if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        const topResults = [];
+        const limit = parseInt(req.params.number);
+        const blocks = [];
+        if(!limit){
+            return res.send("Didn't send a proper limit to the API. The format for getting top issue links to a project is /project/topissues/:number/:projectID .");
+        }
+        if(req.user){
+            User.findById(req.user._id, (err, user) => {
+                if(err){
+                    console.error(err);
+                    return res.send(`Problem finding the user you were logged in as: ${err}`);
+                } else if(user){
+                    for(let i = 0; user.projectVotes && topResults.length < limit && i < user.projectVotes.length; i++){
+                        const edge = user.projectVotes[i].targets.find(e => {
+                            return String(e.project) === String(req.params.id);
+                        })
+                        if(edge){
+                            if(edge.vote){
+                                topResults.push({
+                                    vertex: user.projectVotes[i].issue
+                                });
+                            } else {
+                                blocks.push(user.projectVotes[i].issue);
+                            }
+                        }
+                    }
+                } else {
+                    return res.send("For some reason your user ID didn't turn up a user.");
+                }
+            });
+        }
+        if(topResults.length == limit){
+            return res.send(topResults);
+        }
+        Project.findById(req.params.id)
+            .populate({
+                path: "issues",
+                populate: { path: "edges" }
+            })
+            .exec((err, project)=> {
+                if(err){
+                    console.log(err);
+                }
+                // console.log("GET/toplinks for project" + project);
+                for(let i = 0; topResults.length < limit && i < project.issues.edges.length; i++){
+                    const edge = project.issues.edges[i];
+                    if(!blocks.includes(edge.vertex)){
+                        let userVoteIndex = topResults.findIndex(e => {
+                            return String(e.vertex) === String(edge.vertex);
+                        });
+                        if(userVoteIndex === -1){
+                            topResults.push(edge);
+                        } else {    
+                            topResults[userVoteIndex] = edge;
+                        }
+                    } 
+                }
+                return res.send(topResults);
+            });
+    } else {
+        return res.send("Tried to get the top links from an project with an invalid ID");
+    }
+});
+
 router.get("/data/:id", async (req, res) => {
 	if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         Project.findById(req.params.id)
