@@ -14,6 +14,9 @@
 </head>
 <body>
 <%- include("../partials/navbar") %>
+<div id="header-links">
+    <a href="/wiki">Return to Wiki</a>
+</div>
 <div id="allContent" class="expanded">
     <section id="intro">
         <h1>Magnova Projects Portal</h1>
@@ -31,26 +34,49 @@
         </ul>
         <p>Ultimately, the goal is to make a game out of activism, socioforming a process that's more fun and effective for grassroots purposes than corporate-aimed project management suites. Projects provide a singular place to collect information on strategy, motivation, and skills that are relevant to pulling off some plan. This organizational structure makes it possible for ordinary people to just. do. it. without depending on corporations or the government.</p>
     </section>
-    <% if(projects?.length > 0){%>
-        <h2>Know: Recently Identified Projects</h2>
-        <p></p>
-        <div id="project-browse">
-            <% projects.forEach(function(project){ %>
-                <div class="project-snapshot" title="<%= project.name %>">
-                    <a href="project/<%=project._id%>">
-                        <div class="project-thumbnail"><img src="<%=project.image%>"></div>
-                        <h4>
-                            <% if(project.name.length <= 30){ %>
-                                <%= project.name %>
-                            <% } else { %>
-                                <%= `${project.name.slice(0, 26)}...` %>
-                            <% } %>
-                        </h4>
-                    </a>
-                </div>
-            <% }); %>
+    <section>
+        <% if(projects?.length > 0){%>
+            <h2>Existing Projects</h2>
+            <p></p>
+            <div id="project-browse">
+                <% projects.forEach(function(project){ %>
+                    <div class="project-snapshot" title="<%= project.name %>">
+                        <a href="project/<%=project._id%>">
+                            <div class="project-thumbnail"><img src="<%=project.image%>"></div>
+                            <h4>
+                                <% if(project.name.length <= 30){ %>
+                                    <%= project.name %>
+                                <% } else { %>
+                                    <%= `${project.name.slice(0, 26)}...` %>
+                                <% } %>
+                            </h4>
+                        </a>
+                    </div>
+                <% }); %>
+            </div>
+        <% } %>
+    </section>
+    <hr>
+    <section id="submission">
+        <div id="project-submission">
+            <h2>
+                Create a New Project
+            </h2>	
+            <div id="project-submitter">
+                <form action="/project" method="post">
+                    <div class="form-group">
+                        <input type="text" placeholder="Project name" name="project[name]">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" placeholder="Image URL" name="project[image]">
+                    </div>
+                    <button type="submit">
+                        Submit
+                    </button>
+                </form>
+            </div>
         </div>
-    <% } %>
+    </section>
 </div>
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="scripts/wiki.js"></script>

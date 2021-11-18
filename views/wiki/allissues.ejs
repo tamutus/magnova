@@ -13,6 +13,9 @@
 </head>
 <body>
 <%- include("../partials/navbar") %>
+<div id="header-links">
+    <a href="/wiki">Return to Wiki</a>
+</div>
 <div id="allContent" class="expanded">
 
     <section id="issues">
@@ -37,6 +40,27 @@
             </div>
         <% } %>
 	</section>
+    <hr>
+    <section id="submission">
+        <div id="issue-submission">
+            <h2>
+                Identify a New Issue
+            </h2>	
+            <div id="issue-submitter">
+                <form action="/issue" method="post">
+                    <div class="form-group">
+                        <input type="text" placeholder="Issue name" name="issue[name]">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" placeholder="Image URL" name="issue[image]">
+                    </div>
+                    <button type="submit">
+                        Submit
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
 </div>
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="scripts/wiki.js"></script>
