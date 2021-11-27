@@ -95,6 +95,7 @@ body {
     /* font-style: italic; */
     text-shadow: 0px 3px 0 #000;
     margin-bottom: 30px;
+    transition: font-size .3s ease-in-out;
 }
 #bio-links {
 	-ms-flex-line-pack: center;
@@ -521,6 +522,7 @@ div.meta-cube {
     border: 3px solid rgb(117, 210, 116);
     padding: 20px;
     margin: 15px;
+    transition: flex .3s ease-in-out;
 }
 .action-portal .action h2 {
     font-family: Orbitron;
@@ -541,6 +543,7 @@ div.meta-cube {
     background: linear-gradient(135deg, rgba(198,29,60,.59) 29%, rgba(37,0,65,.56) 80%);
     padding: 30px;
     margin-bottom: 30px;
+    transition: padding .3s ease-in-out, margin .3s ease-in-out;
 }
 .quote .author {
     margin-left: 30px;
@@ -1154,7 +1157,7 @@ h1.big-title {
 	h2, h2 em {
 		font-size: 30px;
 	}
-	h3 {
+	h3, .small-and-big .big-bullets li {
 		font-size: 22px;
 	}
     h4 {
@@ -1162,6 +1165,14 @@ h1.big-title {
     }
     p {
         font-size: 15px;
+    }
+    .quote {
+        margin-left: -15px;
+        margin-right: -15px;
+        padding: 15px;
+    }
+    .action-portal .action {
+        flex: 1 0 300px;
     }
 }
 @media screen and (max-width: 650px){
