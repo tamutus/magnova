@@ -1172,9 +1172,6 @@ h1.big-title {
         margin-right: -15px;
         padding: 15px;
     }
-    .action-portal .action {
-        flex: 1 0 300px;
-    }
 }
 @media screen and (max-width: 650px){
 	#allContent, #allContent.expanded {
@@ -1217,13 +1214,9 @@ h1.big-title {
             -ms-transform: translate(-130px, -25px) scale(.7);
                 transform: translate(-130px, -25px) scale(.7);
     }
-    .cheat-sheet > .model {
+    .small-and-big .big-bullets .cheat-sheet > .model, .action-portal .action {
         flex: 1 0 280px;
     }
-    .small-and-big .big-bullets {
-        flex: 1 0 280px;
-    }
-
 }
 @media screen and (max-height: 400px){
 	
