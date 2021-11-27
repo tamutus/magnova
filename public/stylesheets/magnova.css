@@ -1214,7 +1214,7 @@ h1.big-title {
             -ms-transform: translate(-130px, -25px) scale(.7);
                 transform: translate(-130px, -25px) scale(.7);
     }
-    .small-and-big .big-bullets .cheat-sheet > .model, .action-portal .action {
+    .small-and-big .big-bullets, .cheat-sheet > .model, .action-portal .action {
         flex: 1 0 280px;
     }
 }
