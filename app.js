@@ -52,7 +52,7 @@ app.use(favicon(path.join(__dirname, 'public/assets', 'magnova_favicon.png')));
 // ======================
 
 app.use(require('express-session')({
-	secret: "Redacted is a lesbian icon",
+	secret: process.env.SESSION_SECRET,
 	resave: false,
 	saveUninitialized: false
 }));

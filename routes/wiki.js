@@ -93,7 +93,7 @@ router.get("/search", async (req, res) => {
         // results["projects"] = results["projects"].filter(project => project.confidenceScore > 10);
     }
     Object.keys(results).forEach(key => {
-        results[key] = results[key].filter(item => JSON.parse(JSON.stringify(item)).confidenceScore > 3); // https://stackoverflow.com/a/36522374 and https://stackoverflow.com/a/35038179 explain why this JSON conversion is necessary.
+        results[key] = results[key].filter(item => JSON.parse(JSON.stringify(item)).confidenceScore > (Math.min(5, searchTerm.length))); // https://stackoverflow.com/a/36522374 and https://stackoverflow.com/a/35038179 explain why this JSON conversion is necessary.
     });
 
     if(req.query.locations === "true"){

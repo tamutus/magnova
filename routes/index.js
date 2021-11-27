@@ -2,7 +2,9 @@ const express = require('express'),
 		router = express.Router();
 
 router.get("/", (req, res) => {
-	res.redirect("/wiki");
+	res.render("home", {
+        title: "Magnova"
+    });
 });
 router.get("/nexus", (req, res) => {
 	res.render('forceGraph', {

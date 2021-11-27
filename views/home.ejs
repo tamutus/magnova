@@ -1,0 +1,284 @@
+<%- include("./partials/header") %>
+<% if(currentUser){ %>
+    <!-- <div class="landing-links">
+        <a href="/" class="landing-link"></a>
+        <a href="/" class="landing-link">Overview</a>
+        <a href="/" class="landing-link">Overview</a>
+    </div> -->
+<% } %>
+<section>
+    <h1 class="big-title">Magnova</h1>
+    <div class="small-and-big">
+        <ul class="big-bullets">
+            <li>Collaboratively solve global problems</li>
+            <li>Democratize the means of production</li>
+            <li></li>
+        </ul>
+        <div>
+            <p>Welcome to Magnova. This website is a hub for voluntary direct action and organizing. Providing a suite of always-free tools for identifying issues in the world that need to be solved and for coordinating the action to solve them, Magnova provides digital infrastructure that people need to govern themselves without money, exploitation, or repression of liberty.</p>
+            
+            <p>Many people are alienated by problems they feel powerless to address. The powerful entities that do exist, like large corporations and governments, are actually responsible for many of those problems, so it is unrealistic to depend on them to fix them. If we, The People, want to make the world more livable for all, then it falls on us to organize by creating a new system. Instead of copying the strategies of our exploiters, Magnova offers a completely new method for making things happen. It arose from the earnest question: "How could the management of an evolving, complex society be handled entirely with direct participatory democracy?"</p>
+        </div>
+    </div>
+</section>
+    
+    <p></p>
+    <section>
+        <h1>How does it work?</h1>
+        <div class="small-and-big">
+            <ul class="big-bullets">
+                <li>Document challenges that many face</li>
+                <li>Collaboratively overcome problems</li>
+                <li>Deploy projects locally with modifications</li>
+                <li>Sum community needs and wants</li>
+                <li>Track shared resources</li>
+                <li>Compile open-source formulas for social-profit production</li>
+                <li>Moneyless economy grows through voluntary action</li>
+                <li>Distribute surplus freely with priority to contributors</li>
+            </ul>
+        
+            <div>
+                <p>Magnova is a system of organizing action using grassroots and democratic principles. When it is fully developed, it will provide tools for different steps of mass action: identifying Issues in the world and their connections, designing Projects to address them, dividing Projects into Tasks that individuals can do, deploying Projects to different Locations, sharing and distributing Resources, and collecting Formulas for producing new Resources.</p>
+                <p>Building this system requires a lot of data and a cogent organization of it. Magnova leverages a document-oriented database, MongoDB, to organize the kinds of data we need into what are called "models". Magnova's API allows users to read, create, and edit instances of each model. Different pages on the site allow users to navigate this data and modify its connections in different ways. The following models make it all possible:</p>
+                <p><em>(Click a card to flip it and learn more)</em></p>
+            </div>
+        </div>
+</section>
+
+<div class="cheat-sheet">
+    <div class="model">
+        <div class="cheat">
+            <h2>Issues</h2>
+            <h4>Identifying the problem</h4>
+        </div>
+        <div class="study">
+            <h4>Issues</h4>
+            <div class="notes">
+                <p>Problem-solving starts with identifying the problem. On Magnova, any registered user can create a page for something they see wrong with the world: an Issue.</p>
+                <p>News cycles are short, and people either don't know or forget about what's going on. The Issue page is a place to record the news, explain the problems with the status quo, offer moral reasoning for action, and link Project pages.</p>
+                <p>Every current event has a history and often systemic causes. To address problems, it is important to address the causes rather than merely the symptoms. To that end, Magnova gives registered users the ability to assign an Issue as a contributing factor to another Issue, and anyone can navigate this node map in the Nexus (link in the top-left Menu). Complex problems can democratically be broken down into their underlying factors.</p>
+                <p>Soon, it will be possible to map Issues to Locations to create Local Issue pages, and to measure their material "Harms".</p>
+            </div>
+        </div>
+    </div>
+    <div class="model">
+        <div class="cheat">
+            <h2>Projects</h2>
+            <h4>Planning scalable solutions</h4>
+        </div>
+        <div class="study">
+            <h4>Projects</h4>
+            <div class="notes">
+                <p>Templating civic engagement as direct action opportunites, Projects act as hubs for:</p>
+                <ul>
+                    <li>Organizing coherent plans</li>
+                    <li>Establishing what resources are needed</li>
+                    <li>Sharing know-how</li>
+                    <li>Making direct action scalable</li>
+                </ul>
+                <p>Soon, you will be able to deploy Projects to Locations as Local Projects, allowing for precision adaptation in varying circumstances.</p>
+            </div>
+        </div>
+    </div>
+    <div class="model">
+        <div class="cheat">
+            <h2>Tasks</h2>
+            <h4>Direct action you can take</h4>
+        </div>
+        <div class="study">
+            <h4>Tasks</h4>
+            <div class="notes">
+                <p>Setting bold goals is not action in and of itself. For change to happen, people must do things. On this platform, anybody can post Tasks that make up a Project, which everybody sees and anybody can do.</p>
+                <p>Planned features for Tasks:</p>
+                <ol>
+                    <li>Local Tasks + the ability to sign up to do them</li>
+                    <li>Designating Tasks as prerequisites to others</li>
+                    <li>Recurring tasks</li>
+                    <li>Progress and completion reports to guide others doing the same Task elsewhere</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+    <div class="model">
+        <div class="cheat">
+            <h2>Locations</h2>
+            <h4>Scaling, evolution, and community</h4>
+        </div>
+        <div class="study">
+            <h4>Locations</h4>
+            <div class="notes">
+                <p>Locations are the bridge between general plans and action. Issues, Projects, and Tasks are conceptual blueprints that you will be able to deploy to any Location. Our development goal is to create a UI that allows community members to create local addenda to those blueprints and clone any Project along with all its Tasks.</p>
+                <p>You can explore Locations using the Map page (link in the top-left Menu). Unlike other maps, each Location can be divided into sublocations using our geoJSON submission form, providing different geopolitical scales at which Issues can be analyzed, Harms can be measured, Projects can be deployed, and Resources can be shared.</p>
+            </div>
+        </div>
+    </div>
+    <div class="model">
+        <div class="cheat">
+            <h2>Resources</h2>
+            <h4>A library for sharing material goods</h4>
+        </div>
+        <div class="study">
+            <h4>Resources</h4>
+            <div class="notes">
+                <p>Creating a Resource-Based Economy (RBE) requires a thorough accounting of what resources exist and are needed. To build the foundations of a globally expansible RBE, Magnova will have a database of Resources that interfaces with Projects, Tasks, and Locations. Specifically, a Resource will be what we call the generic form of some physical item, such as raw material, a tool, food, or a commodity.</p>
+                <p>Each Resource will store listings of physical units that the community has ready to share, as well as a list of features/dimensions a unit can have. For instance, the Resource page for a "Drill press" might specify that it can be measured by its horsepower and swing size, that it can have a depth stop, that one user is giving one away, and that another user can share theirs on weekends.</p>
+                <p>Registered Magnova users will be able to create lists of Resources that they need, whether to borrow or keep, once or on a recurring basis. Using the lists of all users, a list of needs will be generated for the Locations where those users live. With Formulas and Projects, it will be possible to create grassroots production. As the RBE grows, this production can transition from local DIY to industrially automated processes and logistics.</p>
+            </div>
+        </div>
+    </div>
+    <div class="model">
+        <div class="cheat">
+            <h2>Formulas</h2>
+            <h4>Consolidating 🔄 Open-sourcing<br>Production Knowledge</h4>
+        </div>
+        <div class="study">
+            <h4>Formulas</h4>
+            <div class="notes">
+                <p>Resource pages will link to any number of user-submitted Formulas. A Formula is a community-editable guide that links to the Resources it yields, Resources it consumes, and tool Resources.</p>
+                <p>The open-source movement is impressive. People around the world figure out accessible ways to create things and share that information with the public. There are numerous websites that provide DIY guides. The passion of this community demonstrates that ample inventors and engineers want to share what they make.</p>
+                <p>Magnova aims to plug those guides into Resources, and the community will be able to create new ones directly on Magnova. A Formula will be able to specify the features and dimensions of a Resource that the Formula will yield.</p>
+            </div>
+        </div>
+    </div>
+    <!-- <div class="model">
+        <div class="cheat">
+            <h2></h2>
+            <h4></h4>
+        </div>
+        <div class="study">
+            <h4></h4>
+            <div class="notes">
+                <p></p>
+            </div>
+        </div>
+    </div> -->
+</div>
+<section>
+    <h1>What can Magnova accomplish?</h1>
+    <div class="small-and-big">
+        <ul class="big-bullets">
+            <li>Empower meaningful, global community-building</li>
+            <li>Democratize the means of production</li>
+            <li>Scaffold a voluntary, moneyless, resource-based economy</li>
+            <li>Provide living essentials for free</li>
+        </ul>
+        <div>
+            <p>Magnova's Issue-Project-Task pipeline is a radical re-envisioning of the flow of human labor. It crowdsources each step of the problem-solving process to democratize humanity in a way that's impossible through social media and existing infrastructure. By offering grassroots management tools catering to social-profit production and services, it replaces the profit incentive with non-transactional mutual aid. Most organizations handle the division of labor by having a rich person or social elite tell employees what to do. We instead provide a method for communities to collectively figure out the work that needs to be done and coordinate voluntary action.</p>
+        </div>
+    </div>
+    <p>Every living being has certain quantifiable needs for survival, with food, clean water, and shelter topping the list. Human needs and wants go beyond these basics, evolving with psychological discoveries, technological inventions, and medical breakthroughs. Capitalism posits markets as the best way to nurture innovation and allocate resources, yet markets have yielded us a world where there are more unoccupied houses than homeless people, people with inadequate health insurance suffering from and dying to preventable/treatable diseases, and food/technology/clothes being thrown away. An economy is a way of allocating scarce resosurces. If your economy incentivizes the scarcification of resources, it is a bad economy.</p>
+    <p>We propose an economy of voluntary mutual aid and social profit. Humans are happiest and work the most passionately when they feel like they are part of a community that cares about them, and where generosity can change the world for the better. Magnova thus reimagines labor as a set of voluntary contributions that sustain the community, and replaces exchange with demand-driven production + egalitarian distribution. Where work in the capitalist economy is gatekept behind years of commitment, Magnova divides work into specific Tasks that users will be able to associate with Skills (and vice versa), directly integrating education into labor.</p>
+</section>
+<section>
+    <h1>Social Profit Economy</h1>
+    <div class="small-and-big">
+        <ol class="big-bullets">
+            <li>Make lists of Resources you need and want</li>
+            <li>Magnova outputs members' collective needs</li>
+            <li>Produce or donate things others need</li>
+            <li>Trusted member verifies work</li>
+            <li>Become a trusted member with by contributing time consistently</li>
+            <li>Receive free deliveries</li>
+            <li>Higher priority delivery for more contributions</li>
+        </ol>
+        <div class="quote">
+            <h3 class="author">From <a href="/users/lavra">Lavra</a>, the programmer:</h3>
+            <div class="speech">
+                <p>The problem isn’t that we don’t have enough bread, houses, or phones (i.e. “scarcity”). The issues lie in how these goods are produced and accessed. The market forces of supply and demand are both manipulated by wealthy proponents of “free markets” and by the politicians they finance to create artificial scarcity and facilitate extravagantly profitable price gouging. As a result, <a href="https://www.mckinsey.com/featured-insights/coronavirus-leading-through-the-crisis/charting-the-path-to-the-next-normal/the-cost-of-basic-necessities-rose-much-faster-than-inflation-this-century">prices for everything essential are rising way faster than wages</a>.</p>
+                <p>Let’s build infrastructure that is designed with the principles of human dignity at the forefront. Practice giving things away. Pay things forward to people who are needier than us. Build up our communities with mutual aid and set examples of social profit. Help a friend cover an emergency bill if we get a nice bonus. Talk to people on the fence. Teach people about the possibilities of a world with unconditional income. We can help build the new world in the shell of the old.</p>
+            </div>
+            <p><a href="https://moneylesssociety.com/economy/you-shouldnt-have-to-pay-to-be-alive/" title="You Shouldn't Have to Pay to Be Alive">Read more</a></p>
+        </div>
+    </div>
+    <p>Everyone will be able to create a list of Resources they <em>need</em>, and a separate list for those they <em>want</em>. Compiling these lists for all users will provide a list of production goals that the community wants to meet. Based on those needs, the Magnova community will build up a repertoire of Formulas for producing those Resources. Projects will be created to blueprint production processes, and Tasks set up that will allow Magnova users to get in on the action.</p>
+            <p>When you complete Tasks, you will be able to submit a record of what you did, which will be verified by trusted community members. The hours that you contribute to production or community-beneficial Tasks will be recorded. For a given Resource, Magnova will provide makers a distribution list of people within a shipping distance of their choosing. Magnova won't mandate logistical decisions, but we will provide tools to sort the distribution list by the total number of hours a person has contributed, choosing a bundle amount for the Resource in question, and delivering that amount to each person on the list in order of hours they've contributed.</p>
+    
+    
+</section>
+<section>
+    <h1>What can I do?</h1>
+    <p>Magnova is a project driven by the action of its community members. If you believe in the society we are trying to build, you can make it happen sooner by contributing to this open-source database, spreading the word, and getting involved in action that will help your community. There are numerous ways you can be help this movement and more to come with future features. Magnova is explicitly designed to enable small individual contributions to vortex together into paradigm shifts.</p>
+    <% if(!currentUser){ %>
+        <p>Any visitors to this site can do the things in white text, and anybody who registers can do the actions in pink text.</p>
+    <% } %>
+    <div class="action-portal">
+        <div class="action">
+            <h2>Student</h2>
+            <ul>
+                <li>Search our content from the <a href="/wiki">Wiki page</a> to get up to speed on the state of the world and activism</li>
+                <li class="login-requirement">Ask questions in the Discuss section of any wiki page</li>
+                <li class="login-requirement">When you learn about current events elsewhere, save what you learn in the <a href="wiki">Wiki</a></li>
+            </ul>
+        </div>
+        <div class="action">
+            <h2>News Hound</h2>
+            <ul>
+                <li>Share Magnova pages on social media</li>
+                <li class="login-requirement">Edit <a href="wiki">Wiki</a> pages to add links to informative articles</li>
+                <li class="login-requirement">Summarize external links in the <a href="/wiki">Wiki</a></li>
+                <li class="login-requirement">Get involved in the Discuss section of any <a href="/wiki">Wiki</a> page</li>
+                <li class="login-requirement">Create <a href="/project">Project</a> pages to describe successful activism</li>
+            </ul>
+        </div>
+        <div class="action">
+            <h2>Analyzer</h2>
+            <ul>
+                <li>Unpack the connections between Issues and Projects in the <a href="/nexus">Nexus</a></li>
+                <li class="login-requirement">Link <a href="/wiki/all">Issues</a> to their causes on their wiki page or in the <a href="/nexus">Nexus</a></li>
+                <li class="login-requirement">Link <a href="/project">Projects</a> to Issues they can alleviate</li>
+            </ul>
+        </div>
+        <div class="action">
+            <h2>Planner</h2>
+            <ul>
+                <li>Share this platform's tools with activists you know</li>
+                <li class="login-requirement">Share your wild idea for paradigm shift as a new Project</li>
+                <li class="login-requirement">Add Tasks to Projects that will help complete or sustain them</li>
+            </ul>
+        </div>
+        <div class="action">
+            <h2>Volunteer</h2>
+            <ul>
+                <li>Introduce Magnova to organizations with whom you associate</li>
+                <li>Check the <a href="/project">Projects</a> portal to find organizations who inspire you</li>
+                <li class="login-requirement">Volunteer for Tasks that will benefit the community</li>
+                <li class="login-requirement">Tell us <a href="/wiki/61154178c1aa0c00156455b9">how Magnova could be better for you</a></li>
+            </ul>
+        </div>
+        <div class="action">
+            <h2>Digital Wizard</h2>
+            <ul>
+                <li>Get involved with <a href="/project/60f716cf5759a57c20b29d80">building Magnova</a></li>
+                <li class="login-requirement">Add geoJSON for the subdivisions of a <a href="/locations">Location</a></li>
+                <li class="login-requirement"><a href="/wiki/61154178c1aa0c00156455b9">Submit bugs</a></li>
+            </ul>
+        </div>
+
+    </div>
+</section>
+
+<!--
+Get to the bottom of it
+{marquee} "Why are children being put in cages? How did the Taliban win the war in Afghanistan? Why do laws passed in the US have zero correlation to what voters want passed?" {/marquee}
+On social media and in news outlts, information is like dust on the wind. It spreads in cycles, and is easily forgotten. Invest your energy into a grassroots information network that builds movements instead of abandoning them for the next hot topic. If you are learning about an issue, why not record what you learned in the collective knowledge? Even if you're just linking to articles on other sites, Magnova's wiki bridges the chasm between knowledge about what's wrong and what can be done to help.
+
+Convince people the world needs to change
+Magnova's wiki empowers your social advocacy lifestyle. Instead of It specifically welcomes information about and reasoning for why things should change.
+
+Do something that improves life on Earth
+Make stuff for myself and others
+
+Teach people how to make things
+Do you have experience building things? Do you work in a factory, are you a DIY enthusiast, or are you some other kind of creator? Create and edit formulas for Resources, teaching people how to make one thing or set of things out of others.
+
+Help build a structured location database
+Magnova's <a href="/locations">Map</a> provides a new, convenient way to view the relationships between locations at different levels. Each location stores data for its shape (geoJSON) and references to all of its sublocations. Locations serve as hubs for identifying local issues, projects, shared resources, and action opportunities. By finding and uploading geoJSON for the internal administrative boundaries of Earth's nations at each level, you can make it possible for more local action to be organized.
+
+Get free stuff
+Share things you don't really use but don't want to get rid of. Let other people use your tools.
+
+Imagine us as:
+The Magnova Investigation Agency. We investigate what's wrong with the world, document it publicly, and do the same for action that can create measurable change.  -->
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="scripts/home.js"></script>
+<%- include("./partials/footer") %>

@@ -88,7 +88,7 @@ a, a:visited {
 }
 #search {
     display: inline-block;
-    width: min(800px, 80vw);
+    width: 80vw;
     margin-right: 100px;
 }
 #search-results > * {
@@ -371,6 +371,7 @@ h4.result-name {
     height: 200px;
     text-align: left;
     margin: 15px 10px;
+    transition: width .3s ease-in-out, height .3s ease-in-out;
 }
 .issue-snapshot:hover img, .project-snapshot:hover img {
     filter: contrast(170%) grayscale(30%) brightness(1.6);
@@ -390,6 +391,7 @@ h4.result-name {
     -ms-flex-line-pack: center;
         align-content: center;
     margin-bottom: 10px;
+    transition: width .3s ease-in-out, height .3s ease-in-out;
 }
 .issue-thumbnail img, .project-thumbnail img {
     max-width: 200px;
@@ -397,6 +399,21 @@ h4.result-name {
     margin: auto;
     border-radius: 10px;
     transition: filter .5s ease-out;
+    transition: max-width .3s ease-in-out, max-height .3s ease-in-out;
+}
+@media screen and (max-width: 800px){
+    .issue-snapshot, .project-snapshot {
+        width: 150px;
+        height: 150px;
+    }
+    .issue-thumbnail, .project-thumbnail {
+        width: 150px;
+        height: 100px;
+    }
+    .issue-thumbnail img, .project-thumbnail img {
+        max-width: 150px;
+        max-height: 100px;
+    }
 }
 .issue-snapshot a h4, .project-snapshot a h4 {
     margin: auto;
@@ -485,7 +502,7 @@ input.topic-name {
     cursor: s-resize;
 }
 
-#image-container, #wiki-overview {
+#image-container, #search {
     flex: 1 1 67%;
     margin: 40px auto 20px auto;
 }

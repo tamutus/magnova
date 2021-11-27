@@ -222,10 +222,10 @@ let toolSize = 45;
 let issueTools = [
     { name: "Causes", f: showLinks, class: "show-links"},
     { name: "Link Issue", f: linkIssue, class: "add-link"},
-    { name: "Projects", f: showProjects, class: "show-links"},
+    { name: "Link Project", f: linkProject, class: "add-link"},
     { name: "Unload", f: unload, class: "unloader"},
     { name: "Wiki", f: goToWiki, class: "wiki-link"},
-    { name: "Link Project", f: linkProject, class: "add-link"}
+    { name: "Projects", f: showProjects, class: "show-links"}
     // { name: "Location", f: heatmap},
 ];
 let projectTools = [
