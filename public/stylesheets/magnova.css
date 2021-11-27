@@ -88,6 +88,7 @@ body {
     display: flex;
     flex-flow: column nowrap;
     align-self: flex-start;
+    transition: flex .3s ease-in-out;
 }
 .small-and-big .big-bullets li {
     font-family: Montserrat;
@@ -1201,7 +1202,7 @@ h1.big-title {
 		    -ms-transform: scale(.6) translate(20px, -20px);
 		        transform: scale(.6) translate(20px, -20px);
 	}
-	#conrols {
+	#controls {
 		-webkit-transform: scale(.4);
 		    -ms-transform: scale(.4);
 		        transform: scale(.4);
@@ -1216,6 +1217,13 @@ h1.big-title {
             -ms-transform: translate(-130px, -25px) scale(.7);
                 transform: translate(-130px, -25px) scale(.7);
     }
+    .cheat-sheet > .model {
+        flex: 1 0 280px;
+    }
+    .small-and-big .big-bullets {
+        flex: 1 0 280px;
+    }
+
 }
 @media screen and (max-height: 400px){
 	
