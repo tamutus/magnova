@@ -1,7 +1,7 @@
 <%- include('../partials/header'); %>
 <ul>
     <% for (userListing of allUsers){ %>
-        <li><a href=<%= `/users/${userListing.username}` %>><%= userListing.username %></a></li>
+        <li><a href=<%= `/users/${encodeURI(userListing.username)}` %>><%= userListing.username %></a></li>
     <% } %>
 </ul>
 <%- include('../partials/footer'); %>
