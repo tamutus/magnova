@@ -87,7 +87,7 @@
             <% if(project.issues && project.issues.edges.length > 0 ) { %>
                 <p>The Magnova community says <%= project.name %> addresses the following issues.
                 <% if(currentUser) { %>
-                    If you agree that <%= project.name %> will help combat a given issue below, press the "Sub-issue" button next to it. If you think they are not actually related, click the "Not" (a sub-issue) button.
+                    If you agree that <%= project.name %> will help address a given issue below, press the "Helps" button next to it. If you think the issue will NOT be helped with this project, click the "Misses" button.
                 <% } else { %>
                     (Registered users can upvote/downvote these connections.)
                 <% } %>
@@ -120,9 +120,11 @@
                     <div id="task-viewer" class="minimized">
                         <div id="task-buttons" class="hidden">
                             <span id="task-return-message"></span>
+                            <a id="task-delete-button" onclick="deleteActiveTask();"><button>Delete</button></a>
                             <a id="task-edit-button" onclick="toggleTaskEditing();"><button>Edit task</button></a>
                             <a id="task-cancel-button" onclick="stopTaskEditing();" class="hidden"><button>Cancel</button></a>
-                            <a id="task-cancel-button" onclick="displayThisTask();"><button>Unload</button></a>
+                            <a id="task-discuss-button"><button>Discuss</button></a>
+                            <a id="task-unload-button" onclick="displayThisTask();"><button>Unload</button></a>
                         </div>
                         <div id="task-display">
                             <em>Viewing task:</em>

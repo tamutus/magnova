@@ -36,6 +36,14 @@
 #task-buttons.hidden {
     height: 0;
 }
+@media screen and (max-width: 800px){
+    #task-buttons {
+        height: 120px;
+    }
+    #task-buttons a {
+        margin-bottom: 10px;
+    }
+}
 #task-buttons a {
     margin-left: 30px;
     height: 50px;
@@ -49,6 +57,9 @@
 }
 #task-buttons a button {
     width: 115px;
+}
+#task-delete-button button {
+    background-color: red;
 }
 #task-return-message {
     -webkit-transform: scaleX(0);

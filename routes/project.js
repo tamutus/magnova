@@ -260,6 +260,7 @@ router.post("/addtask/:projectid", isLoggedIn, async (req, res) => {
                                                 });
                                                 project.tasks.markModified("edges");
                                                 project.tasks.save();
+                                                task.creator = currentUser;
                                                 return res.send(task);
                                             }
                                         });
@@ -649,6 +650,10 @@ router.delete("/toissue/:projectid/:issueid", isLoggedIn, async (req, res) => {
         return res.send("Either the project or issue you were trying to disconnect had an improper ID");
     }
 });
+
+// router.get("/deploy/:templateID", (req, res) => {
+    
+// })
 
 router.get("/all", (req, res) => {
     Project.find({}, (err, projects) => {

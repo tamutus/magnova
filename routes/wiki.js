@@ -2,6 +2,7 @@ const	express = require('express'),
 		router = express.Router(),
 		Issue = require('../api/issue/issue.template'),
 		Issuegraph = require("../api/issue/issue.graph"),
+        LocalIssue = require("../api/issue/issue.local"),
         Project = require("../api/project/project.template"),
         Projectgraph = require("../api/project/project.graph"),
         Location = require("../api/maps/location.model"),
@@ -165,7 +166,50 @@ router.get("/all", (req, res) => {
         }
     });
 });
-
+// router.get("/local/:id", (req, res) => {
+//     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+//         LocalIssue.findById(req.params.id)
+//             // Populate its own fields,
+//             .populate("localizer", "username")
+//             .populate("location")
+//             .populate("editors", "username")
+//             .populate("resources.form")
+//             .populate("projects")
+//             // and populate some of its template's fields
+//             .populate("template")
+            
+//             //     populate: {
+//             //         path: "projects",
+//             //         populate: {
+//             //             path: "edges.vertex",
+//             //             select: "name tasks",
+//             //             populate: {
+//             //                 path: "tasks",
+//             //                 populate: {
+//             //                     path: "edges.vertex",
+//             //                     populate
+//             //                 }
+//             //             }
+//             //         }
+//             //     }
+//             // })
+//             .exec((err, instance) => {
+//                 if(err){
+//                     console.log(err);
+//                     return res.status(404).redirect("/wiki/nothing");
+//                 } else if(instance){
+//                     Location.findById(instance.location._id);
+//                     return res.render("wiki/viewLocal", {
+//                         title: `${instance.template.name} in ${instance.location.name}`
+//                     })
+//                 } else {
+//                     return res.status(404).redirect("/wiki/nothing");
+//                 }
+//             });
+//     } else {
+//         return res.status(404).redirect("/wiki/nothing");
+//     }    
+// });
 // Check whether req.params.id is mongoose objectid by this method, https://stackoverflow.com/a/29231016/6096923 , and if it's not look up at the path. refactor to have stable paths.
 router.get('/:id', (req, res) => {
 	if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
@@ -181,8 +225,11 @@ router.get('/:id', (req, res) => {
                 populate: { path: "edges.vertex" }
             })
             .populate("tags")
-            .populate("resources.resource")
-            .populate("instances")
+            .populate("resources.form")
+            .populate({
+                path: "instances",
+                populate: "location"
+            })
             .populate({
                 path: "projects",
                 populate: { path: "edges.vertex" }

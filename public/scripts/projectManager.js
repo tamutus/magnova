@@ -4,6 +4,7 @@ const   newTaskForm = document.querySelector("#task-submission form"),
         taskDisplay = d3.select("#task-display"),
         taskButtons = taskViewer.select("#task-buttons"),
         taskEditButton = taskButtons.select("#task-edit-button"),
+        taskDeleteButton = taskButtons.select("#task-delete-button"),
         taskCancelButton = taskButtons.select("#task-cancel-button"),
         taskMessageSpan = taskButtons.select("#task-return-message"),
         taskNameDisplay = taskDisplay.select("#task-name"),
@@ -11,7 +12,14 @@ const   newTaskForm = document.querySelector("#task-submission form"),
         taskCreationDisplay = taskDisplay.select("#task-creation"),
         taskCompletionDisplay = taskDisplay.select("#task-completion"),
         taskDataDisplays = taskDisplay.selectAll(".task-data"),
+        loggedInDiv = d3.select("#logged-in"),
         rootStyle = document.documentElement;
+
+let userID, username;
+if(!loggedInDiv.empty()){
+    userID = d3.select("#hidden-user-id").text();
+    username = d3.select("#username").text();
+}
 
 window.addEventListener('resize', updateDimensions);
 updateDimensions();
@@ -71,6 +79,7 @@ function displayThisTask(task){
         taskCompletionDisplay.select("div").select("p").text("");
         taskCreationDisplay.html("");
         d3.select("#task-info-text").html("");
+        d3.select("#task-discuss-button").attr("href", "");
         taskButtons.classed("hidden", true);
         if(same){
             activeTask = null;
@@ -85,17 +94,26 @@ function displayThisTask(task){
         // Set height of textarea for taskCompletion
         rootStyle.style.setProperty('--completionInputHeight', `${taskCompletionDisplay.style("height")}`);
 
+        // Fill task display with info for this task
         taskNameDisplay.select("h3").text(task.name);
         taskCreationDisplay.html(`<p>Created on ${new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", timeZoneName: 'short'}).format(Date.parse(task.creationDate))} by <a href="/users/${task.creator.username}">${task.creator.username}</a></p>`);
         taskCompletionDisplay.select("div").select("p").text(task.completionRequirements);
         d3.select("#task-info-text").html(task.info);
-        if(!d3.select("#logged-in").empty()){
+        d3.select("#task-discuss-button").attr("href", `/talk/${task.talkpage}`);
+        if(userID){
             taskButtons.classed("hidden", false);
+            taskDeleteButton.classed("hidden", !(userID === String(task.creator._id) || username === "lavra"));
         }
     }
     activeTask = task;
 }
+
+let pendingCreation = false;
+
 async function createTask(){
+    if(pendingCreation){return};
+    pendingCreation = true;
+
     if(routeBase === "project"){
         let formInput = new FormData(newTaskForm);
         let newTask = {
@@ -109,16 +127,30 @@ async function createTask(){
             },
             body: JSON.stringify(newTask)
         })
-        .then(res => handleErrors(res))
+        .then(handleErrors)
         .then(res => res.json())
         .then(task => {
             displayTasks(topicID);
             displayThisTask(task);
             d3.select(newTaskForm).selectAll("input").property("value", "");
+            pendingCreation = false;
         })
-        .catch(err => {
-            console.error(err);
-        });
+        .catch(console.error);
+    }
+}
+
+async function deleteActiveTask(){
+    if(window.confirm(`Do you really want to delete the task "${activeTask.name}"?`)){
+        console.log(activeTask);
+        let deletedMessage = await fetch(`/task/${activeTask._id}`, {
+            method: "DELETE"
+        })
+        .then(handleErrors)
+        .then(res => res.text())
+        .catch(console.error);
+        console.log(deletedMessage);
+        await displayTasks(topicID);
+        displayThisTask();
     }
 }
 
@@ -245,3 +277,26 @@ function displayTaskMessage(message){
     void taskMessageSpan.node().offsetWidth; // See https://stackoverflow.com/questions/60686489/what-purpose-does-void-element-offsetwidth-serve for more info
     taskMessageSpan.classed("revealed", true);
 }
+
+  // ***************** //
+ // ***** TO DO ***** //
+// ***************** //
+// Recreate the taskgraph model as something like this: 
+// const TaskgraphSchema = {
+//     taskID: id,
+//     prerequisites: [taskID],
+//     enablesTasks: [taskID]
+// };
+
+// Both here and in the route, have cycle checking as follows:
+// In the route for designating task A as a prerequisite to task B, do DFS of B's enabled tasks and store each ID in temp array.
+// If task A's id shows up, forbid the action and inform the user where the cycle is.
+// If it doesn't, add B to A's enablesTasks array and A to B's prerequisites array
+
+// When removing prerequisite task A from task B, recreate A's enablesTasks array  remove 
+// Load subtasks
+// push the task list to the left?
+// 
+// Create a grid of nodes with d3
+
+// Cycle detection algorithm

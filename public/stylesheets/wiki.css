@@ -398,8 +398,7 @@ h4.result-name {
     max-height: 150px;
     margin: auto;
     border-radius: 10px;
-    transition: filter .5s ease-out;
-    transition: max-width .3s ease-in-out, max-height .3s ease-in-out;
+    transition: max-width .3s ease-in-out, max-height .3s ease-in-out, filter .5s ease-out;
 }
 @media screen and (max-width: 800px){
     .issue-snapshot, .project-snapshot {

@@ -495,12 +495,18 @@ function updateSubissues(){
            connectionVoteEnter
                .append("button")
                    .classed("upvote", true)
-                   .text("Sub-issue")
+                   .text(d => {
+                       if(routeBase === "wiki"){return "Sub-issue"}
+                       if(routeBase === "project"){return "Helps"}
+                   })
                    .on("click", edge => upvoteIssueLink(topicID, edge.vertex._id));
            connectionVoteEnter
                .append("button")
                    .classed("downvote", true)
-                   .text("Not")
+                   .text(d => {
+                        if(routeBase === "wiki"){return "Not"}
+                        if(routeBase === "project"){return "Misses"}
+                    })
                    .on("click", edge => downvoteIssueLink(topicID, edge.vertex._id));
        }
        connectionSelection.exit().remove();
@@ -549,12 +555,12 @@ function updateProjects(){
             projectVoteEnter
                 .append("button")
                     .classed("upvote", true)
-                    .text("Relevant")
+                    .text("Helpful")
                     .on("click", edge => upvoteProjectLink(edge.vertex._id, topicID));
             projectVoteEnter
                 .append("button")
                     .classed("downvote", true)
-                    .text("Not")
+                    .text("Misses")
                     .on("click", edge => downvoteProjectLink(edge.vertex._id, topicID));
         }
         projectLinkSelection.exit().remove();

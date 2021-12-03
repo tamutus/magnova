@@ -520,7 +520,7 @@ div.meta-cube {
     align-items: center;
     justify-content: flex-start;
     background-color: rgb(93, 111, 50);
-    border: 3px solid rgb(117, 210, 116);
+    border: 7px outset rgb(117, 210, 116);
     padding: 20px;
     margin: 15px;
     transition: flex .3s ease-in-out;
