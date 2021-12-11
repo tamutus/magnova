@@ -40,8 +40,8 @@ font-weight: 700;
 }
 
 ::selection {
-    background-color: rgb(245, 154, 68);
-    color: rgb(55, 1, 87);
+    background-color: rgb(4, 27, 91);
+    color: rgb(53, 255, 101);
 }
 body {
 	background: -o-linear-gradient(100deg, rgb(209, 105, 2), rgba(94, 49, 105, 1) 40%, rgba(44, 23, 136, 1) 80%, rgba(46, 8, 77, 1));

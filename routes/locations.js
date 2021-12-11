@@ -268,6 +268,23 @@ router.put("/geometry/:id", isLoggedIn, (req, res) => {
         return res.send("Tried to edit geometry for a location with an invalid ID");
     }
 });
+router.get("/geometry/:id", (req, res) => {
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        Location.findById(req.params.id, (err, location) => {
+            if(err){
+                console.log(err);
+                return res.send(`Error finding a location at ID ${req.params.id}: ${err}`);
+            } else if(!location){
+                return res.send(`Can't find a location at that ID`);
+            } else {
+                return res.send(location.geometry);
+            }
+        });
+    } else {
+        return res.send("Tried to get geometry for a location with an invalid ID");
+    }
+});
+
 router.put("/color/:id", isLoggedIn, (req, res) => {
     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         Location.findById(req.params.id, (err, location) => {

@@ -7,6 +7,7 @@ const pageID = window.location.pathname.slice(6);
 let pageData,
     threadSelection = d3.select("#threads").selectAll(".thread"),
     comments = [],
+    activeThreadIndex,
     currentThread = {},
     commentSelection = d3.select("#comments").selectAll("div.comment"),
     scrollReturn,
@@ -20,9 +21,13 @@ const   currentUserIdDiv = d3.select("#hidden-user-id"),
         threadArea = d3.select("#threads"),
         threadContents = threadViewer.select("#thread-contents"),
         threadIndexDiv = threadContents.select("#thread-index"),
-        threadTitle = threadContents.select("#thread-title"),
+        threadTitleContainer = threadContents.select("#thread-title-container"),
+        threadTitle = d3.select("#thread-title");
+        titleChange = threadContents.select("#title-change"),
+        newThreadTitle = titleChange.select("#new-thread-title"),
         commentBox = threadContents.select("#comment-container"),
-        newCommentInput = threadContents.select("#new-comment");
+        newCommentInput = threadContents.select("#new-comment"),
+        messageSpan = d3.select("#return-message");
 if(!currentUserIdDiv.empty()){
     currentUserID = currentUserIdDiv.text();
 }
@@ -37,7 +42,7 @@ async function updateThreads(){
             threadArea.html("");
             threadSelection = threadArea.selectAll(".thread")
                 .data(pageData.threads
-                    .slice(0)
+                    .filter(thread => !thread.deleted)
                     .sort(function(x, y){
                         return d3.ascending(y.lastActivity, x.lastActivity);
                     }), 
@@ -113,6 +118,62 @@ async function openThread(div){
     setParams(index);
     openThreadAtIndex(index);
 }
+function changeThreadSubject(){
+    const opening = titleChange.classed("hidden");
+    if(opening){
+        newThreadTitle.property("value", threadTitle.text());
+    }
+    threadTitleContainer.classed("hidden", opening);
+    titleChange.classed("hidden", !opening);   
+}
+
+async function submitThreadTitle(){
+    const newSubject = newThreadTitle.property("value");
+    if(window.confirm(`You would like to change this thread's name to ${newSubject}?`)){
+        fetch(`/talk/threadsubject/${pageID}/${activeThreadIndex}`, {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({newSubject: newSubject})
+        })
+            .then(handleErrors)
+            .then(res => res.text())
+            .then(res => {
+                displayMessage(res);
+                if(res === "Saved"){
+                    threadTitle.text(newThreadTitle.property("value"));
+                    changeThreadSubject();
+                }
+            })
+            .catch(console.error);
+    }
+}
+
+function displayMessage(message){
+    messageSpan.classed("revealed", false);
+    void messageSpan.node().offsetWidth;
+    messageSpan.text(message);
+    messageSpan.classed("revealed", true);
+}
+
+async function deleteActiveThread(){
+    if(window.confirm("Are you sure you want to delete this thread? Cannot be undone")){
+        fetch(`/talk/thread/${pageID}/${activeThreadIndex}`, {
+            method: "DELETE",
+        })
+            .then(res => handleErrors(res))
+            .then(res => res.text())
+            .then(res => {
+                if(res === "success"){
+                    window.location.href = `${baseURL}talk/${pageID}`;
+                } else {
+                    console.error(res);
+                }
+            })
+            .catch(console.error);
+    }
+}
 
 function setParams(threadIndex, commentIndex){
     const params = new URLSearchParams(window.location.search);
@@ -138,6 +199,7 @@ function loadCommentAtIndex(index){
 window.addEventListener("popstate", event => {
     const params = new URLSearchParams(window.location.search);
     if(!params.has("thread")){
+        activeThreadIndex = undefined;
         threadIndexDiv.text("");
         threadViewer.classed("hidden", true);
         viewerBackdrop.classed("hidden", true);
@@ -160,7 +222,7 @@ async function openThreadAtIndex(index, commentIndex){
     if(window.event){
         window.event.stopPropagation();
     }
-    
+    activeThreadIndex = index;
 
     threadIndexDiv.text(index);
 
@@ -187,6 +249,7 @@ async function openThreadAtIndex(index, commentIndex){
     
 }
 function closeThread(){
+    activeThreadIndex = undefined;
     threadIndexDiv.text("");
     threadViewer.classed("hidden", true);
     viewerBackdrop.classed("hidden", true);
@@ -264,7 +327,7 @@ async function postComment(){
         })
         .then(res => handleErrors(res))
         .then(res => res.json())
-        .then(commentResponse => addComment(commentResponse))
+        .then(addComment);
     }
 }
 function addComment(comment){
@@ -283,18 +346,17 @@ async function deleteComment(comment){
     fetch(`${baseURL}talk/comment/${comment._id}`, {
         method: "DELETE"
     })
-    .then(res => handleErrors(res))
-    .then(res => res.text())
-    .then(res => {
-        if(res == "Success"){
-            comments.splice(comments.indexOf(comment), 1);
-            updateComments();
-            const params = new URLSearchParams(window.location.search);
-            params.delete("comment");
-            window.history.pushState({}, '', window.location.pathname + "?" + params.toString());
-        } else {
-            console.log(res);
-        }
-    });
-
+        .then(handleErrors)
+        .then(res => res.text())
+        .then(res => {
+            if(res == "Success"){
+                comments.splice(comments.indexOf(comment), 1);
+                updateComments();
+                const params = new URLSearchParams(window.location.search);
+                params.delete("comment");
+                window.history.pushState({}, '', window.location.pathname + "?" + params.toString());
+            } else {
+                console.log(res);
+            }
+        });
 }

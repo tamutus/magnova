@@ -39,6 +39,100 @@ router.post("/newthread/:talkpageid", isLoggedIn, async (req, res) => {
         return res.send("Tried to add a thread to a talkpage using an invalid talkpage ID");
     }
 });
+router.put("/threadsubject/:talkpageid/:threadindex", isLoggedIn, (req, res) => {
+    if(req.params.talkpageid.match(/^[0-9a-fA-F]{24}$/)){
+        Talkpage.findById(req.params.talkpageid, (err, talkpage) => {
+            if(err){
+                console.error(err);
+                return res.send(`Error finding talkpage at id ${req.params.talkpageid}: ${err}`);
+            } else if(!talkpage){
+                return res.send(`No talkpage found with id ${req.params.talkpageid}`);
+            } else {
+                let thread = talkpage.threads[parseInt(req.params.threadindex)];
+                if(thread){
+                    if(thread.subject === req.body.newSubject){
+                        return res.send("No change needed");
+                    } else {
+                        thread.subject = req.body.newSubject;
+                        talkpage.save();
+                        return res.send(`Saved`);
+                    }
+                } else {
+                    return res.send(`Didn't find a thread at index ${req.params.threadindex}`);
+                }
+            }
+        });
+    } else {
+        return res.send("Tried to change a thread to a talkpage using an invalid talkpage ID");
+    }
+});
+router.delete("/thread/:talkpageid/:threadindex", isLoggedIn, async (req, res) => {
+    if(req.params.talkpageid.match(/^[0-9a-fA-F]{24}$/)){
+        let threadDeletionResult;
+        Talkpage.findById(req.params.talkpageid)
+            .populate({
+                path: "threads.comments",
+                populate: {
+                    path: "author",
+                    select: "comments"
+                }
+            })
+            .exec()
+            .then(talkpage => {
+                if(threadDeletionResult){
+                    return res.send(threadDeletionResult);
+                }
+                else if(!talkpage){
+                    return res.send(`Didn't find a talkpage with id ${req.params.talkpageid}`);            
+                } else {
+                    const authorsToSave = [];
+                    if(!req.params.threadindex){
+                        return res.send("Didn't provide a thread index");
+                    }
+                    const thread = talkpage.threads[parseInt(req.params.threadindex)];
+                    if(!thread){
+                        return res.send("Didn't find a thread at that index");
+                    }
+                    for(comment of thread.comments){
+                        // For each comment, delete reference to it in the author's comments array. Replies are irrelevant when deleting the whole talkpage, since replies are made within a thread.
+                        const userCommentsIndex = comment.author.comments.findIndex(c => String(c) === String(comment._id));
+                        if(userCommentsIndex >= 0){
+                            console.log(`This is comment ${userCommentsIndex} for user with id ${comment.author._id}`);
+                            comment.author.comments.splice(userCommentsIndex, 1);
+                            if(!authorsToSave.find(author => author._id === comment.author._id)){
+                                authorsToSave.push(comment.author);
+                            }
+                        }
+                        // Then delete the comment itself.
+                        Comment.deleteOne({_id: comment._id}, err => {
+                            if(err){
+                                console.log(err);
+                            }
+                        });
+                    }
+                    for(author of authorsToSave){
+                        author.save();
+                    }
+                    thread.subject = undefined;
+                    thread.lastActivity = Date.now();
+                    thread.comments = undefined;
+                    thread.deleted = true;
+                    talkpage.markModified("threads");
+                    talkpage.markModified("threads.deleted");
+                    talkpage.save();
+                    threadDeletionResult = "success";
+                    return res.send(threadDeletionResult);
+                }
+            })
+            .catch(err => {
+                console.log(err);
+                threadDeletionResult = `Error finding the Talkpage with id ${req.params.talkpageid}: ${err}`;
+                return res.send(threadDeletionResult);
+            });
+    } else {
+        return res.send("");
+    }
+});
 router.post("/comment/:talkpageid/:threadindex", isLoggedIn, (req, res) => {
     if(req.params.talkpageid.match(/^[0-9a-fA-F]{24}$/)){
         Talkpage.findById(req.params.talkpageid, (err, page) => {

@@ -1,9 +1,66 @@
 :root {
     --editorHeight: 0px;
 }
-
+#return-message {
+    position: fixed;
+    bottom: 50px;
+    left: 50px;
+    -webkit-transform: scaleX(0);
+        -ms-transform: scaleX(0);
+            transform: scaleX(0);
+    border-radius: 4px;
+    background-color: rgb(49, 92, 47);
+    padding: 10px;
+    transition: left .3s ease-out, bottom .3s ease-in;
+    z-index: 2;
+}
+#return-message.revealed {
+    -webkit-animation: flashMessage 10s;
+            animation: flashMessage 10s;
+}
+@media screen and (max-width: 700px){
+    #return-message {
+        left: 10px;
+        bottom: 10px;
+    }
+}
+@-webkit-keyframes flashMessage {
+    0%, 100% {
+        -webkit-transform: scale(0, 0);
+                transform: scale(0, 0);
+    }
+    5%, 95% {
+        -webkit-transform: scale(.8, .8);
+                transform: scale(.8, .8);
+    }
+    10%, 90% {
+        -webkit-transform: scale(1, 1);
+                transform: scale(1, 1);
+    }
+}
+@keyframes flashMessage {
+    0%, 100% {
+        -webkit-transform: scale(0, 0);
+                transform: scale(0, 0);
+    }
+    5%, 95% {
+        -webkit-transform: scale(.8, .8);
+                transform: scale(.8, .8);
+    }
+    10%, 90% {
+        -webkit-transform: scale(1, 1);
+                transform: scale(1, 1);
+    }
+}
+#thread-index {
+    display: none;
+}
 #new-thread-zone {
     margin: 40px auto;
+}
+#new-thread-zone > * {
+    margin-right: 30px;
+    margin-bottom: 30px;
 }
 .threader {
     flex: 1 0 125px;
@@ -20,9 +77,115 @@
     border: 2px solid rgb(186, 131, 211);
     border-radius: 30px;
     cursor: zoom-in;
+    overflow: hidden;
+}
+
+  /*======================*/
+ /* Active thread styles */
+/*======================*/
+
+#thread-contents {
+    transition: height .5s ease;
+    padding-bottom: 50px;
+    padding-top: 10px;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    align-items: center;
+}
+#thread-title-container {
+    visibility: visible;
+    margin: 0 50px;
+    height: 140px;
+    transition: height .3s ease-in-out, padding .3s ease-in-out;
+    padding: 10px;
+    overflow: hidden;
+    display: flex;
+    flex: 1 1 auto;
+    flex-flow: row wrap;
+    /* justify-content: baseline; */
+    justify-content: flex-start;
+    align-items: center;
+}
+#thread-title-container.hidden {
+    height: 0;
+    padding: 0;
+}
+#thread-title, #thread-edit {
+    margin-left: 50px;
+    flex: 1 1 auto;
 }
 #thread-title {
-    margin-left: 50px;
+    margin: 0 50px;
+    height: 120px;
+}
+#thread-title-container #thread-title {
+    height: 120px;
+    padding: 0;
+    margin: 0;    
+}
+
+#thread-edit {
+    flex: 0 0 200px;
+}
+#thread-edit a {
+    cursor: pointer;
+    user-select: none;
+}
+#thread-contents #title-change {
+    visibility: visible;
+    height: 100px;
+    flex: 1 0 90%;
+    margin: 20px;
+    transition: height .3s ease-in-out, margin .3s ease-in-out;
+    overflow: hidden;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-evenly;
+    align-items: baseline;
+}
+#thread-contents #title-change.hidden {
+    height: 0;
+    margin: 0;
+}
+#thread-contents #title-change > input {
+    flex: 0 1 calc(100% - 295px);
+    height: 80px;
+    margin-right: 15px;
+    transition: height .3s ease, margin .3s ease, flex .3s ease;
+}
+#thread-contents #title-change > button {
+    margin-right: 15px;
+    flex: 0 1 100px;
+    height: 60px;
+    transition: height .3s ease;
+}
+@media screen and (max-width: 900px){
+    #thread-contents #title-change {
+        height: 130px;
+    }
+    #thread-contents #title-change > input {
+        flex: 1 1 calc(100% - 50px);
+        height: 50px;
+        margin-bottom: 8px;
+    }
+    #thread-contents #title-change > button {
+        height: 48px;
+    }
+}
+#thread-delete {
+    position: absolute;
+    bottom: 6px;
+    right: 0px;
+}
+#thread-delete button {
+    background-color: red;
+    height: 100px;
+    width: 100px;
+    border-radius: 20px;
+}
+#comments, #comments-container {
+    flex: 1 0 100%;
 }
 .comment{
     background-color:rgb(24, 100, 201);
@@ -118,14 +281,17 @@
     height: 50px;
 }
 #comment-container {
+    flex: 1 1 calc(100% - 100px);
     margin: 50px 50px 0px 50px;
     display: flex;
     flex-flow: row wrap;
+    justify-content: center;
 }
 #comment-box {
     flex: 7 1 70%;
     height: var(--editorHeight);
     margin-right: 50px;
+    margin-bottom: 20px;
 }
 div.tox.tox-tinymce {
     width: 100%;
@@ -135,7 +301,7 @@ div.tox.tox-tinymce {
     cursor: text;
 }
 #comment-submitter {
-    flex: 1 1 250px;
+    flex: 0 1 250px;
     height: 150px;
 }
 .comment-buttons {
@@ -164,7 +330,7 @@ div.tox.tox-tinymce {
 #thread-viewer {
     display: block;
     position: absolute;
-    top: 150px;
+    top: 160px;
     left: 5%;
     width: 90%;
     min-height: 500px;
@@ -175,10 +341,6 @@ div.tox.tox-tinymce {
 }
 #thread-viewer.hidden {
     transform: scale(0);
-}
-#thread-contents {
-    transition: height .5s ease;
-    padding-bottom: 50px;
 }
 .viewer-backdrop {
     display: block;
@@ -192,6 +354,7 @@ div.tox.tox-tinymce {
     opacity: 1;
     transition: opacity .7s ease;
     cursor: zoom-out;
+    z-index: 0;
   }
 .viewer-backdrop.hidden {
     opacity: 0;

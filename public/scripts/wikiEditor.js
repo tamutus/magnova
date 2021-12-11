@@ -83,6 +83,7 @@ const nameInput = d3.select("#name-container")
 if(!imageBox.empty()){
     imageInput = imageBox
         .append("input")
+            .attr("placeholder", "Image URL")
             .attr("type", "text")
                 .property("value", d3.select("#topic-image").attr("src"))
             .attr("id", "image-input")

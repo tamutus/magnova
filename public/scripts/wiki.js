@@ -291,6 +291,8 @@ function displayResults(){
         .delay(500)
         .remove();
     locationResultSelection = locationResultSelection.merge(locationResultsEnter);
+    
+    document.querySelector('#search-results').scrollIntoView({behavior: 'smooth'})
 }
 function clearSearch(){
     searchResults = {};
