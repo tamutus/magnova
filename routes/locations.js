@@ -208,6 +208,21 @@ router.get("/data/:id", (req, res) => {
         Location.findById(req.params.id)
             .populate("sublocations", "name")
             .populate("superlocation", "name sublocationWord")
+            .populate({
+                path: "issues",
+                populate: {
+                    path: "template",
+                    select: "name"
+                }
+            })
+            .populate({
+                path: "projects",
+                populate: {
+                    path: "template",
+                    select: "name"
+                }
+            })
+            .populate("tasks", "name")
             // .populate("tags")
             // .populate("resources")
             // .populate("harms")
@@ -500,8 +515,20 @@ router.get("/:id", (req, res) => {
             .populate("tags")
             .populate("resources")
             .populate("harms")
-            .populate("issues", "name")
-            .populate("projects", "name")
+            .populate({
+                path: "issues",
+                populate: {
+                    path: "template",
+                    select: "name"
+                }
+            })
+            .populate({
+                path: "projects",
+                populate: {
+                    path: "template",
+                    select: "name"
+                }
+            })
             .populate("tasks", "name")
             .exec((err, location) => {
                 if(err){

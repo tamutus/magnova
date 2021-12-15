@@ -166,50 +166,151 @@ router.get("/all", (req, res) => {
         }
     });
 });
-// router.get("/local/:id", (req, res) => {
-//     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
-//         LocalIssue.findById(req.params.id)
-//             // Populate its own fields,
-//             .populate("localizer", "username")
-//             .populate("location")
-//             .populate("editors", "username")
-//             .populate("resources.form")
-//             .populate("projects")
-//             // and populate some of its template's fields
-//             .populate("template")
-            
-//             //     populate: {
-//             //         path: "projects",
-//             //         populate: {
-//             //             path: "edges.vertex",
-//             //             select: "name tasks",
-//             //             populate: {
-//             //                 path: "tasks",
-//             //                 populate: {
-//             //                     path: "edges.vertex",
-//             //                     populate
-//             //                 }
-//             //             }
-//             //         }
-//             //     }
-//             // })
-//             .exec((err, instance) => {
-//                 if(err){
-//                     console.log(err);
-//                     return res.status(404).redirect("/wiki/nothing");
-//                 } else if(instance){
-//                     Location.findById(instance.location._id);
-//                     return res.render("wiki/viewLocal", {
-//                         title: `${instance.template.name} in ${instance.location.name}`
-//                     })
-//                 } else {
-//                     return res.status(404).redirect("/wiki/nothing");
-//                 }
-//             });
-//     } else {
-//         return res.status(404).redirect("/wiki/nothing");
-//     }    
-// });
+
+router.put("/local/:id", isLoggedIn, (req, res) => {
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        const {info, image, patch, latestVersion} = req.body;
+        LocalIssue.findById(req.params.id)
+            .populate("edits")
+            .exec(async (err, localIssue) => {
+                if(err){
+                    console.log(err);
+                    return res.send(`Error trying to find that Local Issue: ${err}`);
+                }
+                else if(!localIssue){
+                    return res.send(`Didn't find a Local Issue with ID ${req.params.id}`);
+                }
+                else {
+                    let returnMessage = "Update ";
+                    if(localIssue.localInfo != info || localIssue.image != image){
+                        if(!localIssue.version){
+                            localIssue.version = 0;
+                            localIssue.markModified("version");
+                        }
+                        if(localIssue.version != latestVersion){
+                            return res.send("Latest version changed while you were creating a patch. Try again now.");
+                        }
+                        if(!localIssue.edits){
+                            Patchlist.create({root: localIssue._id, rootType: "LocalIssue"}, (err, patchlist) => {
+                                if(err){
+                                    console.log(err);
+                                    return res.send("No patch list for edits, and an error creating a new one: " + err);
+                                }
+                                else{
+                                    localIssue.edits = patchlist;
+                                    localIssue.markModified("edits");
+                                }
+                            });
+                        }
+                        if(localIssue.localInfo != info){
+                            returnMessage += "to this Local Issue's info, ";
+                            localIssue.edits.patches.push({
+                                editor: req.user._id,
+                                patch: patch
+                            });
+                            localIssue.edits.markModified("patches");
+                            localIssue.edits.save();
+                            
+                            localIssue.version++;
+                            localIssue.markModified("version");
+                            localIssue.localInfo = info;
+                        }
+                        
+                        if(!localIssue.editors){
+                            localIssue.editors = [];
+                            localIssue.markModified("editors");
+                        }
+                        if(!localIssue.editors.find(e => String(e) == String(req.user._id))){
+                            localIssue.editors.push(req.user._id);
+                            localIssue.markModified("editors");
+                        }
+                        if(localIssue.image != image){
+                            returnMessage += "to this Local Issue's image, ";
+                            localIssue.image = image;
+                        }
+
+                        returnMessage += "Successful!";
+                        localIssue.save();
+                    } else {
+                        returnMessage += "not needed.";
+                    }
+                    return res.send(returnMessage);
+                }
+            });
+    } else {
+        return res.send(`The server received a PUT request for a Local Issue with an improper ID: ${req.params.id}`);
+    }
+});
+
+router.get("/local/:id", (req, res) => {
+    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        LocalIssue.findById(req.params.id)
+            // Populate its own fields,
+            .populate("localizer", "username")
+            .populate("location")
+            .populate("editors", "username")
+            .populate("resources.form")
+            .populate("harms.form")
+            // and populate some of its template's fields
+            // .populate("template")
+            .populate({
+                path: "template",
+                populate: {
+                    path: "projects",
+                    populate: {
+                        path: "edges.vertex",
+                        select: "name tasks implementations",
+                        populate: {
+                            path: "implementations",
+                            select: "location"
+                        }
+                        // populate: {
+                        //     path: "tasks",
+                        //     populate: {
+                        //         path: "edges.vertex",
+                        //         select: "name"
+                        //     }
+                        // }
+                    }
+                }
+            })
+            .exec((err, instance) => {
+                if(err){
+                    console.log(err);
+                    return res.status(404).redirect("/wiki/nothing");
+                } else if(!instance){
+                    return res.status(404).redirect("/wiki/nothing");
+                } else {
+                    instance.template.projects.edges = instance.template.projects.edges.filter(edge => edge.score > 0);
+                    instance.localProjects = [];
+                    for(edge of instance.template.projects.edges){
+                        let localProject = edge.vertex.implementations.find(implementation => implementation.location === instance.location._id);
+                        if(localProject){
+                            instance.localProjects.push(localProject);
+                        }
+                    }
+                    if(!instance.edits){
+                        Patchlist.create({root: instance._id, rootType: "LocalIssue"}, (err, patchlist) => {
+                            if(err){console.log(err);}
+                            else{
+                                LocalIssue.findByIdAndUpdate(instance._id, {edits: patchlist}, {omitUndefined: true, strict: false}, (err, updatedLocalIssue) => {
+                                    if(err){ console.log(err); }
+                                    else{ instance.edits = updatedLocalIssue.edits; }
+                                });
+                            }
+                        });
+                    }
+                    return res.render("wiki/viewLocal", {
+                        title: `${instance.template.name} in ${instance.location.name}`,
+                        localIssue: instance
+                    });
+                }
+            });
+    } else {
+        return res.status(404).redirect("/wiki/nothing");
+    }    
+});
+
 // Check whether req.params.id is mongoose objectid by this method, https://stackoverflow.com/a/29231016/6096923 , and if it's not look up at the path. refactor to have stable paths.
 router.get('/:id', (req, res) => {
 	if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
@@ -228,7 +329,10 @@ router.get('/:id', (req, res) => {
             .populate("resources.form")
             .populate({
                 path: "instances",
-                populate: "location"
+                populate: {
+                    path: "location",
+                    select: "name"
+                }
             })
             .populate({
                 path: "projects",
@@ -311,11 +415,17 @@ router.get('/:id', (req, res) => {
                     Issue.findByIdAndUpdate(issue._id, {version: 0}, {omitUndefined: true, strict: false}, (err, updatedIssue) => {
                         if(err){console.log(err);}
                         else { issue.version = 0; }
-                    })
+                    });
                 }
                 if(issue.creator || issue.creationDate){
                     Issue.findByIdAndUpdate(issue._id, {creator: undefined, creationDate: undefined}, {omitUndefined: true, strict: false}, (err, updatedIssue) => {
                         if(err){console.log(err);}
+                    });
+                }
+                if(!issue.instances){
+                    Issue.findByIdAndUpdate(issue._id, {instances: []}, {omitUndefined: true, strict: false}, (err, updatedIssue) => {
+                        if(err){console.log(err);}
+                        else { issue.instances = []; }
                     });
                 }
                 return res.render("wiki/view", {
@@ -338,6 +448,9 @@ router.put("/:id", isLoggedIn, (req, res) => {
             .exec(async (err, issue) => {
                 if(err){
                     console.log(err);
+                }
+                else if(!issue){
+                    return res.send(`Didn't find an Issue with ID ${req.params.id}`);
                 }
                 else{
                     let returnMessage = "Update ";

@@ -1,0 +1,144 @@
+<%- include("../partials/wikiHeader") %>
+<span class="hidden" id="hidden-local-issue-id"><%= localIssue._id %></span>
+    <div>
+        <div id="name-container">
+            <h1 class="topic-name"><a href="<%= `/wiki/${localIssue.template._id}` %>"><%= localIssue.template.name %></a> in <a href="<%= `/locations/${localIssue.location._id}` %>"><%= localIssue.location.name%></a></h1>
+        </div>
+        <div id="overview-area">
+            <div id="table-of-contents">
+                <a onclick="document.querySelector('#about').scrollIntoView({behavior: 'smooth'});">About</a>
+                <a onclick="document.querySelector('#local-projects').scrollIntoView({behavior: 'smooth'});">Local Projects</a>
+                <a onclick="document.querySelector('#direct-action').scrollIntoView({behavior: 'smooth'});">Direct Action</a>
+                <a onclick="document.querySelector('#harms').scrollIntoView({behavior: 'smooth'});">Harm Measurement</a>
+                <a onclick="document.querySelector('#qr').scrollIntoView({behavior: 'smooth'});">QR Code</a>
+            </div>
+            <div id="image-container">
+                <img id="topic-image" class="portrait" src=<%= `${localIssue.image}` %>>
+            </div>
+        </div>
+        <% if(currentUser){ %>
+            <div id="editing-block">
+                <span id="return-message"></span>
+                <a id="edit-button" onclick="toggleEditing();"><button>Edit page</button></a>
+                <a id="cancel-button" onclick="stopEditing();" class="hidden"><button>Cancel</button></a>
+            </div>
+            <div id="discussion-block">
+                <a href="<%= `/talk/${localIssue.talkpage}` %>"><button>Discuss this Local Issue</button></a>
+            </div>
+        <% } else { %>
+            <p><em>Log in to discuss and edit this Local Issue</em></p>
+        <% } %>
+        <ul>
+        <hr>
+        <li id="about">
+            <h2>About</h2>
+            <div id="description">
+                <div id="description-text-container" class="mutable data">
+                    <div id="description-text"><%- localIssue.localInfo %></div>
+                </div>
+                <% if(currentUser){ %>
+                    <form id="description-editor-container" name="description-form" class="hidden mutable">
+                        <input type="text" id="description-editor" name="description-html"></input>
+                    </form>
+                <% } %>
+            </div>
+            
+            <% if(currentUser && currentUser.username == "lavra"){ %>
+                <button id="edit-loader" onclick="toggleRolling();">Edit History</button>
+                <div id="rolling-tray" class="hidden">
+                    <button id="back-roller" onclick="rollBack();">Roll back</button>
+                    <button id="forward-roller" onclick="rollForward();">Roll forward</button>
+                    <% if(currentUser && currentUser.username == "lavra"){ %>
+                        <button id="cleric" onclick="rollSave();">Restore</button>
+                    <% } %>
+                    <span id="hidden-patchlist-id" class="hidden"><%= localIssue.edits %></span>
+                <% } %>
+                    <div id="versions">
+                        Version <span id="revision-version-count"><%= localIssue.version %></span> of <span id="current-version-count"><%= localIssue.version %></span>
+                    </div>
+                <% if(currentUser && currentUser.username == "lavra"){ %>
+                    <div id="revision-display">
+                        <div id="revision-metadata"></div>
+                        <div id="revision-text"></div>
+                    </div>
+                </div>
+
+            <% } %>
+        </li>
+        <% if(localIssue.localizer){ %>
+            <li id="identification">This local issue page was deployed by <a href="<%= `users/${localIssue.localizer.username}` %>"><%= localIssue.localizer.username %></a> on <%= new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric'}).format(localIssue.localizationDate) %></li>
+        <% } %>
+        <li id="editors">
+            Editors of this page: 
+            <% for(let i = 1; i < localIssue.editors.length -1; i++){ %>
+                <a href="<%= `/users/${localIssue.editors[i].username}` %>"><%= localIssue.editors[i].username %></a>, 
+            <% } %>
+            <% if(localIssue.editors.length > 1){ %>
+                and 
+            <% } if(localIssue.editors.length > 0){ %>
+            <a href="<%= `/users/${localIssue.editors[localIssue.editors.length-1].username}` %>"><%= localIssue.editors[localIssue.editors.length-1].username %></a>.
+            <% } else { %>
+                none.
+            <% } %>
+        </li>
+        <hr>
+        <li id="local-projects">
+            <h2>Local Projects addressing <%= localIssue.template.name %></h2>
+            <p>Just like you can create a Local Issue page, Magnova will soon allow you to create Local Project pages. Creating these pages will clone the Project and all of its Tasks.</p>
+            <% if(localIssue.localProjects && localIssue.localProjects.length > 0){ %>
+                <p>The Magnova community has created the following Local Projects, decided they help address the Issue, and deployed them in <%= localIssue.location.name %>.
+                <% if(currentUser){ %>
+                    If you want to deploy a Project template to this Location, use the searchbar.
+                <% } else { %>
+                    (Registered users can create new Local Project pages they want to see implemented.)
+                <% } %>
+                </p>
+            <% } %>
+            <div id="projects-are-empty">No projects here yet. 
+                <!-- <% if(!currentUser){ %>Log in to create a new project. <% } else { %> Help solve this problem by finding an existing project that addresses this issue, or by creating a new project! <% } %>  -->
+            </div>
+            <div id="local-projects-container">
+                <div id="local-project-list"></div>
+                <to 
+            </div>
+        </li>
+        <hr>
+        <li id="direct-action">
+            <h2>Direct Action</h2>
+            <p>This is where Local Tasks from Local Projects will show up. This feature is in development.</p>
+        </li>
+        <hr>
+        <li id="harms">
+            <h2>Harm Measurement</h2>
+            <p>Another feature Magnova will possess is the ability to quantify the harms that a particular issue causes.</p>
+        </li>
+        <hr>
+        <!-- <li id="locations">
+            <h2>Locations</h2>
+            <div id="map-container"></div>
+        </li> -->
+        <!-- <h2>Backend Data</h2>
+        <% let keys = ["name", "image", "info", "active", "identifier", "identificationDate", "editors", "talkpage", "harms", "resources", "instances", "issues", "projects"]; %>
+        <% for(key of keys){ %>
+            <li><%= key %> : <%= localIssue[key] %></li>
+        <% } %>
+        <p class="hidden localIssueID"><%= localIssue._id %></p>
+        </ul> -->
+        <hr>
+        <div id="qr">
+            <img src=<%= `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURI(currentHost + currentURL)}&amp;size=100x100` %> alt="" title="<%= localIssue.name %>" />
+            <h3>QR Code</h3>
+            <p>This QR code links to this page. Print stickers, add it to fliers, or chalk it onto your driveway.</p>
+        </div>
+        
+    </div>
+    <!-- <a href=<%= `localissue/report/${localIssue._id}` %>><button>Report issue</button></a> -->
+
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="scripts/wiki.js"></script>
+<script src="https://cdn.tiny.cloud/1/f7o04qadc9hhjre2my3ep3ae1qdzax2od04t9ncrm7wold54/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="scripts/TextMerger.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/node-diff3@3.0/dist/index.iife.min.js"></script>
+<script src="scripts/wikiEditor.js"></script>
+<%- include("../partials/footer") %>

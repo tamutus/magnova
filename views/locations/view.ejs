@@ -10,9 +10,9 @@
         <div id="overview-area">
             <div id="table-of-contents">
                 <a onclick="document.querySelector('#about').scrollIntoView({behavior: 'smooth'});">About</a>
+                <a onclick="document.querySelector('#local-issues').scrollIntoView({behavior: 'smooth'});">Local Issues</a>
                 <a onclick="document.querySelector('#locations').scrollIntoView({behavior: 'smooth'});">Geo Relationships</a>
-                <a onclick="document.querySelector('#issues').scrollIntoView({behavior: 'smooth'});">Local Issues</a>
-                <a onclick="document.querySelector('#projects').scrollIntoView({behavior: 'smooth'});">Local Projects</a>
+                <a onclick="document.querySelector('#local-projects').scrollIntoView({behavior: 'smooth'});">Local Projects</a>
                 <a onclick="document.querySelector('#tasks').scrollIntoView({behavior: 'smooth'});">Local Tasks</a>
                 <a onclick="document.querySelector('#qr').scrollIntoView({behavior: 'smooth'});">QR Code</a>
             </div>
@@ -74,6 +74,40 @@
             <li id="creation">This location's boundary shape is <%- shownLocation.geometrySource || "unattributed. Somebody should re-upload geometry geoJSON with has an attribution." %>
         <% } %>
         <hr>
+        <li id="issues">
+            <h2>Local Issues in <%= shownLocation.name %></h2>
+            <div id="local-issue-description">
+                <p>Is there some suffering or injustice in your area that people should do something about? Magnova's catalog of "Issues" documents general problems. Each can be deployed to a Location to create a "Local Issue" page, where users can measure an Issue's impact on that Location, and discuss things that are particular to the community.</p>
+                <ul class="advice">
+                    <li>Existing Local Issue pages are shown below.</li>
+                    <li>You can create a new Local Issue page based on an existing Issue using the adjacent searchbar. Clicking the search result will take you to an existing Local Issue page, or else create a new one.</li>
+                    <li>If the Issue you want to discuss isn't registered on Magnova yet, you can do so at the <a href="/wiki">Wiki</a></li>
+                </ul>
+            </div>
+            <% if(shownLocation.issues && shownLocation.issues.length > 0 ) { %>    
+                <h4><em>
+                    Magnova users have noticed the following issues affecting this community:
+                </em></h4>
+            <% } %>
+                <div id="connections-are-empty"><p>None identified yet! <% if(!currentUser){ %>Registered users can identify new local issues. <% } else { %>Choose an Issue to create a Local Issue page.<% } %> </p></div>
+                <div id="local-issue-container">
+                    <div id="local-issue-list">
+                    </div>
+                    <% if(currentUser) { %>
+                        <div id="issue-searchbar">
+                            <div class="searchbar-heading">Identify an issue affecting <span id="link-source"><%= shownLocation.name %></span>:</div>
+                            <input type="text">
+                            <div id="found-issue-links"></div>
+                        </div>
+                    <% } %>
+                </div>
+        <!-- <h2>Backend Data</h2>
+        <% let keys = ["name", "image", "info", "tags", "creator", "creationDate", "designers", "volunteers", "talkpage", "harms", "resources", "implementations", "issues", "tasks", "completionRequirements"]; %>
+        <% for(key of keys){ %>
+            <li><%= key %> : <%= shownLocation[key] %></li>
+        <% } %>
+        </ul> -->
+        <hr>
         <li id="locations">
             <h2>Geo Relationships</h2>
             <div id="geo-relationships">
@@ -123,34 +157,6 @@
             </div>
         </li>
         <hr>
-        <li id="issues">
-            <h2>Local Issues in <%= shownLocation.name %></h2>
-            <p>Is there some suffering or injustice in your area that people should do something about? Search Magnova's catalog of "Issues" and  start sharing information about what's going on in <%= shownLocation.name %>. "Local Issue" pages let you measure the impact of a given issue in a certain location, and discuss things that are particular to a certain community.
-            <% if(shownLocation.issues && shownLocation.issues.length > 0 ) { %>    
-                
-                    Magnova users have noticed the following issues affecting this community:
-                
-                </p>
-            <% } %>
-                <div id="connections-are-empty"><p>None identified yet! <% if(!currentUser){ %>Registered users will be able to identify local issues soon. <% } else { %>Local Issues haven't been implemented quite yet, but are coming soon. Once they are, share the news about what's going on in a certain location by finding an Issue to create a page with local info. <% } %> </p></div>
-                <div id="connections-container">
-                    <div id="issue-connections">
-                    </div>
-                    <% if(currentUser) { %>
-                        <div id="issue-searchbar">
-                            <div class="searchbar-heading">Identify an issue affecting <span id="link-source"><%= shownLocation.name %></span>:</div>
-                            <input type="text">
-                            <div id="found-issue-links"></div>
-                        </div>
-                    <% } %>
-                </div>
-        <!-- <h2>Backend Data</h2>
-        <% let keys = ["name", "image", "info", "tags", "creator", "creationDate", "designers", "volunteers", "talkpage", "harms", "resources", "implementations", "issues", "tasks", "completionRequirements"]; %>
-        <% for(key of keys){ %>
-            <li><%= key %> : <%= shownLocation[key] %></li>
-        <% } %>
-        </ul> -->
-        <hr>
         <li id="projects">
             <h2>Local Projects in <%= shownLocation.name %></h2>
             <% if(shownLocation.projects && shownLocation.projects.length > 0){ %>
@@ -167,7 +173,7 @@
                 <div id="project-list"></div>
                 <% if(currentUser) { %>
                     <div id="project-searchbar">
-                        <div class="searchbar-heading">Identify project that deals with "<span class="link-source-name"><%= shownLocation.name %></span>"</div>
+                        <div class="searchbar-heading">Deploy a Project to "<span class="link-source-name"><%= shownLocation.name %></span>" (This doesn't work yet!)</div>
                         <input type="text">
                         <div id="found-project-links"></div>
                     </div>

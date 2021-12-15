@@ -55,6 +55,9 @@
 #thread-index {
     display: none;
 }
+#submission-container {
+    margin-top: 50px;
+}
 #new-thread-zone {
     margin: 40px auto;
 }
@@ -303,6 +306,7 @@ div.tox.tox-tinymce {
 #comment-submitter {
     flex: 0 1 250px;
     height: 150px;
+    margin-bottom: 100px;
 }
 .comment-buttons {
     flex: 0 0 200px;
@@ -330,6 +334,7 @@ div.tox.tox-tinymce {
 #thread-viewer {
     display: block;
     position: absolute;
+    z-index: 1;
     top: 160px;
     left: 5%;
     width: 90%;

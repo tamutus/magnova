@@ -131,13 +131,15 @@ router.delete("/:id", isLoggedIn, (req, res) => {
                                             const taskIndex = project.tasks.edges.findIndex(edge => {
                                                 return String(edge.vertex) === String(task._id);
                                             });
-                                            let talkpageDeletionResult = await deleteTalkpage(task.talkpage, req);
-                                            if(talkpageDeletionResult === "success"){
-                                                project.tasks.edges.splice(taskIndex, 1);
-                                                project.tasks.save();
-                                            } else {
-                                                console.log(`Talkpage deletion result: ${talkpageDeletionResult}`);
-                                                return res.send(talkpageDeletionResult);
+                                            if(task.talkpage){
+                                                let talkpageDeletionResult = await deleteTalkpage(task.talkpage, req);
+                                                if(talkpageDeletionResult === "success"){
+                                                    project.tasks.edges.splice(taskIndex, 1);
+                                                    project.tasks.save();
+                                                } else {
+                                                    console.log(`Talkpage deletion result: ${talkpageDeletionResult}`);
+                                                    return res.send(talkpageDeletionResult);
+                                                }
                                             }
                                             Task.deleteOne({_id: task._id}, err => {
                                                 if(err){

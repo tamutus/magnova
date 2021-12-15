@@ -4,55 +4,61 @@
 </h1>
 <a href="<%= rootLink %>"><button>Go to wiki</button></a>
 <span id="return-message"></span>
-<% if(page.threads.length > 0){ %>
-    <div class="viewer-backdrop hidden" onclick="closeThread();"></div>
-    <div id="thread-viewer" class="hidden">
-        <div id="thread-contents">
-            <span class="hidden" id="thread-index"></span>
+
+<div class="viewer-backdrop hidden" onclick="closeThread();"></div>
+<div id="thread-viewer" class="hidden">
+    <div id="thread-contents">
+        <span class="hidden" id="thread-index"></span>
+        <% if(currentUser){ %>
+        <div id="thread-title-container">
+        <% } %>
+            <h2 id="thread-title"></h2>
             <% if(currentUser){ %>
-            <div id="thread-title-container">
-            <% } %>
-                <h2 id="thread-title"></h2>
-                <% if(currentUser){ %>
-                    <h4 id="thread-edit"><a onclick="changeThreadSubject();">Edit thread name</a></h4>
-                </div>
-                <div id="title-change" class="hidden">    
-                    <input type="text" id="new-thread-title" placeholder="New thread title">
-                    <button onclick="submitThreadTitle();">Save</button>
-                    <button onclick="changeThreadSubject();">Cancel</button>
-                </div>
-                <a id="thread-delete" onclick="deleteActiveThread();"><button>Delete Thread</button></a>
-            <% } %>
-            <div id="comments"></div>
-            <div id="comment-container">
-                <div id="comment-box">
-                    <input type="text" placeholder="Post your comment here" id="new-comment">
-                </div>
-                <button id="comment-submitter" onclick="postComment();"><h3>Submit your comment</h3></button>
+                <h4 id="thread-edit"><a onclick="changeThreadSubject();">Edit thread name</a></h4>
             </div>
+            <div id="title-change" class="hidden">    
+                <input type="text" id="new-thread-title" placeholder="New thread title">
+                <button onclick="submitThreadTitle();">Save</button>
+                <button onclick="changeThreadSubject();">Cancel</button>
+            </div>
+            <a id="thread-delete" onclick="deleteActiveThread();"><button>Delete Thread</button></a>
+        <% } %>
+        <div id="comments"></div>
+        <div id="comment-container">
+            <div id="comment-box">
+                <input type="text" placeholder="Post your comment here" id="new-comment">
+            </div>
+            <button id="comment-submitter" onclick="postComment();"><h3>Submit your comment</h3></button>
         </div>
     </div>
-    <div id="threads">
-        <% let threadSort = []; for(let i = 0; i < page.threads.length; i++){ %>
-            <% if(page.threads[i].deleted){continue;} %>
-            <% let j = 0; %>
-            <% for(j = 0; j < threadSort.length; j++){ if(page.threads[i].lastActivity.getTime() > threadSort[j].lastActivity.getTime()){break;}} %>
-            <% threadSort.splice(j, 0, page.threads[i]); %>
-        <% } for(let i = 0; i < threadSort.length; i++){ let thread = threadSort[i]; %>
-            <div class="thread" onclick="openThread(this);" id="<%= `thread_${page.threads.indexOf(thread)}` %>">
-                <div class="threader"><%= thread.subject %><br><%= new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", timeZoneName: 'short'}).format(thread.lastActivity) %></div>
-                <% if(thread.comments.length > 0){ %>
-                    <div class="first-comment"><%= thread.comments[0] %></div>
-                <% } if(thread.comments.length > 1) { %>
-                    <div class="last-comment"><%= thread.comments[thread.comments.length-1] %></div>
-                <% } %>
-            </div>
-        <% } %>
-    </div>
+</div>
+<div id="threads">
+    <% let threadSort = []; for(let i = 0; i < page.threads.length; i++){ %>
+        <% if(page.threads[i].deleted){continue;} %>
+        <% let j = 0; %>
+        <% for(j = 0; j < threadSort.length; j++){ if(page.threads[i].lastActivity.getTime() > threadSort[j].lastActivity.getTime()){break;}} %>
+        <% threadSort.splice(j, 0, page.threads[i]); %>
+    <% } for(let i = 0; i < threadSort.length; i++){ let thread = threadSort[i]; %>
+        <div class="thread" onclick="openThread(this);" id="<%= `thread_${page.threads.indexOf(thread)}` %>">
+            <div class="threader"><%= thread.subject %><br><%= new Intl.DateTimeFormat('en-US', {year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", timeZoneName: 'short'}).format(thread.lastActivity) %></div>
+            <% if(thread.comments.length > 0){ %>
+                <div class="first-comment"><%= thread.comments[0] %></div>
+            <% } if(thread.comments.length > 1) { %>
+                <div class="last-comment"><%= thread.comments[thread.comments.length-1] %></div>
+            <% } %>
+        </div>
+    <% } %>
+</div>
+<section id="submission-container">
+<% if(currentUser){ %>
+    <h4 class="advice">Starting a new conversation? First, choose a thread title. You'll be able to comment once you create the thread.</h4>
+    <form id="new-thread-zone" action="/talk/newthread/<%= page._id %>" method="post">
+        <input type="text" placeholder="Thread Topic" name="subject"><button id="thread-adder" type="submit"><h2>Submit a new thread</h2></button>
+    </form>
+<% } else { %>
+    <em>Log in to participate in the discussion</em>
 <% } %>
-<h3>Starting a new conversation? First, choose a thread title. You'll be able to comment once you create the thread.</h3>
-<form id="new-thread-zone" action="/talk/newthread/<%= page._id %>" method="post">
-    <input type="text" placeholder="Thread Topic" name="subject"><button id="thread-adder" type="submit"><h2>Submit a new thread</h2></button>
-</form>
+</section>
+
 
 <%- include("../partials/talkFooter") %>

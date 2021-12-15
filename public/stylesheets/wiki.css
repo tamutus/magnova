@@ -312,15 +312,16 @@ h4.result-name {
 #submission {
     display: flex;
     flex-flow: row wrap;
+    justify-content: space-evenly;
 }
 #issue-submission, #project-submission {
     display: inline-block;
     width: 300px;
-    margin: 20px auto;
+    flex: 0 0 300px;
+    margin: 30px 20px 20px 20px;
     vertical-align: top;
     border-radius: 30px;
     padding-left: 20px;
-    margin-top: 30px;
 }
 #issue-submission {
     border-left: 4px solid rgb(255, 174, 82);
@@ -369,14 +370,52 @@ h4.result-name {
 .issue-snapshot, .project-snapshot {
     width: 200px;
     height: 200px;
+}
+.issue-snapshot, .project-snapshot, .local-issue-snapshot, .local-project-snapshot {
     text-align: left;
     margin: 15px 10px;
     transition: width .3s ease-in-out, height .3s ease-in-out;
 }
-.issue-snapshot:hover img, .project-snapshot:hover img {
+.local-issue-snapshot, .local-project-snapshot {
+    width: 90%;
+    margin: 12px auto 12px auto;
+    display: flex;
+    flex-flow: row wrap;
+}
+.local-issue-snapshot > * {
+    border-color: rgb(185, 145, 218);
+    border-style: solid;
+}
+.local-issue-snapshot > a, .local-project-snapshot > a {
+    flex: 1 0 200px;
+    margin: 0px 0 10px -15px;
+    padding: 10px;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(110, 4, 190);
+    border-radius: 30px 100px 0 0 / 80% 65% 0 0;
+    border-width: 7px 3.5px 0 7px;
+}
+.local-issue-snapshot .info, .local-project-snapshot .info {
+    margin: 0px 15px 10px 0;
+    flex: 3 0 50%;
+    background-color: rgb(236, 143, 28, .67);
+    border-radius: 100px 30px 0 0 / 65% 80% 0 0;
+    border-width: 7px 7px 0 3.5px;
+    padding: 15px 12px 12px 70px;
+    max-height: 300px;
+}
+#localizer-link {
+    padding: 15px;
+    margin: 20px 10px;
+    flex: 0 1 250px;
+}
+.issue-snapshot:hover img, .project-snapshot:hover img, .local-issue-snapshot:hover img, .local-project-snapshot:hover img {
     filter: contrast(170%) grayscale(30%) brightness(1.6);
 }
-.issue-snapshot:hover a h4, .project-snapshot:hover img a h4{
+.issue-snapshot:hover a h4, .project-snapshot:hover img a h4 {
     color: rgb(255, 221, 25);
 }
 .issue-thumbnail, .project-thumbnail {
@@ -400,6 +439,14 @@ h4.result-name {
     border-radius: 10px;
     transition: max-width .3s ease-in-out, max-height .3s ease-in-out, filter .5s ease-out;
 }
+.tiny.issue-thumbnail, .tiny.project-thumbnail {
+    width: 100px;
+    height: 100px;
+}
+.tiny.issue-thumbnail img, .tiny.project-thumbnail img {
+    max-height: 100px;
+    max-width: 100px;
+}
 @media screen and (max-width: 800px){
     .issue-snapshot, .project-snapshot {
         width: 150px;
@@ -414,7 +461,7 @@ h4.result-name {
         max-height: 100px;
     }
 }
-.issue-snapshot a h4, .project-snapshot a h4 {
+.issue-snapshot a h4, .project-snapshot a h4, .local-issue-snapshot a h4, .local-project-snapshot a h4 {
     margin: auto;
     text-align: center;
     transition: color .4s ease-out;
@@ -564,8 +611,32 @@ input.topic-name {
 #revision-text a:hover {
     color: rgb(225, 47, 192);
 }
-#connections-container, #projects-container {
-    width: 90%;
+#local-issue-description {
+    display: flex;
+    flex-flow: row wrap;
+    margin-bottom: 20px;
+}
+#local-issue-description > p {
+    flex: 1 1 500px;
+    margin-right: 80px;
+    margin-bottom: 30px;
+    transition: font-size .3s ease, margin .3s ease;
+}
+@media screen and (max-width: 800px){
+    #local-issue-description > p {
+        margin-right: 15px;
+    }
+}
+#local-issue-description > .advice {
+    flex: 1 1 600px;
+    margin-top: 0;
+}
+#local-issue-description > ul.advice {
+    list-style: outside disc;
+    padding-left: 40px;
+}
+#connections-container, #projects-container, #local-issue-container {
+    width: 100%;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -576,6 +647,7 @@ input.topic-name {
     -webkit-box-pack: space-evenly;
         -ms-flex-pack: space-evenly;
             justify-content: space-evenly;
+    align-items: center;
     margin: 30px auto;
     overflow-x: visible;
 }
@@ -590,14 +662,16 @@ input.topic-name {
 }
 #issue-searchbar, #project-searchbar {
     /* position: fixed; */
-    -ms-flex-preferred-size: 4 1 40%;
-        flex-basis: 4 1 40%;
-    display: flexbox;
+    -ms-flex-preferred-size: 1 1 35%;
+    min-width: 300px;
+    flex: 1 1 35%;
     min-height: 100px;
     max-height: 500px;
-    margin-right: 30px;
+    /* margin-right: 30px; */
     right: 6vw;
     top: 8vh;
+    display: flex;
+    flex-flow: column nowrap;
     -ms-flex-pack: distribute;
         justify-content: space-around;
     -webkit-box-align: center;
@@ -700,14 +774,14 @@ input.topic-name {
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
-#issue-connections, #project-list {
+#issue-connections, #project-list, #local-issue-list, #local-project-list {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
     max-height: 400px;
     -webkit-box-flex: 0;
-        -ms-flex: 0 1 650px;
-            flex: 0 1 650px;
+        -ms-flex: 3 1 650px;
+            flex: 3 1 650px;
     -webkit-box-orient: vertical;
     -webkit-box-direction: normal;
         -ms-flex-flow: column nowrap;
@@ -731,6 +805,17 @@ input.topic-name {
 #project-list {
     border: 4px solid rgb(133, 42, 0);
     background-color: rgba(202, 183, 12, 0.205);
+}
+#local-issue-list {
+    background-color: rgba(84, 14, 113, .41);
+    border: 6px solid rgb(198, 110, 20);
+    border-radius: 16px;
+    max-height: 600px;
+}
+#local-project-list {
+    background-color: rgba(22, 113, 14, 0.41);
+    border: 6px solid rgb(20, 204, 218);
+    border-radius: 16px;
 }
 
 #issue-connections p, #project-connections p {
@@ -1070,7 +1155,7 @@ input.topic-name {
                 flex: 1 0 150px;
         font-size: 12px;
     }
-    #connections-container, #projects-container {
+    #connections-container, #projects-container, #local-issue-container {
         width: 94%;
     }
 }

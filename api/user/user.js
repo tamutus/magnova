@@ -40,7 +40,7 @@ var UserSchema = new mongoose.Schema({
 	contributions: {
         issues: [{
             issue: {type: Schema.Types.ObjectId, ref: "LocalIssue"},
-            hours: Number
+            hours: {type: Number, default: 0}
         }],
         projects: [{
             project: {type: Schema.Types.ObjectId, ref: "LocalProject"},
@@ -61,7 +61,8 @@ var UserSchema = new mongoose.Schema({
         skill: {type: Schema.Types.ObjectId, ref: "Skill"},
         hours: Number
     }],
-    badges: [{type: Schema.Types.ObjectId, ref: "Badge"}]
+    badges: [{type: Schema.Types.ObjectId, ref: "Badge"}],
+    joinDate: {type: Date, default: Date.now}
 });
 UserSchema.plugin(passportLocalMongoose);
 UserSchema.plugin(mongoose_fuzzy_searching, { fields: ['username'] });

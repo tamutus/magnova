@@ -40,7 +40,7 @@ font-weight: 700;
 }
 
 ::selection {
-    background-color: rgb(4, 27, 91);
+    background-color: rgba(4, 27, 91, .8);
     color: rgb(53, 255, 101);
 }
 body {
@@ -579,7 +579,7 @@ div.meta-cube {
 /* ============= */
 
 #sidebar {
-	z-index: 1001;
+	z-index: 1002;
 	background-color: rgb(166, 79, 120);
 	position: fixed;
 	left: 0;
@@ -673,7 +673,7 @@ div.meta-cube {
 	left: 15px;
 	top: 15px;
 	margin: none;
-	z-index: 1002;
+	z-index: 1003;
 	width: 100px;
 	height: 100px;
 	background-color: rgb(139, 17, 74);
@@ -920,7 +920,7 @@ h1.big-title {
 
 #user-bar {
 	position: fixed;
-	z-index: 8;
+	z-index: 1001;
 	top: 15px;
 	right: 15px;
 	height: 50px;

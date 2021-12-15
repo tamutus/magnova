@@ -17,8 +17,11 @@ let currentUser, userEdgeVotes, userProjectVotes, currentTopicData,
 
 // Capture topic id
 const   issueIdDiv = d3.select("#hidden-issue-id"),
+        localIssueIdDiv = d3.select("#hidden-local-issue-id"),
         projectIdDiv = d3.select("#hidden-project-id"),
+        localProjectIdDiv = d3.select("#hidden-local-project-id"),
         taskIdDiv = d3.select("#hidden-task-id"),
+        localTaskIdDiv = d3.select("#hidden-local-task-id"),
         locationIdDiv = d3.select("#hidden-location-id");
 let topicID,
     routeBase;
@@ -30,6 +33,10 @@ if(!issueIdDiv.empty()){
     topicID = issueIdDiv.text(); 
     routeBase = "wiki";
 }
+else if(!localIssueIdDiv.empty()){
+    topicID = localIssueIdDiv.text();
+    routeBase = "wiki/local";
+}
 else if(!projectIdDiv.empty()){
     topicID = projectIdDiv.text(); 
     routeBase = "project";
@@ -38,10 +45,19 @@ else if(!projectIdDiv.empty()){
     domRoot.style.setProperty("--linkColor", "rgb(158, 231, 255)");
     domRoot.style.setProperty("--linkBGColor", "rgba(82, 227, 203, .44)");
 }
+else if(!localProjectIdDiv.empty()){
+    topicID = localProjectIdDiv.text();
+    routeBase = "project/local";
+}
 else if(!taskIdDiv.empty()){
     topicID = taskIdDiv.text();
     routeBase = "task";
-} else if(!locationIdDiv.empty()){
+} 
+else if(!localTaskIdDiv.empty()){
+    topicID = localTaskIdDiv.text();
+    routeBase = "task/local";
+} 
+else if(!locationIdDiv.empty()){
     topicID = locationIdDiv.text();
     routeBase = "locations";
 }
@@ -298,9 +314,11 @@ function clearSearch(){
     searchResults = {};
     displayResults();
 }
+
 function toggleResultInfo(){
     
 }
+
 if(searchForm){
     searchForm.addEventListener("submit", e => {
         e.preventDefault();
@@ -322,14 +340,14 @@ async function searchAll(){
     if(formInput.get("locations") === "true"){
         fetchString += `&locations=true`;
     }
-    console.log(`Sending fetch request ${baseURL + fetchString}`);
+    // console.log(`Sending fetch request ${baseURL + fetchString}`);
     searchResults = await fetch(baseURL + fetchString)
         .then(res => handleErrors(res))
         .then(res => res.json())
         .catch(err => {
             console.log(err)
         });
-    console.log(searchResults.locations);
+    // console.log(searchResults.locations);
     displayResults();
 }
 // // Place buttons that run the upvote and downvote functions
@@ -357,13 +375,14 @@ async function searchAll(){
 
 let upvotes = d3.selectAll(".upvote"),
     downvotes = d3.selectAll(".downvote"),
-    connectionSelection, projectLinkSelection;
+    connectionSelection, projectLinkSelection, instanceSelection, implementationSelection;
 
 if(topicID){ loadData();}
 
 async function loadData(){
     // Only load votes on wiki pages for issue templates and project templates
-    if(routeBase !== "project" && routeBase !== "wiki" && routeBase !== "locations"){
+    const allowedRoutes = ["project", "wiki", "locations", "wiki/local", "project/local"];
+    if(!allowedRoutes.includes(routeBase)){
         return;
     }
     
@@ -371,15 +390,28 @@ async function loadData(){
     if(dataRoute === "wiki"){
         dataRoute = "issue";
     }
+    if(dataRoute === "wiki/local"){
+        dataRoute = "issue/local";
+    }
     currentTopicData = await fetch(`${dataRoute}/data/${topicID}`)
         .then(res => handleErrors(res))
         .then(res => res.json())
+        .then(res => {
+            if(res?.message === "OK"){
+                return res.content;
+            } else {
+                return res;
+            }
+        })
         .catch(err => {
             console.log(err);
         });
     if(currentTopicData.issues){ updateSubissues(); }
     if(currentTopicData.projects){ updateProjects(); }
-
+    if(currentTopicData.instances) { updateInstances(); }
+    if(currentTopicData.implementations) { updateImplementations(); }
+    
+    // Here is where votes are updated. Only necessary for projects and issues.
     if(loggedIn && (routeBase === "project" || routeBase === "wiki")){
         if(!currentUser){
             currentUsername = loggedIn.textContent;
@@ -513,20 +545,36 @@ function updateSubissues(){
        }
        connectionSelection.exit().remove();
        connectionSelection = connectionSelection.merge(connectionEnter);
-    // Locations don't track votes to local issues
-    } else if(routeBase === "locations"){
-        connectionSelection = d3.select("#issue-connections").selectAll(".connection")
-           .data(currentTopicData.issues, issue => issue._id);
+    }
+    // Locations don't track votes to local issues, so they can be displayed differently.
+    else if(routeBase === "locations"){
+        connectionSelection = d3.select("#local-issue-list").selectAll(".local-issue-snapshot")
+           .data(currentTopicData.issues, localIssue => localIssue._id);
         let connectionEnter = connectionSelection
            .enter()
                .append("div")
-                   .classed("connection", true)
-                   .attr("id", issue => `issue-${issue._id}`);
-       connectionEnter
-           .append("div")
-               .classed("link-info", true)
-               .html(issue => `<a href="wiki/${issue._id}">${issue.name}</a>`);
-       
+                   .classed("local-issue-snapshot", true)
+                   .attr("title", localIssue => localIssue.template.name)
+                   .attr("id", localIssue => `local-issue-${localIssue._id}`)
+                   .html(localIssue => {
+                        let formattedInfo;
+                        if(localIssue.localInfo){
+                            formattedInfo = localIssue.localInfo.replace( /(<([^>]+)>)/ig, '');
+                            if(formattedInfo.length > 100){
+                                formattedInfo = `${formattedInfo.slice(0, 96)}...` 
+                            }
+                        } else {
+                            formattedInfo = "<em>No local information yet. Why not add some?</em>";
+                        }
+                        return `<a href="wiki/local/${localIssue._id}">
+                        <div class="tiny issue-thumbnail"><img src="${localIssue.image}"></div>
+                        <h4>
+                        ${localIssue.template.name.length <= 30 ? localIssue.template.name : localIssue.template.name.slice(0, 26) + "..."}
+                        </h4>
+                        </a>
+                        <div class="info">${formattedInfo}</div>`
+                    });
+                       
        connectionSelection.exit().remove();
        
        connectionSelection = connectionSelection.merge(connectionEnter);
@@ -569,17 +617,17 @@ function updateProjects(){
         projectLinkSelection = projectLinkSelection.merge(projectLinkEnter);
     // Locations are a little different, since they don't store projectGraphs, they just store an array of local projects
     } else if(routeBase === "locations"){
-        projectLinkSelection = d3.select("#project-list").selectAll(".connection")
-           .data(currentTopicData.projects, project => project._id);
+        projectLinkSelection = d3.select("#local-project-list").selectAll(".connection")
+           .data(currentTopicData.projects, localProject => localProject._id);
         let projectLinkEnter = projectLinkSelection
            .enter()
                .append("div")
                    .classed("connection", true)
-                   .attr("id", project => `project-${project._id}`);
+                   .attr("id", localProject => `local-project-${localProject._id}`);
        projectLinkEnter
            .append("div")
                .classed("project-info", true)
-               .html(project => `<a href="wiki/${project._id}">${project.name}</a>`);
+               .html(localProject => `<a href="project/local/${localProject._id}">${localProject.name}</a>`);
        
        projectLinkSelection.exit().remove();
        
@@ -592,7 +640,78 @@ function updateProjects(){
     d3.select("#projects-are-empty")
         .classed("hidden", !projectLinkSelection.empty());
 }
+// Call this for issues, which will have local issue instances
 
+function updateInstances(){
+    instanceSelection = d3.select("#local-issue-list").selectAll(".local-issue-snapshot")
+        .data(currentTopicData.instances, localIssue => localIssue._id);
+    let connectionEnter = instanceSelection
+        .enter()
+            .append("div")
+                .classed("local-issue-snapshot", true)
+                .attr("title", localIssue => localIssue.location.name)
+                .attr("id", localIssue => `local-issue-${localIssue._id}`)
+                .html(localIssue => {
+                    let formattedInfo;
+                    if(localIssue.localInfo){
+                        formattedInfo = localIssue.localInfo.replace( /(<([^>]+)>)/ig, '');
+                        if(formattedInfo.length > 100){
+                            formattedInfo = `${formattedInfo.slice(0, 96)}...` 
+                        }
+                    } else {
+                        formattedInfo = "<em>No local information yet. Why not add some?</em>";
+                    }
+                    return `<a href="wiki/local/${localIssue._id}">
+                        <div class="tiny issue-thumbnail"><img src="${localIssue.image}"></div>
+                        <h4>
+                            ${localIssue.location.name.length <= 30 ? localIssue.location.name : localIssue.location.name.slice(0, 26) + "..."}
+                        </h4>
+                    </a>
+                    <div class="info">${formattedInfo}</div>`
+                });
+    
+    instanceSelection.exit().remove();
+    
+    instanceSelection = instanceSelection.merge(connectionEnter);
+
+    d3.select("#instances-are-empty")
+        .classed("hidden", !instanceSelection.empty());
+}
+function updateImplementations(){
+    implementationSelection = d3.select("#implementation-list").selectAll(".local-project-snapshot")
+        .data(currentTopicData.implementations, localProject => localProject._id);
+    let implementationEnter = implementationSelection
+        .enter()
+            .append("div")
+                .classed("local-project-snapshot", true)
+                .attr("title", localProject => localProject.location.name)
+                .attr("id", localProject => `local-project-${localProject._id}`)
+                .html(localProject => {
+                    let formattedInfo;
+                    if(localProject.localInfo){
+                        formattedInfo = localProject.localInfo.replace( /(<([^>]+)>)/ig, '');
+                        if(formattedInfo.length > 100){
+                            formattedInfo = `${formattedInfo.slice(0, 96)}...` 
+                        }
+                    } else {
+                        formattedInfo = "<em>No local information yet. Why not add some?</em>";
+                    }
+                    return `<a href="project/local/${localProject._id}">
+                        <div class="tiny project-thumbnail"><img src="${localProject.image}"></div>
+                        <h4>
+                            ${localProject.location.name.length <= 30 ? localProject.location.name : localProject.location.name.slice(0, 26) + "..."}
+                        </h4>
+                    </a>
+                    <div class="info">${localProject.localInfo ? localProject.localInfo.slice(0, 200) + "..." : "<em>No local information yet. Why not add some?</em>"}</div>`
+                });
+    
+    implementationSelection.exit().remove();
+    
+    implementationSelection = implementationSelection.merge(implementationEnter);
+
+    d3.select("#projects-are-empty")
+        .classed("hidden", !implementationSelection.empty());
+}
 // let issues = [];
 // getIssues();
 // function getIssues(){
@@ -691,7 +810,7 @@ async function projectLinkSearch(){
         .append("div")
             .classed("result", true)
             .text(project => project.name)
-            .on("click", project => routeBase === "locations" ? identifyLocalIssue(topicID, project._id) : upvoteProjectLink(project._id, topicID));
+            .on("click", project => routeBase === "locations" ? deployLocalProject(topicID, project._id) : upvoteProjectLink(project._id, topicID));
     projectSearchResults
         .exit()
             .remove();
@@ -775,7 +894,34 @@ function toggleIssueSearchbar(){
 // General functions
 
 async function identifyLocalIssue(locationID, issueID){
-
+    if(!locationID.match(/^[0-9a-fA-F]{24}$/) || !issueID.match(/^[0-9a-fA-F]{24}$/)){
+        console.error("Tried identifying a Local Issue with an improper Issue or Location id.");
+        return;
+    }
+    let result = await fetch(`/issue/localize/${issueID}/${locationID}`,{
+        method: "POST"
+    })
+        .then(handleErrors)
+        .then(res => res.json()) // *TO DO: Check whether you can detect whether .json or .text is appropriate
+        .catch(console.error);
+    if(result.message === "exists"){
+        // display this message. Run a countdown?
+        console.log("A local issue here already exists.");
+        if(result.localURL){
+            console.log("Redirecting in three seconds");
+            setTimeout(() => {
+                window.location = result.localURL;
+            }, 3000);
+        }
+    }
+    else if(result.message === "success" && result.localURL){
+        window.location = result.localURL;
+    }
+    else if(result.message){
+        console.log(result.message);
+    } else {
+        console.log(result);
+    }
 }
 
 async function upvoteIssueLink(sourceID, targetID) {
@@ -822,8 +968,8 @@ async function downvoteIssueLink(sourceID, targetID){
 }
 
 // Same logic as identifyLocalIssue but for projects
-async function createLocalProject(locationID, projectID){
-
+async function deployLocalProject(locationID, projectID){
+    console.log(locationID, projectID);
 }
 
 // Same logic as upvoteLink/downvoteLink but for projects

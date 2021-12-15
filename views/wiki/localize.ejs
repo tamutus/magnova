@@ -1,0 +1,61 @@
+<%- include("../partials/mapHeader") %>
+<h1>Mapping <a href="<%= `/wiki/${issue._id}` %>"><span id="issue-name"><%= issue.name %></span></a></h1>
+<span class="hidden" id="hidden-issue-id"><%= issue._id %></span>
+<span class="hidden" id="instance-csv"><% for(instance of issue.instances){ %><%= instance.location %>:<%= instance._id %>,<% } %></span>
+<div id="map-container">
+    <div id="map-display"></div>
+    <div id="location-info-display-container">
+        <div id="location-info-display">
+            <div id="location-info-header">
+                <h2 id="location-name"><span class="location-name">Earth</span></h2>
+                <button onclick="toggleToSublocationList();">List each <span class="subdivision-name">country</span> →</button>
+            </div>
+            <p id="location-geometry-attribution"></p>
+            <h4>A <span id="division-word">planet</span> of <span id="superlocation-name">the Solar System</span></h4>
+            <div id="location-description">
+                <div id="location-description-text"></div>
+                <div id="localize-button" class="greyed" title="Select a location">Create Local Issue page</div>
+            </div>
+        </div>
+        <div id="sublocation-list-container" class="hidden">
+            <div id="sublocation-header">
+                <h2>Sublocations</h2>
+                <button onclick="toggleToLocationInfo();">← Location Info</button>
+            </div>
+            <div id="sublocation-list"></div>
+        </div>
+    </div>
+</div>
+
+<div id="instructions" class="advice">
+    <h3>Controls</h3>
+    <p>Click to focus a place. Double click a place to load its sublocations. Once you have focused the location where you want to track <%= issue.name %>, click "Create Local Issue Page".</p>
+    <p>If nobody has added the location you're looking for, head to the <a href="/locations">Map</a> to learn how you can build our location database directly.</p>
+</div>
+
+<div id="bugs">
+    <h3>Known issues</h4>
+    <ol>
+        <li>Some parts of locations do not properly change style at certain zoom levels. You will notice Alaska and Russia in particular have this problem. Zoom in to somewhat fix this.</li>
+    </ol>
+</div>
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<!-- Make sure you put this AFTER Leaflet's CSS -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+crossorigin=""></script>
+<!-- These two scripts allow for tile caching-->
+<script src="https://unpkg.com/pouchdb@^5.2.0/dist/pouchdb.js"></script>
+<script src="https://unpkg.com/leaflet.tilelayer.pouchdbcached@latest/L.TileLayer.PouchDBCached.js"></script>
+<!-- For creating tile layers out of geoJSON -->
+<script src="https://unpkg.com/leaflet.vectorgrid@latest/dist/Leaflet.VectorGrid.bundled.js"></script>
+
+<script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-array@3"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-geo@3"></script>
+
+<!-- <script type="text/javascript" src="https://chir.ag/projects/ntc/ntc.js"></script> -->
+
+<script src="/scripts/localize.js"></script>
+<%- include("../partials/footer") %>

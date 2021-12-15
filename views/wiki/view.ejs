@@ -103,6 +103,24 @@
                         <input type="text">
                         <div id="found-issue-links"></div>
                     </div>
+                    <div id="issue-submission">
+                        <h2>
+                            Identify a new issue
+                        </h2>	
+                        <div id="issue-submitter">
+                            <form action="/issue" method="post">
+                                <div class="form-group">
+                                    <input type="text" placeholder="Issue name" name="issue[name]">
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" placeholder="Image URL" name="issue[image]">
+                                </div>
+                                <button type="submit">
+                                    Submit
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 <% } %>
             </div>
         </li>
@@ -150,7 +168,20 @@
         </li>
         <hr>
         <li id="locations">
-            <h2>Locations</h2>
+            <h2>Local instances of <%= issue.name %></h2>
+            <div id="local-issue-description">
+                <p>Is <%= issue.name %> affecting your community? Issue pages, like the one you're on now, are ideal for talking about general problems. Each Issue can be deployed to a Location to create a "Local Issue" page, where users can measure an Issue's impact on that Location, and discuss things that are particular to the community.</p>
+                <ul class="advice">
+                    <li>Existing Local Issue pages are shown below.</li>
+                    <li>You can create a new Local Issue page based on an existing Issue using the adjacent searchbar. Clicking the search result will take you to an existing Local Issue page, or else create a new one.</li>
+                    <li>If the Issue you want to discuss isn't registered on Magnova yet, you can do so at the <a href="/wiki">Wiki</a></li>
+                </ul>
+            </div>
+            <div id="instances-are-empty"><p>None identified yet! <% if(!currentUser){ %>Registered users can identify new Local Issues. <% } else { %>Use the map to create the first Local Issue page for <%= issue.name %>.<% } %> </p></div>
+            <div id="local-issue-container">
+                <div id="local-issue-list"></div>
+                <button id="localizer-link"><h3><a href="<%= `/issue/localize/${issue._id}` %>">Map <%= issue.name %></a></h3></button>
+            </div>
             <div id="map-container"></div>
         </li>
         <!-- <h2>Backend Data</h2>

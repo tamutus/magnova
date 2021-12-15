@@ -7,7 +7,8 @@ var TalkpageSchema = new Schema({
     threads: [{
         subject: String,
         lastActivity: Date,
-        comments: [{type: Schema.Types.ObjectId, ref: "Comment"}]
+        comments: [{type: Schema.Types.ObjectId, ref: "Comment"}],
+        deleted: {type: Boolean, default: false}
     }]
 });
 

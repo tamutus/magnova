@@ -8,7 +8,7 @@ module.exports.isLoggedIn = function(req, res, next){
     next();
 }
 module.exports.deleteTalkpage = async function(talkpageID, req){
-    if(talkpageID.match(/^[0-9a-fA-F]{24}$/)){
+    if(String(talkpageID).match(/^[0-9a-fA-F]{24}$/)){
         if(!req.isAuthenticated()){
             return "Not authenticated";
         }

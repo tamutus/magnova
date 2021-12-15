@@ -103,6 +103,24 @@
                             <input type="text">
                             <div id="found-issue-links"></div>
                         </div>
+                        <div id="issue-submission">
+                            <h2>
+                                Identify a new issue
+                            </h2>	
+                            <div id="issue-submitter">
+                                <form action="/issue" method="post">
+                                    <div class="form-group">
+                                        <input type="text" placeholder="Issue name" name="issue[name]">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="text" placeholder="Image URL" name="issue[image]">
+                                    </div>
+                                    <button type="submit">
+                                        Submit
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     <% } %>
                 </div>
         <!-- <h2>Backend Data</h2>

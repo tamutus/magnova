@@ -52,6 +52,8 @@ let liveVersion,
     patchData,
     // These inputs will only be added on project and issue pages
     imageInput,
+    // This input will only be added on template and location pages
+    nameInput,
     // These inputs will only be added on location pages
     subWordInput,
     geoInput,
@@ -71,13 +73,17 @@ if(!editIdDiv.empty()){
 //     });
 
 // Add and capture hidden input fields on top of display fields
-const nameInput = d3.select("#name-container")
-    .insert("input",":first-child")
-        .attr("type", "text")
-            .property("value", topicName.text())
-        .classed("topic-name", true)
-        .classed("mutable", true)
-        .classed("hidden", true);
+
+// For template, Local Task, and Location pages
+if(!nameBox.select(".mutable").empty()){
+    nameInput = d3.select("#name-container")
+        .insert("input",":first-child")
+            .attr("type", "text")
+                .property("value", topicName.text())
+            .classed("topic-name", true)
+            .classed("mutable", true)
+            .classed("hidden", true);
+}
 
 // For issue and project pages:
 if(!imageBox.empty()){
@@ -156,8 +162,8 @@ async function toggleEditing(){
     else{
         
         // Make an API call to get a live version of info for a three way merge with what you started editing and your edits, then save, returning and displaying any error messages.
-        
-        const dataRoute =   routeBase == "wiki" ? "issue" : routeBase;
+
+        let dataRoute = routeBase.replace("wiki", "issue");
         liveVersion = await fetch(`/${dataRoute}/data/${topicID}`)
             .then(serverResponse => serverResponse.json())
             .then(resObject => {
@@ -183,7 +189,7 @@ async function toggleEditing(){
         // Three way merge logic
         let oldInfo = descriptionText.html(),
             newInfo = tinymce.get("description-editor").getContent(),
-            liveInfo = liveVersion.info || "";
+            liveInfo = liveVersion.info || liveVersion.localInfo || "";
         console.log(`Old: ${oldInfo}, New: ${newInfo}, Live: ${liveInfo}`);
         const merged = Textmerger.get().merge(oldInfo, newInfo, liveInfo);
         console.log(`Merged: ${merged}`);
@@ -225,6 +231,14 @@ async function toggleEditing(){
                 latestVersion: liveVersion.version
             }
         }
+        else if(routeBase === "wiki/local" || routeBase === "project/local"){
+            topicUpdate = {
+                info: merged,
+                image: imageInput.property("value"),
+                patch: patch,
+                latestVersion: liveVersion.version
+            }
+        }
         if(patchYields !== merged){
             window.alert("There was an error updating content. A bug has been detected and a report submitted. We've saved your edits. If you were planning to make more, hold onto them until we fix the issue.");
             reportBug({
@@ -233,7 +247,7 @@ async function toggleEditing(){
             });
             return;
         }
-        if(liveVersion.info && liveVersion.info !== invertedPatchYields){
+        if(liveInfo && liveInfo !== invertedPatchYields){
             window.alert("This edit can't be backwards patched and would corrupt the data. A bug has been detected and a report submitted.");
             reportBug({
                 link: window.location.pathname,
@@ -262,7 +276,9 @@ async function toggleEditing(){
         // With failure code, change the failure message div's text but otherwise return from this function
         
         //Success 
-        topicName.text(topicUpdate.name);
+        if(topicUpdate.name !== undefined){
+            topicName.text(topicUpdate.name);
+        }
         // handle.text(`@ ${topicUpdate.username}`);  // username changes need to be implemented
         descriptionText.html(topicUpdate.info);
         

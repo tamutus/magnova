@@ -11,29 +11,46 @@ const   mapContainer = d3.select("#map-container"),
         sublocationList = sublocationContainer.select("#sublocation-list"),
         infoDisplay = infoDisplayContainer.select("#location-info-display"),
         locationName = infoDisplay.select("#location-info-header").select("#location-name").select("span.location-name"),
-        wikiButton = infoDisplay.select("#wiki-button"),
-        colorEditor = infoDisplay.select("#color-editor"),
-        colorName = d3.select("#location-color-name"),
+        // colorEditor = infoDisplay.select("#color-editor"),
+        // colorName = d3.select("#location-color-name"),
         superlocationName = d3.select("#superlocation-name"),
         divisionWord = d3.select("#division-word"),
         locationAttribution = infoDisplay.select("#location-geometry-attribution"),
         allNameDisplays = d3.selectAll("span.location-name"),
         allSubdivisionNameDisplays = d3.selectAll("span.subdivision-name"),
-        locationColorInput = d3.select("#sublocation-submitter input[type=color]"),
-        fetchToggler = d3.select("#fetch-toggler"),
-        fetchDisplay = d3.select("#fetch-display"),
-        fetchInput = fetchDisplay.select("#fetch-target"),
-        fetchNameProperty = fetchDisplay.select("#fetch-name-property"),
-        fetchProvider = fetchDisplay.select("#fetch-provider"),
-        fetchAttributionLink = fetchDisplay.select("#fetch-attribution-link"),
-        fetchResult = fetchDisplay.select("#fetch-result"),
-        sublocationForm = document.querySelector("#new-sublocation-form");
+        // locationColorInput = d3.select("#sublocation-submitter input[type=color]"),
+        // fetchToggler = d3.select("#fetch-toggler"),
+        // fetchDisplay = d3.select("#fetch-display"),
+        // fetchInput = fetchDisplay.select("#fetch-target"),
+        // fetchNameProperty = fetchDisplay.select("#fetch-name-property"),
+        // fetchProvider = fetchDisplay.select("#fetch-provider"),
+        // fetchAttributionLink = fetchDisplay.select("#fetch-attribution-link"),
+        // fetchResult = fetchDisplay.select("#fetch-result"),
+        // sublocationForm = document.querySelector("#new-sublocation-form"),
+        localizeButton = infoDisplay.select("#localize-button"),
+        issueIdDiv = d3.select("#hidden-issue-id"),
+        issueNameSpan = d3.select("#issue-name"),
+        instanceCsvSpan = d3.select("#instance-csv"),
+        loggedIn = d3.select("#logged-in");
 
 
 
   //================//
  // Initialization //
 //================//
+
+// Capture the existing instances in an array
+let instanceCSV = instanceCsvSpan.text();
+instanceCSV = instanceCSV.slice(0, instanceCSV.length - 1);
+const instancePairs = instanceCSV.split(',');
+const instances = [];
+for(instancePair of instancePairs){
+    const pair = instancePair.split(':');
+    instances.push({
+        location: pair[0],
+        _id: pair[1]
+    });
+}
 
 // Set defaults for the map and create variables for stable access
 let activeLocation = {
@@ -56,12 +73,17 @@ let activeLocation = {
     activeVectorGrid,
     tempLayer,
     layerIsLoading = false,
-    activeFeatureID;
+    activeFeatureID,
+    templateID,
+    issueName;
 
-// To-do: Initialization could be moved into this function and put into a button. This would decrease unintentional requests to the API, but also add a step for users.
-function loadMap(){
-    
+if(!issueIdDiv.empty()){
+    templateID = issueIdDiv.text();
 }
+if(!issueNameSpan.empty()){
+    issueName = issueNameSpan.text();
+}
+
 
 // Initialize Leaflet (L) Map with double-click zoom turned off (we'll use double click for loading subfeatures and manually set the zoom level), the map slightly skewed from center, 
 const mymap = L.map('map-display', {
@@ -80,6 +102,7 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
 
 // initialize the popup interface
 const popup = L.popup();
+
 
     //======//
    // Zoom //
@@ -165,206 +188,227 @@ async function startWithEarth(){
     }
 }
 
-async function showCountries(){
-    let results = await fetch("https://raw.githubusercontent.com/martynafford/natural-earth-geojson/master/10m/cultural/ne_10m_admin_0_countries.json")
-        .then(handleErrors)
-        .then(res => res.json())
-        .then(res => {
-            showLayer(res);
-            readFeatureList(activeGeo.features);
-            mymap.fitBounds(L.latLngBounds(collectPointsForLeaflet([], activeLocation.geometry.coordinates)));
-            return res;
-        })
-        .then(console.log)
-        .catch(console.error);
-}
-
-  //==================//
- // Sublocation AJAX //
-//==================//
 
 
-if(sublocationForm){
-    sublocationForm.addEventListener("submit", async e => {
-        e.preventDefault();
-        const newLocation = previewLocationSubmission();
-        if(newLocation === false){
-            return;
-        } else {
-            startLoadingLayer();
-            let submittedFeature = await submitSublocation(newLocation, newLocation.geometrySource);
-            finishLoadingLayer();
-            renderNewSublocation(submittedFeature);
-        }
-    });
-}
+  //======//
+ // AJAX //
+//======//
 
-function previewLocationSubmission(){
-    const   formInput = new FormData(sublocationForm),
-            newLocation = {
-                name: capitalize(formInput.get("name")),
-                geometry: JSON.parse(formInput.get("geojson")),
-                geometrySource: `©<a href="${formInput.get("location-attribution")}">${formInput.get("geo-provider")}</a>`,
-                color: formInput.get("location-color"),
-                sublocationWord: formInput.get("sublocation-word")
-            }
-    const confirmed = window.confirm("This is what you're about to submit. Look good?" + JSON.stringify(newLocation));
-    if(confirmed){
-        return newLocation;
-    }
-    else {
-        return false;
-    }
-}
 
-async function submitSublocation(feature, attribution){
-    let newLocation;
-    if(!feature || !activeParent){
-        return;
-    } else {
-        newLocation = {
-            geometry: feature.geometry,
-            geometrySource: attribution,
-            sublocationWord: feature.sublocationWord,
-            superlocation: activeParent.properties._id
-        };
-        if(feature.name){
-            newLocation.name = capitalize(feature.name);
-        } else if(feature.properties.NAME) {
-            newLocation.name = capitalize(feature.properties.NAME);
-        }
-        if(feature.color){
-            newLocation.color = feature.color
-        }
-    }
-    // console.log(JSON.stringify(newLocation));
-    let result = await fetch("/locations", {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newLocation)
-    })
-        .then(handleErrors)
-        .then(res => res.json())
-        .catch(console.error);
-    if(result.message !== "OK"){
-        console.error(result.message);
-        return false;
-    } else {
-        return result.content;
-    }
-}
+// if(sublocationForm){
+//     sublocationForm.addEventListener("submit", async e => {
+//         e.preventDefault();
+//         const newLocation = previewLocationSubmission();
+//         if(newLocation === false){
+//             return;
+//         } else {
+//             startLoadingLayer();
+//             let submittedFeature = await submitSublocation(newLocation, newLocation.geometrySource);
+//             finishLoadingLayer();
+//             renderNewSublocation(submittedFeature);
+//         }
+//     });
+// }
 
-function renderNewSublocation(submittedFeature){
-    if(!geoCache[submittedFeature.superlocation._id]){
-        updatedFeatureCollection = {
-            type: "FeatureCollection",
-            features: [],
-            parent: activeParent
-        };
-        geoCache[submittedFeature.superlocation._id] = updatedFeatureCollection;
-    }
-    const formattedFeature = addToGeo(submittedFeature);
-    geoCache[submittedFeature.superlocation._id].features.push(formattedFeature);
-    document.querySelector("#map-display").scrollIntoView({behavior: "smooth"});
-    showLayer(activeGeo);
-}
+// function previewLocationSubmission(){
+//     const   formInput = new FormData(sublocationForm),
+//             newLocation = {
+//                 name: capitalize(formInput.get("name")),
+//                 geometry: JSON.parse(formInput.get("geojson")),
+//                 geometrySource: `©<a href="${formInput.get("location-attribution")}">${formInput.get("geo-provider")}</a>`,
+//                 color: formInput.get("location-color"),
+//                 sublocationWord: formInput.get("sublocation-word")
+//             }
+//     const confirmed = window.confirm("This is what you're about to submit. Look good?" + JSON.stringify(newLocation));
+//     if(confirmed){
+//         return newLocation;
+//     }
+//     else {
+//         return false;
+//     }
+// }
 
-async function fetchThis(){
-    const parent = activeParent;
-    fetch(`${fetchInput.property("value")}`)
-        .then(handleErrors)
-        .then(res => res.json())
-        .then(res => {      
-            res.parent = parent;
-            for(feature of res.features){
-                feature.properties.geometrySource = `©<a href="${fetchAttributionLink.property("value")}">${fetchProvider.property("value")}</a>`;
-                feature.properties.NAME = capitalize(feature.properties[fetchNameProperty.property("value")]);
-            }
-            showLayer(res);
-            activeGeo
-            fetchResult.html(`<p>${res.features.length} sublocations detected</p>`)
-            sublocationList.html(sublocationList.html() + `<button onclick="submitFetchedSublocations();">Submit ${activeGeo.features.length} sublocations</button>`);
-            toggleToSublocationList();
-            document.querySelector("#map-display").scrollIntoView({behavior: "smooth"});
-            mymap.fitBounds(L.latLngBounds(collectPointsForLeaflet([], activeLocation.geometry.coordinates)));
-            return res;
-        })
-        // .then(console.log)
-        .catch(console.error);
-}
+// async function submitSublocation(feature, attribution){
+//     let newLocation;
+//     if(!feature || !activeParent){
+//         return;
+//     } else {
+//         newLocation = {
+//             geometry: feature.geometry,
+//             geometrySource: attribution,
+//             sublocationWord: feature.sublocationWord,
+//             superlocation: activeParent.properties._id
+//         };
+//         if(feature.name){
+//             newLocation.name = capitalize(feature.name);
+//         } else if(feature.properties.NAME) {
+//             newLocation.name = capitalize(feature.properties.NAME);
+//         }
+//         if(feature.color){
+//             newLocation.color = feature.color
+//         }
+//     }
+//     // console.log(JSON.stringify(newLocation));
+//     let result = await fetch("/locations", {
+//         method: "POST",
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify(newLocation)
+//     })
+//         .then(handleErrors)
+//         .then(res => res.json())
+//         .catch(console.error);
+//     if(result.message !== "OK"){
+//         console.error(result.message);
+//         return false;
+//     } else {
+//         return result.content;
+//     }
+// }
 
-async function submitFetchedSublocations(){
-    let submittedFeatureCollection = {
-        type: "FeatureCollection",
-        features: [],
-        parent: activeParent
-    };
-    const attribution = `©<a href="${fetchAttributionLink.property("value")}">${fetchProvider.property("value")}</a>`;
-    startLoadingLayer();
-    for(feature of activeGeo.features){
-        const submittedFeature = await submitSublocation(feature, attribution);
+// function renderNewSublocation(submittedFeature){
+//     if(!geoCache[submittedFeature.superlocation._id]){
+//         updatedFeatureCollection = {
+//             type: "FeatureCollection",
+//             features: [],
+//             parent: activeParent
+//         };
+//         geoCache[submittedFeature.superlocation._id] = updatedFeatureCollection;
+//     }
+//     const formattedFeature = addToGeo(submittedFeature);
+//     geoCache[submittedFeature.superlocation._id].features.push(formattedFeature);
+//     document.querySelector("#map-display").scrollIntoView({behavior: "smooth"});
+//     showLayer(activeGeo);
+// }
+
+// async function fetchThis(){
+//     const parent = activeParent;
+//     fetch(`${fetchInput.property("value")}`)
+//         .then(handleErrors)
+//         .then(res => res.json())
+//         .then(res => {      
+//             res.parent = parent;
+//             for(feature of res.features){
+//                 feature.properties.geometrySource = `©<a href="${fetchAttributionLink.property("value")}">${fetchProvider.property("value")}</a>`;
+//                 feature.properties.NAME = capitalize(feature.properties[fetchNameProperty.property("value")]);
+//             }
+//             showLayer(res);
+//             activeGeo
+//             fetchResult.html(`<p>${res.features.length} sublocations detected</p>`)
+//             sublocationList.html(sublocationList.html() + `<button onclick="submitFetchedSublocations();">Submit ${activeGeo.features.length} sublocations</button>`);
+//             toggleToSublocationList();
+//             document.querySelector("#map-display").scrollIntoView({behavior: "smooth"});
+//             mymap.fitBounds(L.latLngBounds(collectPointsForLeaflet([], activeLocation.geometry.coordinates)));
+//             return res;
+//         })
+//         // .then(console.log)
+//         .catch(console.error);
+// }
+
+// async function submitFetchedSublocations(){
+//     let submittedFeatureCollection = {
+//         type: "FeatureCollection",
+//         features: [],
+//         parent: activeParent
+//     };
+//     const attribution = `©<a href="${fetchAttributionLink.property("value")}">${fetchProvider.property("value")}</a>`;
+//     startLoadingLayer();
+//     for(feature of activeGeo.features){
+//         const submittedFeature = await submitSublocation(feature, attribution);
         
-        if(submittedFeature === false){
-            continue;
-        }
-        const formattedFeature = {
-            geometry: submittedFeature.geometry,
-            properties: {
-                NAME: submittedFeature.name,
-                color: submittedFeature.color,
-                geometrySource: submittedFeature.geometrySource,
-                sublocationWord: submittedFeature.sublocationWord,
-                superlocation: activeParent.properties._id
-            },
-            type: "Feature"
-        };
-        tempLayer.addLayer(L.geoJson(formattedFeature));
-        submittedFeatureCollection.features.push(formattedFeature);
-    }
-    finishLoadingLayer();
-    showLayer(submittedFeatureCollection);
-    geoCache[submittedFeatureCollection.parent.properties._id] = activeGeo;
-}
+//         if(submittedFeature === false){
+//             continue;
+//         }
+//         const formattedFeature = {
+//             geometry: submittedFeature.geometry,
+//             properties: {
+//                 NAME: submittedFeature.name,
+//                 color: submittedFeature.color,
+//                 geometrySource: submittedFeature.geometrySource,
+//                 sublocationWord: submittedFeature.sublocationWord,
+//                 superlocation: activeParent.properties._id
+//             },
+//             type: "Feature"
+//         };
+//         tempLayer.addLayer(L.geoJson(formattedFeature));
+//         submittedFeatureCollection.features.push(formattedFeature);
+//     }
+//     finishLoadingLayer();
+//     showLayer(submittedFeatureCollection);
+//     geoCache[submittedFeatureCollection.parent.properties._id] = activeGeo;
+// }
 
-function updateColor(){
-    const   newColor = colorEditor.property("value"),
-            newColorNTC = ntc.name(newColor);
-    if(!activeLocation.properties._id || !window.confirm(`Would you like to change the color of ${activeLocation.properties.NAME} to ${newColorNTC[1]} (${newColorNTC[0]})?`)){
+// function updateColor(){
+//     const   newColor = colorEditor.property("value"),
+//             newColorNTC = ntc.name(newColor);
+//     if(!activeLocation.properties._id || !window.confirm(`Would you like to change the color of ${activeLocation.properties.NAME} to ${newColorNTC[1]} (${newColorNTC[0]})?`)){
+//         return;
+//     }
+//     fetch(`/locations/color/${activeLocation.properties._id}`, {
+//         method: "PUT",
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({
+//             color: newColor
+//         })
+//     })
+//         .then(handleErrors)
+//         .then(res => res.text())
+//         .then(text => {
+//             if(text.charAt(0) === '#'){
+//                 if(!activeGeo.parent && activeGeo.features.length === 1){
+//                     activeGeo.features[0].properties.color = text;
+//                 } else {
+//                     const newlyPainted = geoCache[activeGeo.parent.properties._id].features.find(feature => feature.properties._id == activeLocation.properties._id);
+//                     newlyPainted.properties.color = text;
+//                 }
+//                 colorEditor.property("value", text);
+//                 colorEditor.style("background-color", text);
+//                 colorName.text(`(${ntc.name(text)[1]})`);
+
+//                 showLayer(activeGeo);
+//             } else {
+//                 // display a message to the user that it didn't work
+//                 return;
+//             }
+//         })
+//         .catch(console.error);
+// }
+
+async function localizeIssue(){
+    // *TO DO: display a loading message
+    if(!templateID || !activeLocation?.properties?._id){
+        console.error("Tried localizing an issue but couldn't get both an issue and a location id.");
         return;
     }
-    fetch(`/locations/color/${activeLocation.properties._id}`, {
-        method: "PUT",
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            color: newColor
-        })
+    let result = await fetch(`/issue/localize/${templateID}/${activeLocation.properties._id}`,{
+        method: "POST"
     })
         .then(handleErrors)
-        .then(res => res.text())
-        .then(text => {
-            if(text.charAt(0) === '#'){
-                if(!activeGeo.parent && activeGeo.features.length === 1){
-                    activeGeo.features[0].properties.color = text;
-                } else {
-                    const newlyPainted = geoCache[activeGeo.parent.properties._id].features.find(feature => feature.properties._id == activeLocation.properties._id);
-                    newlyPainted.properties.color = text;
-                }
-                colorEditor.property("value", text);
-                colorEditor.style("background-color", text);
-                colorName.text(`(${ntc.name(text)[1]})`);
-
-                showLayer(activeGeo);
-            } else {
-                // display a message to the user that it didn't work
-                return;
-            }
-        })
+        .then(res => res.json()) // *TO DO: Check whether you can detect whether .json or .text is appropriate
         .catch(console.error);
+    if(result.message === "exists"){
+        // display this message. Run a countdown?
+        console.log("A local issue here already exists.");
+        if(result.localURL){
+            console.log("Redirecting in three seconds");
+            setTimeout(() => {
+                window.location = result.localURL;
+            }, 3000);
+        }
+    }
+    else if(result.message === "success" && result.localURL){
+        window.location = result.localURL;
+    }
+    else if(result.message){
+        console.log(result.message);
+    } else {
+        console.log(result);
+    }
 }
+
 
   //============================//
  // Feature and layer handling //
@@ -402,12 +446,12 @@ function showLayer(featureCollection){
         vectorTileLayerStyles: {
             sliced: (properties) => {
                 return {
-                    "color": properties.color || "#9e50ba",
+                    "color": properties.instance ? "rgb(255, 138, 69)" : "rgb(209, 149, 240)",
                     "fill": true,
-                    "fillColor": properties.color || "#3ba853",
+                    "fillColor": properties.instance ? "rgb(255, 138, 69)" : "rgb(209, 149, 240)",
                     "weight": 5,
-                    "opacity": 0.6,
-                    "fillOpacity": 0.2
+                    "opacity": properties.instance? 0.6 : 0.3,
+                    "fillOpacity": properties.instance? 0.25 : 0.15
                 };
             }
         },
@@ -505,6 +549,10 @@ function addToGeo(feature){
 }
 
 function formatFeature(feature){
+    let foundInstance = instances.find(instance => instance.location === String(feature._id));
+    if(foundInstance){
+        foundInstance = foundInstance._id;
+    }
     const formattedFeature = {
         geometry: feature.geometry,
         properties: {
@@ -528,7 +576,8 @@ function formatFeature(feature){
             talkpage: feature.talkpage,
             issues: feature.issues,
             projects: feature.projects,
-            tasks: feature.tasks
+            tasks: feature.tasks,
+            instance: foundInstance
         },
         type: "Feature"
     }
@@ -642,22 +691,38 @@ function readFeatureList(features){
 function displayFeatureInfo(feature){
     locationName.text(feature.properties.NAME);
     if(feature.properties._id){
-        wikiButton.html(`<a href="/locations/${feature.properties._id}" target="_blank" rel="noopener noreferrer">Go to wiki</a>`);
-        wikiButton.classed("greyed", false);
-        colorEditor.classed("hidden", false);
-        if(feature.properties.color){
-            colorEditor.property("value", feature.properties.color);
-            colorEditor.style("background-color", feature.properties.color);
-            colorName.text(`(${ntc.name(feature.properties.color)[1]})`);
+        if(feature.properties.instance){
+            localizeButton.html(`<a href="/wiki/local/${feature.properties.instance}" target="_blank" rel="noopener noreferrer">View Local Issue page</a>`);
+            localizeButton.attr("title", `Analyze ${issueName} in ${feature.properties.NAME}`);
+            localizeButton.classed("greyed", false);
         } else {
-            colorName.text("");
+            localizeButton.text("Create a Local Issue page");
+            if(!loggedIn.empty()){
+                localizeButton.on("click", localizeIssue);
+                localizeButton.attr("title", `Create a page to analyze ${issueName} in ${feature.properties.NAME}`);
+                localizeButton.classed("greyed", false);
+            } else {
+                localizeButton.on("click", null);
+                localizeButton.attr("title", `Log in to create local issue pages`);
+                localizeButton.classed("greyed", true);
+            }
         }
-        wikiButton.attr("title", `See local issues/projects/tasks, community information, and discussion at ${feature.properties.NAME}`);
+        
+        // colorEditor.classed("hidden", false);
+        // if(feature.properties.color){
+        //     colorEditor.property("value", feature.properties.color);
+        //     colorEditor.style("background-color", feature.properties.color);
+        //     colorName.text(`(${ntc.name(feature.properties.color)[1]})`);
+        // } else {
+        //     colorName.text("");
+        // }
+        
     } else {
-        wikiButton.html("Go to wiki");
-        wikiButton.classed("greyed", true);
-        colorEditor.classed("hidden", true);
-        wikiButton.attr("title", "Location not yet registered");
+        localizeButton.html("Localize");
+        localizeButton.classed("greyed", true);
+        localizeButton.text("No registered location");
+        // colorEditor.classed("hidden", true);
+        localizeButton.attr("title", "Location not yet registered");
     }
     if(activeLocation !== activeParent){
         superlocationName.text(activeParent.properties.NAME);
@@ -689,17 +754,17 @@ function toggleToLocationInfo(){
     sublocationContainer.classed("hidden", true);
 }
 
-if(locationColorInput){
-    locationColorInput.on("change", () => {
-        locationColorInput.style("background-color", locationColorInput.property("value"));
-    })
-}
-if(colorEditor){
-    colorEditor.on("change", () => {
-        colorEditor.style("background-color", colorEditor.property("value"));
-        updateColor();
-    })
-}
+// if(locationColorInput){
+//     locationColorInput.on("change", () => {
+//         locationColorInput.style("background-color", locationColorInput.property("value"));
+//     })
+// }
+// if(colorEditor){
+//     colorEditor.on("change", () => {
+//         colorEditor.style("background-color", colorEditor.property("value"));
+//         updateColor();
+//     })
+// }
 
 function toggleFetchDisplay(){
     const alreadyHidden = fetchDisplay.classed("hidden");

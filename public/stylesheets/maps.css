@@ -90,7 +90,7 @@ span.location-name {
 span.subdivision-name {
     font-size: inherit;
 }
-#wiki-button {
+#wiki-button, #localize-button {
     background-color: #c898ed;
     border-radius: 15px;
     padding: 15px;
@@ -99,10 +99,10 @@ span.subdivision-name {
     cursor: pointer;
     transition: box-shadow .5s ease-out, filter .5s ease-out;
 }
-#wiki-button a {
+#wiki-button a, #localize-button a {
     color: rgb(255, 255, 255);
 }
-#wiki-button.greyed {
+#wiki-button.greyed, #localize-button.greyed {
     cursor: not-allowed;
     filter: grayscale(1);
     box-shadow: 0 0 30px rgb(168, 168, 168), 0 0 10px rgb(168, 168, 168);
