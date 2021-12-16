@@ -173,8 +173,7 @@
                 <p>Is <%= issue.name %> affecting your community? Issue pages, like the one you're on now, are ideal for talking about general problems. Each Issue can be deployed to a Location to create a "Local Issue" page, where users can measure an Issue's impact on that Location, and discuss things that are particular to the community.</p>
                 <ul class="advice">
                     <li>Existing Local Issue pages are shown below.</li>
-                    <li>You can create a new Local Issue page based on an existing Issue using the adjacent searchbar. Clicking the search result will take you to an existing Local Issue page, or else create a new one.</li>
-                    <li>If the Issue you want to discuss isn't registered on Magnova yet, you can do so at the <a href="/wiki">Wiki</a></li>
+                    <li>You can create a new Local Issue page based on an existing Location using our map UI. Just click the "Map <%= issue.name %>" button.</li>
                 </ul>
             </div>
             <div id="instances-are-empty"><p>None identified yet! <% if(!currentUser){ %>Registered users can identify new Local Issues. <% } else { %>Use the map to create the first Local Issue page for <%= issue.name %>.<% } %> </p></div>
