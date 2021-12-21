@@ -1,3 +1,19 @@
+body {
+    background: linear-gradient(-10deg, rgb(2 209 170), rgb(183 106 202) 37%, rgb(83 131 238) 70%, rgb(38 195 255));
+}
+a, a:visited {
+    color: rgb(158, 238, 140);
+}
+#header-links a, #header-links a:visited {
+    background-color: rgb(90 42 186);
+    color: rgb(158, 238, 140);
+}
+#header-links a:hover {
+    color: rgb(255, 255, 78);
+}
+#table-of-contents {
+    background-color: rgba(58, 72, 172, 62%);
+}
 #map-page-title {
     display: flex;
     flex-flow: row nowrap;
@@ -178,7 +194,7 @@ span.subdivision-name {
     -ms-flex-line-pack: flex-start;
         align-content: flex-start;
     margin: 0 auto 30px auto;
-    background-color: rgba(59, 228, 7, 0.397);
+    background-color: rgba(53, 188, 11, 62%);
     border-radius: 20px;
     padding: 20px;
 }

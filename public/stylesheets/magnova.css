@@ -356,9 +356,10 @@ li {
 .advice:hover {
     opacity: 1;
 }
-.advice a {
+.advice a:not(:hover) {
     color: rgb(107, 196, 255);
 }
+
 @media screen and (max-width: 700px){
     .advice {
         width: 400px;
@@ -1024,11 +1025,7 @@ h1.big-title {
     background-color: rgba(169, 126, 204, .7);
     -webkit-box-shadow: 0px 0px 7px 7px rgba(169, 126, 204, .7);
             box-shadow: 0px 0px 7px 7px rgba(169, 126, 204, .7);
-    -webkit-transition: -webkit-box-shadow .5s ease;
-    transition: -webkit-box-shadow .5s ease;
-    -o-transition: box-shadow .5s ease;
-    transition: box-shadow .5s ease;
-    transition: box-shadow .5s ease, -webkit-box-shadow .5s ease;
+    transition: box-shadow .5s ease, -webkit-box-shadow .5s ease, color .4s ease;
     padding: 8px;
     border-radius: 8px;
 }
