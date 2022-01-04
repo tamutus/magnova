@@ -103,7 +103,7 @@
     Recent forum activity (<%= shownUser.comments.length %> comments made)
 </h2>
     <% for(let i = j = shownUser.comments.length; j - i < 10 && i > 0; i--) { %>
-        <% let thisComment = shownUser.comments[i - 1]; %>
+        <% let thisComment = shownUser.comments[i - 1]; thisComment.text = thisComment.text.replace().replace( /(<([^>]+)>)/ig, ' '); %>
         <div class="comment">
             <a href="<%= `/talk/comment/${thisComment._id}` %>"><button type="button">Context</button></a>
             <div class="comment-text">

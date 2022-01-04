@@ -43,7 +43,7 @@ h2 {
     width: 1000px;
     height: 500px;
     transform-origin: bottom left;
-    transition: transform .3s ease, margin .3s ease, top .3s ease, left .3s ease;
+    transition: transform .3s ease, margin .3s ease, top .3s ease, left .3s ease, height .3s ease;
     display: flex;
     flex-flow: row nowrap;
     /* justify-content: center; */
@@ -440,14 +440,7 @@ h1.preferred-name, h1.preferred-name.hidden {
         height: 400px;
     }
 }
-@media screen and (max-height: 300px){
-    #banner {
-        height: 150px;
-    }
-    #header-svg {
-        height: 375px;
-    }
-}
+
 #creations {
     display: flex;
     flex-flow: row wrap;
@@ -504,13 +497,15 @@ h1.preferred-name, h1.preferred-name.hidden {
 }
 .comment-text {
     flex-basis: calc(100% - 130px);
+    width: calc(100% - 130px);
     flex-grow: 0;
     flex-shrink: 0;
     overflow-wrap: break-word;
 }
-.comment-text > * {
+.comment-text {
     overflow-wrap: break-word;
     max-width: calc(100% - 60px);
+    text-align: left;
 }
 @media screen and (max-width: 700px){
     .comment {
@@ -521,5 +516,6 @@ h1.preferred-name, h1.preferred-name.hidden {
     }
     .comment-text {
         flex-basis: 100%;
+        max-width: 100%;
     }
 }
