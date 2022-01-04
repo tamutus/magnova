@@ -22,6 +22,7 @@ font-weight: 700;
 
  :root {
 	--menutwist: 0deg;
+    --menuTogglerHeight: 100px;
 
     --loaderXRotation: 0deg;
     --loaderYRotation: -15deg;
@@ -676,7 +677,7 @@ div.meta-cube {
 	margin: none;
 	z-index: 1003;
 	width: 100px;
-	height: 100px;
+	height: var(--menuTogglerHeight);
 	background-color: rgb(139, 17, 74);
 	border: none;
 	border-radius: 6px;
@@ -686,14 +687,8 @@ div.meta-cube {
 	font-family: 'Montserrat', sans-serif;
 	color: white;
 	/* transition-timing-function: cubic-bezier(0.560, 1.650, 0.570, 0.790); */
-	-webkit-transition: border-radius .2s, top .2s, left .2s, font-size .5s, -webkit-box-shadow .2s, -webkit-transform .5s;
-	transition: border-radius .2s, top .2s, left .2s, font-size .5s, -webkit-box-shadow .2s, -webkit-transform .5s;
-	-o-transition: border-radius .2s, box-shadow .2s, top .2s, left .2s, font-size .5s, transform .5s;
-	transition: border-radius .2s, box-shadow .2s, top .2s, left .2s, font-size .5s, transform .5s;
-	transition: border-radius .2s, box-shadow .2s, top .2s, left .2s, font-size .5s, transform .5s, -webkit-box-shadow .2s, -webkit-transform .5s;
-	-webkit-transform-origin: top left;
-	    -ms-transform-origin: top left;
-	        transform-origin: top left;
+	transition: border-radius .2s, box-shadow .2s, top .2s, left .2s, font-size .5s, transform .5s, height .6s ease;
+	transform-origin: top left;
     cursor: cell;
 }
 #sidebar-toggler:hover {
@@ -1028,6 +1023,7 @@ h1.big-title {
     transition: box-shadow .5s ease, -webkit-box-shadow .5s ease, color .4s ease;
     padding: 8px;
     border-radius: 8px;
+    white-space: nowrap;
 }
 #header-links *:hover {
     -webkit-box-shadow: 0px 0px 3px 3px rgba(169, 126, 204, .7);
@@ -1171,10 +1167,12 @@ h1.big-title {
     }
 }
 @media screen and (max-width: 650px){
-	#allContent, #allContent.expanded {
-		padding-left: 15px;
-        margin-left: 20px;
-        margin-right: 20px;
+    #allContent, #allContent.expanded {
+		padding-top: 70px;
+        padding-left: 8px;
+        padding-right: 8px;
+        margin-left: 2px;
+        margin-right: 2px;
 	}
 	#allContent h1, #allContent.expanded h1 {
 		font-size: 35px;
@@ -1207,9 +1205,9 @@ h1.big-title {
 		color: white; 
 	}
     #header-links {
-        -webkit-transform: translate(-130px, -25px) scale(.7);
-            -ms-transform: translate(-130px, -25px) scale(.7);
-                transform: translate(-130px, -25px) scale(.7);
+        -webkit-transform: translate(-130px, 5px) scale(.7);
+            -ms-transform: translate(-130px, 5px) scale(.7);
+                transform: translate(-130px, 5px) scale(.7);
     }
     .small-and-big .big-bullets, .cheat-sheet > .model, .action-portal .action {
         flex: 1 0 280px;

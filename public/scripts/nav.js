@@ -34,8 +34,16 @@ let loaderZRotation = 0,
 window.addEventListener("resize", e => {
     twistMenu();
 //   root.style.setProperty('--mouse-y', e.clientY + "px");
-
 });
+window.addEventListener("scroll", e => {
+    if(window.scrollY > scrollUpRef){
+        scrollUpRef = window.scrollY;
+    } else if(scrollUpRef - window.scrollY > 600){
+        scrollUpRef = window.scrollY + 600;
+    }
+    updateMenuToggler();
+});
+
 avatar.on("click", toggleUserBar);
 if(userInfo.empty()){
     toggleUserBar();
@@ -49,6 +57,9 @@ function squeezeSidebar() {
     }
 }
 
+// To-do: Create a list of all items that have data-titles, and create fixed-position arrows next to scrollbar to jump to parts of page with hovertext
+
+
 // eliminating peeking and stretching
 function unsqueezeSidebar() {
     sidebar.classed("squeezed", false);
@@ -61,6 +72,7 @@ function toggleSidebar() {
     unsqueezeSidebar();
     sidebar.classed("collapsed", !sidebar.classed("collapsed"));
     content.classed("expanded", !content.classed("expanded"));
+    updateMenuToggler();
 }
 
 function toggleUserBar(){
@@ -73,6 +85,17 @@ function toggleUserBar(){
 function twistMenu(){
     let twistAmount = Math.min(1, ((300 - Number(window.innerHeight)) / 150));
     root.style.setProperty('--menutwist', `${90 * twistAmount}deg`);
+}
+
+// Responsive menu toggler sizing
+let scrollUpRef = window.scrollY;
+
+function updateMenuToggler(){
+    if(window.scrollY > 0 && sidebar.classed("collapsed") && (scrollUpRef - window.scrollY < 600)){
+        root.style.setProperty("--menuTogglerHeight", "60px");
+    } else {
+        root.style.setProperty("--menuTogglerHeight", "100px");
+    }
 }
 
 // Loading animation

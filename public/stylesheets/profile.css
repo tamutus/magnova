@@ -32,34 +32,30 @@ h2 {
     z-index: -1;
     transition: height .3s ease;
 }
-#header-svg {
-    display: block;
-    margin: 0px auto 0px auto;
-    padding-top: 250px;
-    width: 1000px;
-    height: 250px;
-    transform-origin: center;
-    transition: transform .3s ease, margin .3s ease;
-}
 #pfp-input {
     width: 200px;
 }
-#header-svg foreignObject {
-    width: 100%;
-    height: 250px;
-    /* overflow: visible; */
-}
 #header {
+    position: relative;
+    top: 0;
+    left: 200px;
+    margin: 0;
+    width: 1000px;
+    height: 500px;
+    transform-origin: bottom left;
+    transition: transform .3s ease, margin .3s ease, top .3s ease, left .3s ease;
     display: flex;
     flex-flow: row nowrap;
     /* justify-content: center; */
-    margin: 25px 0 25px 30px;
     perspective: 1000px;
 }
 #pfp-container {
+    position: absolute;
+    bottom: 0;
+    left: 30px;
     height: 200px;
     flex: 0 0 200px;
-    margin-right: 25px;
+    margin-bottom: 25px;
     transform-style: preserve-3d;
     transition: transform .6s linear;
     transform-origin: center;
@@ -82,7 +78,7 @@ h2 {
     transform-style: preserve-3d;
 }
 #profile-picture {
-    top: 0px;
+    top: 0;
     left: 0;
 }
 #user-qr {
@@ -97,58 +93,78 @@ h2 {
     width: 100px;
     height: 100px;
 }
+#header-svg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+}
+#header-svg foreignObject {
+    width: 100%;
+    height: 75px;
+    overflow: visible;
+}
 #header-main {
+    position: absolute;
+    left: 255px;
+    bottom: 0;
     align-self: flex-end;
     flex-flow: column nowrap;
     justify-content: space-between;
-    width: 80%;
-    min-height: 200px;
+    width: 1000px;
+    height: 100%;
 }
 #names {
     position: absolute;
-    bottom: 75px;
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: flex-start;
-    align-items: baseline;
+    width: 100%;
+    bottom: 115px;
     text-shadow: 4px 4px 5px black;
+    transition: width .5s ease;
     /* overflow: visible; */
 }
 #names > * {
     flex-grow: 0;
     flex-shrink: 1;
 }
-#names .handle {
+h3.handle {
+    position: absolute;
+    bottom: 55px;
+    left: 25px;
     flex: 1 1 0;
     margin: 10px 0 30px 0;
 }
 .name-shield {
     display: inline-block;
-    transform: translateY(15px);
+    width: 100%;
     z-index: 2;
 }
 .name-shield input {
-    width: max(500px, 100%);
+    width: 100%;
     position: absolute;
     left: 0;
+    bottom: 10px;
     font-size: 55px;
-    height: 80px;
+    height: 100%;
     z-index: 3;
 }
 .name-shield > input.hidden {
     width: 0;
 }
-.preferred-name, h1.preferred-name.hidden {
+h1.preferred-name, h1.preferred-name.hidden {
     font-size: 70px;
     font-family: 'Oxygen', sans-serif;
     font-weight: 700;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
     box-sizing: border-box;
     padding: 0 0 10px 0;
-    display: inline-block;
     position: relative;
     left: 0;
+    bottom: 0;
     visibility: visible;
     width: 100%;
+    margin-bottom: 0;
+    border-bottom: none;
 }
 .handle {
     font-family: 'Orbitron', sans-serif;
@@ -157,6 +173,9 @@ h2 {
     letter-spacing: .1em;
     transform: translateX(20px);
 }
+#allContent {
+
+}
 #scores {
     margin-bottom: 30px;
 }
@@ -164,6 +183,7 @@ h2 {
     display: flex;
     flex-flow: row nowrap;
     width: 70vw;
+    transition: width .4s ease;
 }
 #bio-text-container {
     width: 90%;
@@ -365,28 +385,59 @@ h2 {
     }
 }
 
-
+@media screen and (max-width: 1500px){
+    #names {
+        width: 770px;
+    }
+}
+@media screen and (max-width: 1300px){
+    #header {
+        transform: scale(.9) translate(-100px, -14px);
+    }
+}
 @media screen and (max-width: 1100px){
-    #header-svg {
-        transform: scale(.8) translate(0px, 30px);
+    #header {
+        transform: scale(.8) translate(-150px, -31px);
+    }
+    #names {
+        width: 600px;
+    }
+}
+@media screen and (max-width: 820px){
+    #names {
+        width: 450px;
+    }
+    #name-shield > input {
+        font-size: 45px;
     }
 }
 @media screen and (max-width: 700px){
-    #header-svg {
-        transform: scale(.6) translate(-200px, 80px);
+    #header {
+        transform: scale(.6) translate(-200px, -83px);
+    }
+    #name-shield > input {
+        font-size: 30px;
+    }
+}
+@media screen and (max-width: 650px){
+    #bio {
+        width: 90vw;
+    }
+    #bio-text {
+        width: 80vw;
     }
 }
 @media screen and (max-width: 600px){
-    #header-svg {
-        transform: scale(.6) translate(-300px, 80px);
+    #header {
+        transform: scale(.6) translate(-300px, -83px);
     }
 }
 @media screen and (max-height: 450px){
     #banner {
         height: 275px;
     }
-    #header-svg {
-        margin-top: -100px;
+    #header {
+        height: 400px;
     }
 }
 @media screen and (max-height: 300px){
@@ -394,7 +445,7 @@ h2 {
         height: 150px;
     }
     #header-svg {
-        margin-top: -225px;
+        height: 375px;
     }
 }
 #creations {
@@ -436,17 +487,39 @@ h2 {
 }
 .comment {
     background-color:rgb(24, 100, 201);
-    flex-basis: 30%;
     margin: 15px auto;
     padding: 30px;
     border-radius: 20px;
     display: flex;
     flex-flow: row nowrap;
     color: lavender;
+    box-sizing: border-box;
 }
 .comment a {
     margin-right: 30px;
+    transition: scale .5s ease, translate .4s ease;
 }
 .comment a button {
     padding: 10px;
+}
+.comment-text {
+    flex-basis: calc(100% - 130px);
+    flex-grow: 0;
+    flex-shrink: 0;
+    overflow-wrap: break-word;
+}
+.comment-text > * {
+    overflow-wrap: break-word;
+    max-width: calc(100% - 60px);
+}
+@media screen and (max-width: 700px){
+    .comment {
+        flex-flow: row wrap-reverse;
+    }
+    .comment a {
+        transform: scaleY(.8) translateY(15px);
+    }
+    .comment-text {
+        flex-basis: 100%;
+    }
 }

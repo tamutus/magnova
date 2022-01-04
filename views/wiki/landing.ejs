@@ -35,8 +35,8 @@
                         <h2>Search for:</h2>
                         <div id="search-headers">
                             <h2><input type="checkbox" name="issues" value="true" checked>Issues </h2>
-                            <h2><input type="checkbox" name="users" value="true" checked>Users </h2>
                             <h2><input type="checkbox" name="projects" value="true" checked>Projects</h2>
+                            <h2><input type="checkbox" name="users" value="true">Users</h2>
                             <h2><input type="checkbox" name="locations" value="true">Locations</h2>
                         </div>
                         <div class="search-bar">
@@ -135,7 +135,7 @@
 	<section id="projects">
 		<h2>Organize: Projects</h2>
 
-		<p>At each level of complexity, people have a variety of ideas for how to solve these problems, and so on any issue you will be able to crowdsource projects to create change with volunteer opportunities for the Magnova community. A project is a coordinated gameplan, a collection of Tasks and strategic insights. Projects have templates and local instances. The template is a general outline of a plan, and includes any information that can be helpful to people in different locations. Once location handling is developed on Magnova, you will be able to create an instance of a project template at a given location. A project template has links to task templates, and when you create a local instance of a project, you will create local instances of those tasks as well.</p>
+		<p>At each level of complexity, people have a variety of ideas for how to solve these problems, and so on any issue you will be able to crowdsource projects to create change by adding volunteer opportunities to your project that the Magnova community can see and take on. A Project is a coordinated gameplan, a collection of Tasks and strategic insights. The Project template is a general outline of a plan, and includes any information that can be helpful to people in different locations. Soon, you will be able to deploy these templates to different locations. A project template has links to task templates, and when you create a local instance of a project, you will create local instances of those tasks as well.</p>
         <br>
         <% if(topProjects?.length > 0){%>
             <div id="project-browse">
@@ -155,7 +155,7 @@
                 <% }); %>
             </div>
         <% } else { %>
-            <h2>No projects have been recently created, but the <a href="/project/all">full list is here</a>. Has every problem been found already?</h2>
+            <h2>No projects have been recently created, but the <a href="/project/all">full list is here</a>. Has every possible solution been invented already?</h2>
         <% } %>
         <h3><a href="/project">See all projects</a></h3>
 

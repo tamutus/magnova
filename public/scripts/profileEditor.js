@@ -13,7 +13,7 @@ let editing = false,
 // Capture display fields
 const names = d3.select("#names"),
     preferredName = names.select("div").select("h1.preferred-name"),
-    handle = names.select("h3.handle"),
+    handle = d3.select("h3.handle"),
     emailBox = d3.select("#email-box"),
     emailDisplay = emailBox.select("#email-display"),
     pfp = d3.select("#pfp-container").select("#profile-picture"),
@@ -32,8 +32,7 @@ let currentUser = fetch("/auth/my_data")
     });
 
 // Add and capture hidden input fields on top of display fields
-const preferredNameInput = d3.select("#names")
-    .select("div")
+const preferredNameInput = names.select("div")
     .insert("input",":first-child")
         .attr("type", "text")
             .property("value", preferredName.text())

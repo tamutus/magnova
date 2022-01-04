@@ -14,36 +14,36 @@
 <body>
 <%- include("../partials/navbar") %>
 <div id="banner"></div>
-<svg id="header-svg">
-    <line class="starlight" x1="130" x2="312" y1="125" y2="188"></line>
-    <line class="starlight" x1="312" x2="412" y1="188" y2="188"></line>
-    <line class="starlight" x1="412" x2="512" y1="188" y2="188"></line>
-    <line class="starlight" x1="512" x2="612" y1="188" y2="188"></line>
-    <line class="starlight" x1="612" x2="712" y1="188" y2="188"></line>  
-    <foreignObject>
-        <div id="header" xmlns="http://www.w3.org/1999/xhtml">
-            <div id="pfp-container">
-                <img id="profile-picture" onclick="d3.select('#pfp-container').classed('qr-up', !d3.select('#pfp-container').classed('qr-up'));" class="round mutable data" src="<%= shownUser.pfpLink || '/assets/default_avatar.png' %>" alt="Profile Picture">
-                <img id="user-qr" onclick="d3.select('#pfp-container').classed('qr-up', !d3.select('#pfp-container').classed('qr-up'));" src=<%= `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURI(currentHost + currentURL)}&amp;size=200x200` %> alt="" title="<%= shownUser.username %>'s QR code" />
+<div id="header" >
+    <svg id="header-svg">
+        <line class="starlight" x1="100" x2="357" y1="25" y2="113"></line>
+        <line class="starlight" x1="357" x2="457" y1="113" y2="113"></line>
+        <line class="starlight" x1="457" x2="557" y1="113" y2="113"></line>
+        <line class="starlight" x1="557" x2="657" y1="113" y2="113"></line>
+        <line class="starlight" x1="657" x2="757" y1="113" y2="113"></line>  
+        <foreignObject x="275" y="75">
+            <div id="badges" xmlns="http://www.w3.org/1999/xhtml">
+                <div class="round badge"></div>
+                <div class="round badge"></div>
+                <div class="round badge"></div>
+                <div class="round badge"></div>
+                <div class="round badge"></div>
             </div>
-            <div id="header-main">
-                <div id="names">
-                    <div class="name-shield">
-                        <h1 class="preferred-name mutable data"><%= shownUser.preferredName || shownUser.username %></h1>
-                    </div>
-                    <h3 class="handle">@ <%= shownUser.username %></h3>
-                </div>
-                <div id="badges">
-                    <div class="round badge"></div>
-                    <div class="round badge"></div>
-                    <div class="round badge"></div>
-                    <div class="round badge"></div>
-                    <div class="round badge"></div>
-                </div>
+        </foreignObject>
+    </svg>
+    <div id="pfp-container">
+        <img id="profile-picture" onclick="d3.select('#pfp-container').classed('qr-up', !d3.select('#pfp-container').classed('qr-up'));" class="round mutable data" src="<%= shownUser.pfpLink || '/assets/default_avatar.png' %>" alt="Profile Picture">
+        <img id="user-qr" onclick="d3.select('#pfp-container').classed('qr-up', !d3.select('#pfp-container').classed('qr-up'));" src=<%= `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURI(currentHost + currentURL)}&amp;size=200x200` %> alt="" title="<%= shownUser.username %>'s QR code" />
+    </div>
+    <div id="header-main">
+        <div id="names">
+            <div class="name-shield">
+                <h1 class="preferred-name mutable data"><%= shownUser.preferredName || shownUser.username %></h1>
             </div>
         </div>
-    </foreignObject>
-</svg>
+        <h3 class="handle">@ <%= shownUser.username %></h3>
+    </div>
+</div>
 
 <div class="expanded" id="allContent">
     <% if(currentUser && String(shownUser._id) === String(currentUser._id)){ %>
