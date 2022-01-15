@@ -344,7 +344,7 @@ router.get('/:id', (req, res) => {
                     return res.redirect("back");
                 }
                 else if(!issue){
-                    res.status(404).redirect("/wiki/nowhere");
+                    return res.status(404).redirect("/wiki/nowhere");
                 }
                 if(!issue.issues){
                     Issuegraph.create({root: issue._id, rootType: "Issue"}, (err, issuegraph) => {
