@@ -62,14 +62,21 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-app.use(function(req, res, next){
+// Exposes session details to the ejs rendering engine
+app.use((req, res, next) => {
 	res.locals.currentUser = req.user;
     res.locals.currentURL = req.url;
     res.locals.currentHost = req.get("host");
 	res.locals.clientIP = req.headers["x-forwarded-for"]?.split(',').shift() || req.socket?.remoteAddress;
 	next();
 });
-
+// For CORS
+app.use((req, res, next) => {
+    res.append('Access-Control-Allow-Origin', ['*']);
+    res.append('Access-Control-Allow-Methods', 'GET');
+    res.append('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
 // Change Views directory dynamically (for if I want to add in the kanban stuff) (i don't understand how this works yet)
 // app.use(function(req, res, next){
 // 	if(req.path.slice(0, 7) === "/kanban") app.set('views', path.join(__dirname, '/views/kanban'));
