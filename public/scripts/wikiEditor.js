@@ -120,6 +120,7 @@ let tinyInput, tinyAppBox;
 
 tinymce.init({
     selector: '#description-editor',
+    editor_encoding: "raw",
     plugins: 'emoticons autoresize fullscreen link',
     toolbar: 'fullscreen link',
     max_height: 1000,
@@ -150,7 +151,7 @@ async function toggleEditing(){
             return "Changes are unsaved. Would you still like to leave?";
         };
         // Put bio into the text editor
-        tinymce.get("description-editor").setContent(descriptionText.html());
+        tinymce.get("description-editor").setContent(parseEntitiesToCharacters(descriptionText.html()));
         // Hide display fields and show input fields, bio editor, and cancel-editing button
         dataDisplays.classed("hidden", true);
         // issueImage.classed("shrunk", true);
@@ -161,8 +162,7 @@ async function toggleEditing(){
     // Save changes
     else{
         
-        // Make an API call to get a live version of info for a three way merge with what you started editing and your edits, then save, returning and displaying any error messages.
-
+        // Call API to get a live version of info for a three way merge with what you started editing and your edits, then save, returning and displaying any error messages.
         let dataRoute = routeBase.replace("wiki", "issue");
         liveVersion = await fetch(`/${dataRoute}/data/${topicID}`)
             .then(serverResponse => serverResponse.json())
@@ -186,14 +186,16 @@ async function toggleEditing(){
             });
 
         if(!liveVersion){return;}
-        // Three way merge logic
-        let oldInfo = descriptionText.html(),
-            newInfo = tinymce.get("description-editor").getContent(),
-            liveInfo = liveVersion.info || liveVersion.localInfo || "";
-        console.log(`Old: ${oldInfo}, New: ${newInfo}, Live: ${liveInfo}`);
-        const merged = Textmerger.get().merge(oldInfo, newInfo, liveInfo);
+        // Three way merge logic starts here. Parse all HTML entities to update data correctly, but hold onto raw live info for patching to work correctly
+        let oldInfo = parseEntitiesToCharacters(descriptionText.html()),
+            newInfo = parseEntitiesToCharacters(tinymce.get("description-editor").getContent()),
+            liveInfo = liveVersion.info || liveVersion.localInfo || "",
+            formattedLiveInfo = parseEntitiesToCharacters(liveInfo);
+        console.log(`Old: ${oldInfo}, New: ${newInfo}, Live: ${liveInfo}, FormattedLive: ${formattedLiveInfo}`);
+        const merged = Textmerger.get().merge(oldInfo, newInfo, formattedLiveInfo);
         console.log(`Merged: ${merged}`);
         
+        // if(oldInfo != liveInfo)
         // version = patchData.length + 1;
         // versionDisplay.text(`Version: ${version}`);
         // finalStuff.html(merged);
@@ -210,7 +212,6 @@ async function toggleEditing(){
                 patchYields = Diff3.patch(liveInfo, patch).join(""),
                 invertedPatch = Diff3.invertPatch(patch),
                 invertedPatchYields = Diff3.patch(merged, invertedPatch).join("");
-
         // Collect info to post into an object called topicUpdate
         let topicUpdate;
         if(routeBase === "project" || routeBase === "wiki"){
@@ -299,6 +300,15 @@ async function toggleEditing(){
         stopEditing();
     }
 }
+
+// This helper is vital for preventing page crashing when saving changes. It forces HTML entities to be read as characters.
+function parseEntitiesToCharacters(inputStr){
+    var textarea = document.createElement("textarea");
+    textarea.innerHTML = inputStr;
+    const parsed = textarea.value
+    textarea.remove();
+    return parsed;
+}
 // When you're viewing a location and want to change the geometry, 
 function submitGeometry(){
     let geometryUpdate = {
@@ -380,7 +390,7 @@ function rollBack(){
     revisionVersion--;
     const patchBox = patchData.patches[revisionVersion];
     const invertedPatch = Diff3.invertPatch(patchBox.patch);
-    const rolledBack = Diff3.patch(revisionText.html(), invertedPatch).join("");
+    const rolledBack = Diff3.patch(parseEntitiesToCharacters(revisionText.html()), invertedPatch).join("");
 
     displayRevisionMetadata();
 
@@ -394,7 +404,7 @@ function rollForward(){
     }
     const patchBox = patchData.patches[revisionVersion];
     const parsedPatch = patchBox.patch;
-    const rolledForward = Diff3.patch(revisionText.html(), parsedPatch).join("");
+    const rolledForward = Diff3.patch(parseEntitiesToCharacters(revisionText.html()), parsedPatch).join("");
     
     revisionVersion++;
     displayRevisionMetadata();
