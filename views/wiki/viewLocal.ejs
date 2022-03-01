@@ -70,7 +70,7 @@
         <% } %>
         <li id="editors">
             Editors of this page: 
-            <% for(let i = 1; i < localIssue.editors.length -1; i++){ %>
+            <% for(let i = 0; i < localIssue.editors.length -1; i++){ %>
                 <a href="<%= `/users/${localIssue.editors[i].username}` %>"><%= localIssue.editors[i].username %></a>, 
             <% } %>
             <% if(localIssue.editors.length > 1){ %>
@@ -139,6 +139,6 @@
 <script src="scripts/wiki.js"></script>
 <script src="https://cdn.tiny.cloud/1/f7o04qadc9hhjre2my3ep3ae1qdzax2od04t9ncrm7wold54/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 <script src="scripts/TextMerger.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/node-diff3@3.0/dist/index.iife.min.js"></script>
+<script src="scripts/google_diff.js"></script>
 <script src="scripts/wikiEditor.js"></script>
 <%- include("../partials/footer") %>

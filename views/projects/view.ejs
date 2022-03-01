@@ -70,7 +70,7 @@
         <% } %>
         <li id="designers">
             Designers: 
-            <% for(let i = 1; i < project.designers.length -1; i++){ %>
+            <% for(let i = 0; i < project.designers.length -1; i++){ %>
                 <a href="<%= `/users/${project.designers[i].username}` %>"><%= project.designers[i].username %></a>, 
             <% } %>
             <% if(project.designers.length > 1){ %>
@@ -133,54 +133,53 @@
         <hr>
         <li id="tasks">
             <h2>Tasks that make up this project</h2>
-            <% if(project.tasks && project.tasks.edges.length > 0){ %>
-                <div id="tasks-container">
-                    <div id="task-viewer" class="minimized">
-                        <div id="task-buttons" class="hidden">
-                            <span id="task-return-message"></span>
-                            <a id="task-delete-button" onclick="deleteActiveTask();"><button>Delete</button></a>
-                            <a id="task-edit-button" onclick="toggleTaskEditing();"><button>Edit task</button></a>
-                            <a id="task-cancel-button" onclick="stopTaskEditing();" class="hidden"><button>Cancel</button></a>
-                            <a id="task-discuss-button"><button>Discuss</button></a>
-                            <a id="task-unload-button" onclick="displayThisTask();"><button>Unload</button></a>
+            <div id="tasks-container" class="<%= (project.tasks && project.tasks.edges.length > 0) ? "" : "hidden" %>">
+                <div id="task-viewer" class="minimized">
+                    <div id="task-buttons" class="hidden">
+                        <span id="task-return-message"></span>
+                        <a id="task-delete-button" onclick="deleteActiveTask();"><button>Delete</button></a>
+                        <a id="task-edit-button" onclick="toggleTaskEditing();"><button>Edit task</button></a>
+                        <a id="task-cancel-button" onclick="stopTaskEditing();" class="hidden"><button>Cancel</button></a>
+                        <a id="task-discuss-button"><button>Discuss</button></a>
+                        <a id="task-unload-button" onclick="displayThisTask();"><button>Unload</button></a>
+                    </div>
+                    <div id="task-display">
+                        <em>Viewing task:</em>
+                        <div id="task-name">
+                            <h3 class="task-data">None</h3>
                         </div>
-                        <div id="task-display">
-                            <em>Viewing task:</em>
-                            <div id="task-name">
-                                <h3 class="task-data">None</h3>
+                        <div id="task-info-container">
+                            <div id="task-info-text-container" class="task-data">
+                                <div id="task-info-text"></div>
                             </div>
-                            <div id="task-info-container">
-                                <div id="task-info-text-container" class="task-data">
-                                    <div id="task-info-text"></div>
-                                </div>
-                                <div id="task-info-editor-container" class="hidden task-input"></div>
+                            <div id="task-info-editor-container" class="hidden task-input"></div>
+                        </div>
+                        <div id="task-completion">
+                            <h4>Completion requirements:</h4>
+                            <div class="task-data">
+                                <p>None</p>
                             </div>
-                            <div id="task-completion">
-                                <h4>Completion requirements:</h4>
-                                <div class="task-data">
-                                    <p>None</p>
-                                </div>
-                            </div>
-                            <div id="task-creation">
-                                <p class="task-data"></p>
-                            </div>
+                        </div>
+                        <div id="task-creation">
+                            <p class="task-data"></p>
                         </div>
                     </div>
-                    <ul id="task-list">
-                        <% for(task of project.tasks.edges){ %>
-                            <li><%= task.vertex.name %></li>
-                        <% } %>
-                    </ul>
                 </div>
+                <ul id="task-list">
+                    <% for(task of project.tasks.edges){ %>
+                        <li><%= task.vertex.name %></li>
+                    <% } %>
+                </ul>
+            </div>
+        
+            <p id="tasks-empty" class="<%= (project.tasks && project.tasks.edges.length === 0) ? "" : "hidden" %>">Nothing here yet! 
+            <% if(currentUser){ %> 
+                Why don't you create a new task for this project?
             <% } else { %>
-                <p>Nothing here yet! 
-                <% if(currentUser){ %> 
-                    Why don't you create a new task for this project?
-                <% } else { %>
-                    Register or log in to create tasks for this project.
-                <% } %>
-                </p>
+                Register or log in to create tasks for this project.
             <% } %>
+            </p>
+            
             <% if(currentUser){ %>
                 <hr>
                 <div id="task-submission">
@@ -215,7 +214,7 @@
 <script src="scripts/wiki.js"></script>
 <script src="https://cdn.tiny.cloud/1/f7o04qadc9hhjre2my3ep3ae1qdzax2od04t9ncrm7wold54/tinymce/5/tinymce.min.js" referrerpolicy="origin"></script>
 <script src="scripts/TextMerger.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/node-diff3@3.0/dist/index.iife.min.js"></script>
+<script src="scripts/google_diff.js"></script>
 <script src="scripts/wikiEditor.js"></script>
 <script src="scripts/projectManager.js"></script>
 <%- include("../partials/footer") %>

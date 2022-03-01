@@ -319,6 +319,7 @@ function toggleResultInfo(){
     
 }
 
+// Attach search to the DOM and prevent the submit button from redirecting.
 if(searchForm){
     searchForm.addEventListener("submit", e => {
         e.preventDefault();

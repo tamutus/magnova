@@ -209,11 +209,11 @@ async function toggleEditing(){
         // return;
         
         // Logic for recording the change.
-        // First line is problematic - it takes forever and freezes the page.
-        const   patch = Diff3.diffPatch(liveInfo, merged),
-                patchYields = Diff3.patch(liveInfo, patch).join(""),
-                invertedPatch = Diff3.invertPatch(patch),
-                invertedPatchYields = Diff3.patch(merged, invertedPatch).join("");
+        const   patch = Diff.patch_make(liveInfo, merged),
+                invertedPatch = invertPatch(patch),
+                patchYields = Diff.patch_apply(patch, liveInfo)[0],
+                invertedPatchYields = Diff.patch_apply(invertedPatch, merged)[0];
+                
         // Collect info to post into an object called topicUpdate
         let topicUpdate;
         if(routeBase === "project" || routeBase === "wiki"){
@@ -243,7 +243,8 @@ async function toggleEditing(){
             }
         }
         if(patchYields !== merged){
-            window.alert("There was an error updating content. A bug has been detected and a report submitted. We've saved your edits. If you were planning to make more, hold onto them until we fix the issue.");
+            // window.alert("There was an error updating content. A bug has been detected and a report submitted. We've saved your edits. If you were planning to make more, hold onto them until we fix the issue.");
+            window.alert("There was an error updating content. Please hold onto your edits until we fix the issue.");
             reportBug({
                 link: window.location.pathname,
                 text: `The previous version "${liveInfo}" \n\n wasn't updated to ${merged} \n\n because the inverted patch didn't match the live version (but the patched version did match the merge result). \n\n Patch: \n\n ${JSON.stringify(patch, null, 4)} \n\n Yields \n\n ${patchYields} \n\n Inverted Patch:\n\n ${JSON.stringify(invertedPatch, null, 4)} \n\n Yields \n\n ${invertedPatchYields}`
@@ -251,14 +252,15 @@ async function toggleEditing(){
             return;
         }
         if(liveInfo && liveInfo !== invertedPatchYields){
-            window.alert("This edit can't be backwards patched and would corrupt the data. A bug has been detected and a report submitted.");
+            // window.alert("This edit can't be backwards patched and would corrupt the data. A bug has been detected and a report submitted.");
+            window.alert("This edit can't be backwards patched and would corrupt the data.");
             reportBug({
                 link: window.location.pathname,
                 text: `The previous version "${liveInfo}" \n\n wasn't updated to ${merged} \n\n because the inverted patch didn't match the live version (but the patched version did match the merge result). \n\n Patch: \n\n ${JSON.stringify(patch, null, 4)} \n\n Yields \n\n ${patchYields} \n\n Inverted Patch:\n\n ${JSON.stringify(invertedPatch, null, 4)} \n\n Yields \n\n ${invertedPatchYields}`
             });
             return;
         }
-        return;
+        
         let response = await fetch(`/${routeBase}/${topicID}`, {
             method: "PUT",
             headers: {
@@ -304,14 +306,6 @@ async function toggleEditing(){
     }
 }
 
-// This helper is vital for preventing page crashing when saving changes. It forces HTML entities to be read as characters.
-function parseEntitiesToCharacters(inputStr){
-    var textarea = document.createElement("textarea");
-    textarea.innerHTML = inputStr;
-    const parsed = textarea.value
-    textarea.remove();
-    return parsed;
-}
 // When you're viewing a location and want to change the geometry, 
 function submitGeometry(){
     let geometryUpdate = {
@@ -392,8 +386,8 @@ function rollBack(){
     }
     revisionVersion--;
     const patchBox = patchData.patches[revisionVersion];
-    const invertedPatch = Diff3.invertPatch(patchBox.patch);
-    const rolledBack = Diff3.patch(parseEntitiesToCharacters(revisionText.html()), invertedPatch).join("");
+    const invertedPatch = invertPatch(patchBox.patch);
+    const rolledBack = Diff.patch_apply(invertedPatch, parseEntitiesToCharacters(revisionText.html()));
 
     displayRevisionMetadata();
 
@@ -407,7 +401,7 @@ function rollForward(){
     }
     const patchBox = patchData.patches[revisionVersion];
     const parsedPatch = patchBox.patch;
-    const rolledForward = Diff3.patch(parseEntitiesToCharacters(revisionText.html()), parsedPatch).join("");
+    const rolledForward = Diff.patch_apply(parsedPatch, parseEntitiesToCharacters(revisionText.html()));
     
     revisionVersion++;
     displayRevisionMetadata();
@@ -449,3 +443,30 @@ function displayMessage(message){
     messageSpan.text(message);
     messageSpan.classed("revealed", true);
 }
+
+  //=========================================//
+ // Helper methods for merging and patching //
+//=========================================//
+
+// Vital for preventing page crashing when saving changes. It forces HTML entities to be read as characters.
+function parseEntitiesToCharacters(inputStr){
+    var textarea = document.createElement("textarea");
+    textarea.innerHTML = inputStr;
+    const parsed = textarea.value
+    textarea.remove();
+    return parsed;
+}
+
+function invertPatch(patch) {
+    return patch.map(patchObj => ({
+        diffs: patchObj.diffs.map(diff => [
+            diff[0] * -1, // The money maker
+            diff[1]
+        ]),
+        start1: patchObj.start2,
+        start2: patchObj.start1,
+        length1: patchObj.length2,
+        length2: patchObj.length1  
+    }));
+  };
+  

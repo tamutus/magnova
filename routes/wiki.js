@@ -58,6 +58,21 @@ router.get("/nothing", (req, res) => {
 //     return res.send("done");
 // });
 
+// To reset the edits
+// router.delete("/reset_edits", (req, res) => {
+//     Patchlist.updateMany({}, {patches: []}, (err, patchlists) => {
+//         if(err){
+//             return res.send(err);
+//         } else {
+//             return res.send(patchlists);
+//         }
+//     });
+//     Issue.updateMany({}, {version: 0});
+//     LocalIssue.updateMany({}, {version: 0});
+//     Project.updateMany({}, {version: 0});
+//     Location.updateMany({}, {version: 0});
+// });
+
 
 // Refactor to not send all location info? or refactor to add a d3 rendering of the shape
 router.get("/search", async (req, res) => {
