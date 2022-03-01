@@ -2,7 +2,8 @@ let editing = false,
     rolling = false,
     version = Number(d3.select("#current-version-count").text()),
     revisionVersion = version;
-    styleVars = document.documentElement;
+    styleVars = document.documentElement
+    Diff = new diff_match_patch;
 
 // The below code is in wiki.js
 // // Capture topic id
@@ -208,6 +209,7 @@ async function toggleEditing(){
         // return;
         
         // Logic for recording the change.
+        // First line is problematic - it takes forever and freezes the page.
         const   patch = Diff3.diffPatch(liveInfo, merged),
                 patchYields = Diff3.patch(liveInfo, patch).join(""),
                 invertedPatch = Diff3.invertPatch(patch),
@@ -256,6 +258,7 @@ async function toggleEditing(){
             });
             return;
         }
+        return;
         let response = await fetch(`/${routeBase}/${topicID}`, {
             method: "PUT",
             headers: {
