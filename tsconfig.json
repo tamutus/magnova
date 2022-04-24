@@ -1,0 +1,38 @@
+{
+  "compilerOptions": {
+    "incremental": true,
+
+    "target": "es2016",
+
+    "module": "commonjs",
+    "rootDir": "./",
+    "moduleResolution": "node",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./*"],
+      "@api/*": ["api/*"],
+      "@public/*": ["public/*"],
+      "@routes/*": ["routes/*"],
+      "@types/*": ["types/*"],
+      "@views/*": ["views/*"]
+    },
+    "resolveJsonModule": true,
+
+    "allowJs": true,
+    "checkJs": true,
+
+    "declaration": true,
+    "outDir": "./dist/",
+    "removeComments": true,
+    "importsNotUsedAsValues": "remove",
+
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "strict": true,
+    "alwaysStrict": true,
+
+    "skipLibCheck": true
+  }
+}
