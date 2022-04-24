@@ -9,17 +9,11 @@
     "moduleResolution": "node",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./*"],
-      "@api/*": ["api/*"],
-      "@public/*": ["public/*"],
-      "@routes/*": ["routes/*"],
-      "@types/*": ["types/*"],
-      "@views/*": ["views/*"]
+      "@/*": ["./*"]
     },
     "resolveJsonModule": true,
 
     "allowJs": true,
-    "checkJs": true,
 
     "declaration": true,
     "outDir": "./dist/",
