@@ -4,8 +4,10 @@
   "description": "Global issue explorer, network builder, and crowdsourced task-planner",
   "main": "app.ts",
   "scripts": {
+    "build": "tsc && cp -R public dist",
+    "clean": "tsc --build --clean && rm -r dist",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node -r tsconfig-paths/register app.ts",
+    "start": "TS_NODE_PROJECT=tsconfig.dist.json node -r tsconfig-paths/register dist/app.js",
     "dev": "nodemon -r tsconfig-paths/register app.ts"
   },
   "repository": {

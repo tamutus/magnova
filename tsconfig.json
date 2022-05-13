@@ -31,5 +31,7 @@
     "alwaysStrict": true,
 
     "skipLibCheck": true
-  }
+  },
+
+  "exclude": ["dist", "public"]
 }
