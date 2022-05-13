@@ -1,0 +1,110 @@
+.carousel {
+    width: 1500px;
+    height: 95vh;
+    margin: 0 20px;
+    overflow: hidden;
+}
+.carousel > .views {
+    background-color: rgb(218, 124, 27);
+}
+.carousel > .views > div {
+    width: 1474px;
+    height: calc(95vh - 14px);
+    margin: 0 5px;
+    background-color: rgb(93, 111, 50);
+    border: 7px outset rgb(117, 210, 116);
+}
+.theater {
+    width: 900px;
+    height: 800px;
+    margin: 0 auto;
+    padding-top: 30px;
+    background-color: rgb(56, 3, 3);
+    overflow: hidden;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    color: rgb(255, 237, 75);
+    position: relative;
+    transform-origin: left;
+    transition: transform .5s ease-in-out;
+}
+.theater h2 {
+    margin: 35px auto 15px auto;
+    font-size: 60px;
+}
+.theater h3 {
+    font-size: 40px;
+}
+.theater h6 {
+    font-size: 25px;
+}
+.theater p {
+    font-size: 20px;
+}
+.theater .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    z-index: 3;
+}
+.projector {
+    background-color: black;
+    width: 700px;
+    border: 5px solid black;
+    overflow: hidden;
+    margin-bottom: 50px;
+    color: rgb(33, 37, 41);
+    box-sizing: content-box;
+}
+.projections {
+    margin: 20px auto 40px auto;
+    display: flex;
+    flex-flow: row nowrap;
+    transition: transform .6s cubic-bezier(0.630, 0.370, 0.645, 1.375);
+}
+.projections .projection {
+    flex: 0 0 690px;
+    margin: 0 5px;
+    height: 393.75px;
+    background-color: rgb(191, 135, 224);
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-evenly;
+    align-items: center;
+    overflow-y: auto;
+    border-radius: 40px;
+}
+.projection img {
+    max-width: 80%;
+}
+.film {
+    display: flex;
+    flex-flow: row nowrap;
+    background-color: rgb(41, 23, 23);
+    padding: 0 0 0 8px;
+    border-width: 10px 0;
+    border-color: rgba(168, 137, 106, 0.719);
+    border-style: dashed none;
+}
+.film .still {
+    width: 150px;
+    height: 100px;
+    padding: 3px;
+    background-color: rgba(209, 177, 144, 0.719);
+    color: rgba(75, 43, 38, 0.788);
+    margin-right: 8px;
+    text-align: center;
+    justify-content: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: zoom-in;
+    transition: filter .3s ease-out;
+}
+.film .still:hover {
+    filter: brightness(1.5);
+}

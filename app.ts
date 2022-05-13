@@ -31,6 +31,9 @@ import talkRoutes from './routes/talk';
 import projectRoutes from './routes/project';
 import taskRoutes from './routes/task';
 import locationRoutes from './routes/locations';
+import messageRoutes from './routes/messages';
+import settingsRoutes from './routes/settings';
+import updateRoutes from './routes/updates';
 
 // ===============
 // Mongoose config
@@ -88,9 +91,9 @@ passport.deserializeUser(User.deserializeUser());
 // Exposes session details to the ejs rendering engine
 app.use((req, res, next) => {
 	res.locals.currentUser = req.user;
-  res.locals.currentURL = req.url;
-  res.locals.currentHost = req.get('host');
-  const xff = req.headers['x-forwarded-for'];
+    res.locals.currentURL = req.url;
+    res.locals.currentHost = req.get('host');
+    const xff = req.headers['x-forwarded-for'];
 	res.locals.clientIP = (Array.isArray(xff) ? xff[0] : xff) || req.socket?.remoteAddress;
 	next();
 });
@@ -101,6 +104,7 @@ app.use((_req, res, next) => {
     res.append('Access-Control-Allow-Headers', 'Content-Type');
     next();
 });
+
 // Change Views directory dynamically (for if I want to add in the kanban stuff) (i don't understand how this works yet)
 // app.use(function(req, res, next){
 // 	if(req.path.slice(0, 7) === '/kanban') app.set('views', path.join(__dirname, '/views/kanban'));
@@ -121,6 +125,9 @@ app.use('/talk', talkRoutes);
 app.use('/project', projectRoutes);
 app.use('/task', taskRoutes);
 app.use('/locations', locationRoutes);
+app.use('/messages', messageRoutes);
+app.use('/settings', settingsRoutes);
+app.use('/updates', updateRoutes);
 
 // wild card route: 
 app.all('*', (req, res, next) => {

@@ -24,6 +24,9 @@ body {
     font-weight: 700;
     color: var(--headerLinkColor);
 }
+#header-links a:not(:first-child) {
+    margin-left: 30px;
+}
 a, a:visited {
 	color: var(--linkColor);
 	text-decoration: none;

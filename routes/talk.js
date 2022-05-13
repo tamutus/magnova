@@ -13,6 +13,16 @@ const	express = require('express'),
 
 const { isLoggedIn } = require("../middleware");
 
+router.get("/", (req, res) => {
+    Comment.find({})
+        .populate("topic")
+        .exec((err, comments) => {
+            return res.render("talk/landing", {
+                title: "Public Discussions on Magnova",
+                comments: comments
+            });
+        });
+});
 router.get("/silence", (req, res) => {
     return res.status(404).render("talk/silence", {
         title: "Magnova — Silence (404)"
@@ -305,35 +315,21 @@ router.get("/:id", async (req, res) => {
     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         Talkpage.findById(req.params.id, async (err, page) => {
             if(err){
-                console.log(err);
-                return res.send(`Trouble finding talkpage: ${err}`);
+                console.error(err);
+                return res.render("errorLanding", {
+                    title: "Trouble finding talkpage root",
+                    errorHTML: `<h3>In case you wanted to see the problem we ran into:</h3>
+                    <pre>${JSON.stringify(err, 4)}</pre>`
+                });
             }
-            let title = "",
-                rootLink = "";
             if(page.rootType == "IssueTemplate"){
-                await Issue.findById(page.root, (err, issue) => {
+                Issue.findById(page.root, (err, issue) => {
                     if(err){
-                        console.log(err);
+                        console.error(err);
                         return res.send(`Trouble finding talkpage: ${err}`);
                     }
                     else if(issue){
-                        title = issue.name;
-                        rootLink = `/wiki/${issue._id}`;
-                        let startScript = "<script>";
-                        if(req.query.thread){
-                            startScript += `openThreadAtIndex(${req.query.thread}`;
-                            if(req.query.comment){
-                                startScript += `, ${req.query.comment}`;
-                            }
-                            startScript += ");";
-                        }
-                        startScript += "</script>";
-                        return res.render("talk/page", {
-                            title: title,
-                            rootLink: rootLink,
-                            page: page,
-                            startScript: startScript
-                        });
+                        return renderTalkpage(req, res, page, issue.name, `/wiki/${issue._id}`);
                     } else {
                         return res.status(404).redirect("/talk/silence");
                     }
@@ -341,151 +337,91 @@ router.get("/:id", async (req, res) => {
                 });
             }
             else if(page.rootType == "LocalIssue"){
-                await LocalIssue.findById(page.root)
+                LocalIssue.findById(page.root)
                     .populate("template", "name")
                     .populate("location", "name")
                     .exec((err, localIssue) => {
                         if(err){
-                            console.log(err);
-                            return res.send(`Trouble finding talkpage: ${err}`);
-                        }
-                        else if(!localIssue){
-                            return res.status(404).redirect("/talk/silence");                       
-                        } else {
-                            title = `${localIssue.template.name} in ${localIssue.location.name}`;
-                            rootLink = `/wiki/local/${localIssue._id}`;
-                            let startScript = "<script>";
-                            if(req.query.thread){
-                                startScript += `openThreadAtIndex(${req.query.thread}`;
-                                if(req.query.comment){
-                                    startScript += `, ${req.query.comment}`;
-                                }
-                                startScript += ");";
-                            }
-                            startScript += "</script>";
-                            return res.render("talk/page", {
-                                title: title,
-                                rootLink: rootLink,
-                                page: page,
-                                startScript: startScript
+                            console.error(err);
+                            return res.render("errorLanding", {
+                                title: "Trouble finding talkpage root",
+                                errorHTML: `<h3>In case you wanted to see the problem we ran into:</h3>
+                                <pre>${JSON.stringify(err, 4)}</pre>`
                             });
+                        }
+                        else if(localIssue){
+                            return renderTalkpage(req, res, page, `${localIssue.template.name} in ${localIssue.location.name}`, `/wiki/local/${localIssue._id}`)
+                        } else {
+                            return res.status(404).redirect("/talk/silence");
                         }
                     });
             }
             else if(page.rootType == "ProjectTemplate"){
-                await Project.findById(page.root, (err, project) => {
+                Project.findById(page.root, (err, project) => {
                     if(err){
                         console.log(err);
-                        return res.send(`Trouble finding talkpage: ${err}`);
+                        return res.render("errorLanding", {
+                            title: "Trouble finding talkpage root",
+                            errorHTML: `<h3>In case you wanted to see the problem we ran into:</h3>
+                            <pre>${JSON.stringify(err, 4)}</pre>`
+                        });
                     }
                     else if(project){
-                        title = project.name;
-                        rootLink = `/project/${project._id}`;
-                        let startScript = "<script>";
-                        if(req.query.thread){
-                            startScript += `openThreadAtIndex(${req.query.thread}`;
-                            if(req.query.comment){
-                                startScript += `, ${req.query.comment}`;
-                            }
-                            startScript += ");";
-                        }
-                        startScript += "</script>"
-                        return res.render("talk/page", {
-                            title: title,
-                            rootLink: rootLink,
-                            page: page,
-                            startScript: startScript
-                        });
+                        return renderTalkpage(req, res, page, project.name, `/project/${project._id}`);
                     } else {
                         return res.status(404).redirect("/talk/silence");
                     }
                 });
             }
             else if(page.rootType == "LocalProject"){
-                await LocalProject.findById(page.root)
+                LocalProject.findById(page.root)
                     .populate("template", "name")
                     .populate("location", "name")
                     .exec((err, localProject) => {
                         if(err){
                             console.log(err);
-                            return res.send(`Trouble finding talkpage: ${err}`);
-                        }
-                        else if(!localProject){
-                            return res.status(404).redirect("/talk/silence");                       
-                        } else {
-                            title = `${localProject.template.name} in ${localProject.location.name}`;
-                            rootLink = `/project/local/${localProject._id}`;
-                            let startScript = "<script>";
-                            if(req.query.thread){
-                                startScript += `openThreadAtIndex(${req.query.thread}`;
-                                if(req.query.comment){
-                                    startScript += `, ${req.query.comment}`;
-                                }
-                                startScript += ");";
-                            }
-                            startScript += "</script>";
-                            return res.render("talk/page", {
-                                title: title,
-                                rootLink: rootLink,
-                                page: page,
-                                startScript: startScript
+                            return res.render("errorLanding", {
+                                title: "Trouble finding talkpage root",
+                                errorHTML: `<h3>In case you wanted to see the problem we ran into:</h3>
+                                <pre>${JSON.stringify(err, 4)}</pre>`
                             });
+                        }
+                        else if(localProject){
+                            return renderTalkpage(req, res, page, `${localProject.template.name} in ${localProject.location.name}`, `/project/local/${localProject._id}`);
+                        } else {
+                            return res.status(404).redirect("/talk/silence");
                         }
                     });
             }
             else if(page.rootType == "TaskTemplate"){
-                await Task.findById(page.root, (err, task) => {
+                Task.findById(page.root, (err, task) => {
                     if(err){
                         console.log(err);
-                        return res.send(`Trouble finding Talkpage: ${err}`);
+                        return res.render("errorLanding", {
+                            title: "Trouble finding talkpage root",
+                            errorHTML: `<h3>In case you wanted to see the problem we ran into:</h3>
+                            <pre>${JSON.stringify(err, 4)}</pre>`
+                        });
                     }
                     else if(task){
-                        title = task.name;
-                        rootLink = `/project/${task.project}`;
-                        let startScript = "<script>";
-                        if(req.query.thread){
-                            startScript += `openThreadAtIndex(${req.query.thread}`;
-                            if(req.query.comment){
-                                startScript += `, ${req.query.comment}`;
-                            }
-                            startScript += ");";
-                        }
-                        startScript += "</script>";
-                        return res.render("talk/page", {
-                            title: title,
-                            rootLink: rootLink,
-                            page: page,
-                            startScript: startScript
-                        });
+                        return renderTalkpage(req, res, page, task.name, `/project/${task.project}`);
                     } else {
                         return res.status(404).redirect("/talk/silence");
                     }
                 });
             }
             else if(page.rootType == "Location"){
-                await Location.findById(page.root, (err, location) => {
+                Location.findById(page.root, (err, location) => {
                     if(err){
                         console.log(err);
-                        return res.send(`Trouble finding Talkpage: ${err}`);
+                        return res.render("errorLanding", {
+                            title: "Trouble finding talkpage root",
+                            errorHTML: `<h3>In case you wanted to see the problem we ran into:</h3>
+                            <pre>${JSON.stringify(err, 4)}</pre>`
+                        });
                     }
                     else if(location){
-                        title = location.name;
-                        rootLink = `/locations/${location._id}`;
-                        let startScript = "<script>";
-                        if(req.query.thread){
-                            startScript += `openThreadAtIndex(${req.query.thread}`;
-                            if(req.query.comment){
-                                startScript += `, ${req.query.comment}`;
-                            }
-                            startScript += ");";
-                        }
-                        startScript += "</script>";
-                        return res.render("talk/page", {
-                            title: title,
-                            rootLink: rootLink,
-                            page: page,
-                            startScript: startScript
-                        });
+                        return renderTalkpage(req, res, page, location.name, `/locations/${location._id}`);
                     } else {
                         return res.status(404).redirect("/talk/silence");
                     }
@@ -499,6 +435,24 @@ router.get("/:id", async (req, res) => {
         return res.redirect("/talk/silence");
     }
 });
+
+function renderTalkpage(req, res, page, title, rootLink){
+    let startScript = "<script>";
+    if(req.query.thread){
+        startScript += `openThreadAtIndex(${req.query.thread}`;
+        if(req.query.comment){
+            startScript += `, ${req.query.comment}`;
+        }
+        startScript += ");";
+    }
+    startScript += "</script>";
+    return res.render("talk/page", {
+        title: title,
+        rootLink: rootLink,
+        page: page,
+        startScript: startScript
+    });
+}
 
 router.get("/*", (req, res) => {
     res.status(404).redirect("/talk/silence");

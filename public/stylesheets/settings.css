@@ -1,0 +1,55 @@
+button.inactive, button.inactive:hover {
+    background-color: rgb(140, 140, 140);
+    box-shadow: 0px 4px rgb(80, 80, 80);
+    cursor: not-allowed;
+    transform: translate(0, 0);
+}
+form {
+    margin-left: 50px;
+}
+form * {
+    text-align: left;
+}
+form div {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: flex-start;
+    margin-bottom: 10px;
+}
+form div input {
+    flex: 0 0 500px;
+    margin-right: 40px;
+    margin-bottom: 5px;
+    max-width: 80vw;
+}
+form div p {
+    text-align: left;
+    transition: flex .5s ease;
+}
+.message-display {
+    flex: 0 0 0px;
+    height: 0;
+    border-radius: 0 15px 15px 15px;
+    padding: 0;
+    margin-top: 0;
+    transition: flex .3s ease-out, height .3s ease-out, margin .3s ease-in-out, padding .3s ease-in-out, background-color .35s ease-out;
+    overflow: hidden;
+}
+.message-display.revealed {
+    flex: 0 0 400px;
+    height: 60px;
+    padding: 7px;
+    background-color: rgb(201, 25, 142);
+}
+.message-display.ok {
+    background-color: rgb(11, 175, 80);
+}
+.quote.revealed {
+    padding: 30px;
+}
+#pw-change-response.revealed {
+    margin-top: 20px;
+}
+button:not(:first-child) {
+    margin-left: 30px;
+}

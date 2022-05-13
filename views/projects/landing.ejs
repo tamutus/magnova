@@ -16,6 +16,9 @@
 <%- include("../partials/navbar") %>
 <div id="header-links">
     <a href="/wiki">Return to Wiki</a>
+    <% if(currentUser){ %>
+        <a href="/task/action">Your Action</a>
+    <% } %>
 </div>
 <div id="allContent" class="expanded">
     <section id="intro">
@@ -86,6 +89,8 @@
             <li><a href="https://moneylesssociety.com/get-involved">Moneyless Society</a></li>
             <li><a href="https://www.compassiongames.org/">Compassion Games</a></li>
             <li><a href="https://www.onecommunityglobal.org/">One Community Global</a></li>
+            <li><a href="https://www.noo.world/articles/95-198-methods-nonviolent-direct-action">NooWorld list of non-violent direct action strategies</a></li>
+            <li><a href="https://openaccesseconomy.org/doku.php?id=free_collaboration_networks">Open Access Economy</a></li>
         </ul>
     </section>
 </div>

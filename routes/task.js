@@ -1,3 +1,5 @@
+// API for working with Tasks.
+
 const { isLoggedIn, deleteTalkpage } = require("../middleware");
 
 const express = require('express'),
@@ -17,6 +19,21 @@ const 	User = require('../api/user/user'),
         Tag = require("../api/tags/tag.model"),
         Patchlist = require("../api/patchlist.model"),
         Location = require("../api/maps/location.model");
+
+
+router.get("/action", isLoggedIn, (req, res) => {
+    User.findById(req.user._id, (err, user) => {
+        if(err){
+            console.error(err);
+            return res.send(`Error loading the current user: ${err}`);
+        } else {
+            return res.render('tasks/planner', {
+                title: "Task Manager",
+                currentUser: user
+            });
+        }
+    });
+});
 
 router.get("/:id", (req, res) => {
     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){

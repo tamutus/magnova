@@ -64,6 +64,6 @@ var UserSchema = new mongoose.Schema({
     badges: [{type: Schema.Types.ObjectId, ref: "Badge"}],
     joinDate: {type: Date, default: Date.now}
 });
-UserSchema.plugin(passportLocalMongoose);
+UserSchema.plugin(passportLocalMongoose, {usernameQueryFields: ["email"]});
 UserSchema.plugin(mongoose_fuzzy_searching, { fields: ['username'] });
 module.exports = mongoose.model("User", UserSchema);

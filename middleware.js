@@ -1,6 +1,8 @@
 const   Talkpage = require("./api/comments/talkpage.model"),
         Comment = require("./api/comments/comment.model");
 
+module.exports.reportAddress = "inventor@magnova.space";
+
 module.exports.isLoggedIn = function(req, res, next){
     if(!req.isAuthenticated()){
         return res.redirect("/auth/login");

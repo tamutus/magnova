@@ -24,12 +24,16 @@
             <a id="thread-delete" onclick="deleteActiveThread();"><button>Delete Thread</button></a>
         <% } %>
         <div id="comments"></div>
-        <div id="comment-container">
-            <div id="comment-box">
-                <input type="text" placeholder="Post your comment here" id="new-comment">
+        <% if(currentUser){ %>
+            <div id="comment-container">
+                <div id="comment-box">
+                    <input type="text" placeholder="Post your comment here" id="new-comment">
+                </div>
+                <button id="comment-submitter" onclick="postComment();"><h3>Submit your comment</h3></button>
             </div>
-            <button id="comment-submitter" onclick="postComment();"><h3>Submit your comment</h3></button>
-        </div>
+        <% } else { %>
+            <em>Log in to participate in the discussion</em>
+        <% } %>
     </div>
 </div>
 <div id="threads">

@@ -575,6 +575,12 @@ div.meta-cube {
     bottom: -30px;
     right: -20px;
 }
+.quote .speech form {
+    margin-top: 40px;
+}
+.quote .speech form > :not(:first-child) {
+    margin-left: 15px;
+}
 
   /* ============= */
  /* sidebar stuff */
@@ -957,11 +963,10 @@ h1.big-title {
 	    -ms-flex-align: center;
 	        align-items: center;
 }
-#user-bar div * {
-	margin: 0 10px;
-	font-size: 1.1rem;
+#user-bar div > *, #user-menu h3 {
 	font-family: 'Montserrat', sans-serif;
     vertical-align: middle;
+    font-weight: normal;
 }
 #logged-in, #logged-out {
     overflow: hidden;
@@ -969,6 +974,10 @@ h1.big-title {
     transition: flex .3s ease-out;
     display: flex;
     justify-content: space-evenly;
+}
+#logged-in *, #logged-out * {
+    margin: 0 10px;
+	font-size: 18px;
 }
 #logged-in a {
     flex: 0 1 50px;
@@ -998,8 +1007,87 @@ h1.big-title {
        object-fit: cover;
     cursor: pointer;
 }
+#user-bar #user-menu {
+    position: absolute;
+	top: 50px;
+	right: 0px;
+    z-index: 1001; /* same as user-bar */
+	height: 270px;
+    width: 230px;
+	background-color: rgb(139, 17, 74);
+	border-radius: 0 0 0 30px;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-evenly;
+    overflow: hidden;
+    transition: height .4s ease-out, width .4s ease-out, transform .45s ease, opacity .47s ease;
+    transform: rotate3d(0, 0, 0, 90deg);
+    transform-origin: top right;
+    transform-style: preserve-3d;
+}
+#user-bar.collapsed #user-menu {
+    height: 0;
+    width: 0;
+    opacity: 0;
+    transform: rotate3d(1, 1, 0, 90deg);
+}
+#user-menu > a {
+    width: 90%;
+    position: relative;
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+}
+#user-menu a h3 {
+    font-size: 18px;
+    padding: 10px 0 10px 25px;
+    user-select: none;
+    margin: 0;
+
+}
+
+#user-menu .icon {
+    height: 50px;
+    width: 50px;
+    position: relative;
+    fill: rgb(163, 63, 228);
+    border-radius: 10px;
+}
+#user-menu .icon polyline {
+    stroke-width: 10px;
+    stroke: rgb(108, 22, 165);
+}
+#user-menu .icon text {
+    fill: white;
+    text-anchor: middle;
+    font-size: 30px;
+}
+/* Specific SVG icon descriptions */
+#user-menu .messages.icon polyline {
+    stroke: rgb(108, 22, 165);
+}
+#user-menu .messages.icon {
+    fill: rgb(163, 63, 228);
+}
+#user-menu .updates.icon {
+    fill: rgb(212, 44, 200);
+}
+#user-menu .forums.icon {
+    fill: rgb(48, 207, 255);
+}
+#user-menu .settings.icon path {
+    fill: rgb(224, 190, 54);
+}
+#user-menu .settings.icon rect, #user-menu .settings.icon circle {
+    fill: rgb(44, 51, 99);
+}
+
 
 /* for login page */
+#login-form {
+    margin-bottom: 50px;
+}
 #login-form form button {
     margin-top: 20px;
 }

@@ -437,6 +437,7 @@ function toggleField(id){
     
     // let fieldType = 
 }
+// todo: bring this into its own function, as it's re-used elsewhere
 function displayMessage(message){
     messageSpan.classed("revealed", false);
     void messageSpan.node().offsetWidth;

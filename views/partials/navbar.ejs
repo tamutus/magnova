@@ -12,7 +12,46 @@
 </nav>
 <div id="user-bar" class="collapsed">
 	<% if(currentUser){ %>
-		<div id="logged-in" class="collapsed">
+		<div id="user-menu">
+            <a href="/messages">
+                <h3>Messages</h3>
+                <svg class="messages icon" version="1.1" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 100 100">
+                    <rect x="0" y="0" width="100" height="100" />
+                    <polyline points="0 15 50 35 100 15"/>
+                    <text id="message-count" x="50" y="80">0</text>
+                </svg>
+            </a>
+            <a href="/updates">
+                <h3>Updates</h3>
+                <svg class="updates icon" version="1.1" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 100 100">
+                    <rect x="0" y="0" width="100" height="100" />
+                    <circle cx="50" cy="20" r="18" fill="rgb(75, 75, 75)" />
+                    <circle cx="50" cy="19" r="13" fill="<%= false ? "rgb(100, 230, 100)" : "rgb(95, 95, 95)" %>"/>
+                    <circle cx="53" cy="13" r="3" fill="white" />
+                    <text id="update-count" x="50" y="80">0</text>
+                </svg>
+            </a>
+            <a href="/talk">
+                <h3>Fora</h3>
+                <svg class="forums icon" version="1.1" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 100 100">
+                    <rect x="0" y="0" width="100" height="100" />
+                    <ellipse stroke="rgba(256, 256, 256, .6)" ry="8" rx="13" cy="16" cx="26" fill="rgba(256, 256, 256, .6)"/>
+                    <polygon stroke="none" points="15,20 13,28 23,22" fill="rgba(256, 256, 256, .6)"/>
+                    <ellipse stroke="rgba(256, 256, 256, .6)" ry="8" rx="13" id="svg_8" cy="80" cx="71" fill="rgba(256, 256, 256, .6)"/>
+                    <polygon stroke="none" points="82,85 86,94 75,88" fill="rgba(256, 256, 256, .6)"/>
+                    <text id="forum-update-count" x="50" y="60">0</text>
+                </svg>
+            </a>
+            <a href="/settings">
+                <h3>Settings</h3>
+                <svg class="settings icon" version="1.1" xmlns="http://www.w3.org/2000/svg" viewbox="0 0 100 100">
+                    <rect x="0" y="0" width="100" height="100"/>
+                    <path id="gear-path" d="M 90,50 A 40 40 15 0 0 89.02,41.2 L 81.51,40.19 A 33 33 30 0 0 79.22,34.66 L 83.81,28.63 A 40 40 45 0 0 79.39,22.87 L 72.38,25.75 A 33 33 60 0 0 67.63,22.1 L 68.6,14.59 A 40 40 75 0 0 61.89,11.81 L 57.26,17.81 A 33 33 90 0 0 51.32,17.03 L 48.4,10.03 A 40 40 105 0 0 41.2,10.98 L 40.19,18.49 A 33 33 120 0 0 34.66,20.78 L 28.63,16.19 A 40 40 135 0 0 22.87,20.61 L 25.75,27.62 A 33 33 150 0 0 22.1,32.37 L 14.59,31.4 A 40 40 165 0 0 11.81,38.11 L 17.81,42.74 A 33 33 180 0 0 17.03,48.68 L 10.03,51.6 A 40 40 195 0 0 10.98,58.8 L 18.49,59.81 A 33 33 210 0 0 20.78,65.34 L 16.19,71.37 A 40 40 225 0 0 20.61,77.13 L 27.62,74.25 A 33 33 240 0 0 32.37,77.9 L 31.4,85.41 A 40 40 255 0 0 38.11,88.19 L 42.74,82.19 A 33 33 270 0 0 48.68,82.97 L 51.6,89.97 A 40 40 285 0 0 58.8,89.02 L 59.81,81.51 A 33 33 300 0 0 65.34,79.22 L 71.37,83.81 A 40 40 315 0 0 77.13,79.39 L 74.25,72.38 A 33 33 330 0 0 77.9,67.63 L 85.41,68.6 A 40 40 345 0 0 88.19,61.89 L 82.19,57.26 A 33 33 360 0 0 82.97,51.32 L 89.97,48.4 z"></path>
+                    <circle r="20" cx="50" cy="50" fill="rgb(139, 17, 74)"/>
+                </svg>
+            </a>
+        </div>
+        <div id="logged-in" class="collapsed">
 			<span style="display: none;" id="hidden-user-id"><%= currentUser._id %></span>
 			<a href=<%= `/users/${currentUser.username}` %> >
                 <span id="username"><%= currentUser.username %></span>

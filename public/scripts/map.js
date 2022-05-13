@@ -279,6 +279,14 @@ async function fetchThis(){
         .then(res => {      
             res.parent = parent;
             for(feature of res.features){
+                if(!feature){
+                    continue;
+                }
+                if(!feature.properties){
+                    if(feature.attributes){
+                        feature.properties = feature.attributes;
+                    }
+                }
                 feature.properties.geometrySource = `©<a href="${fetchAttributionLink.property("value")}">${fetchProvider.property("value")}</a>`;
                 feature.properties.NAME = capitalize(feature.properties[fetchNameProperty.property("value")]);
             }

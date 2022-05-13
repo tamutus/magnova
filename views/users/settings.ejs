@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/magnova.css">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/settings.css">
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Poppins:wght@500&display=swap" rel="stylesheet">
+	<base href="/">
+	<title><%= title %></title>
+</head>
+<body>
+<%- include("../partials/navbar") %>
+<div id="allContent" class="expanded">
+    <h1><%= shownUser.preferredName?.length > 0 ? shownUser.preferredName : shownUser.username %>'s settings</h1>
+    <section>
+        <h2>Login Info</h2>
+        <form autocomplete="on">
+            <h4>Old password</h4>
+            <div>
+                <input type="password" id="old-password" placeholder="Old Password" oninput="validatePasswordForm();" class="password">
+                <p class="message-display revealed" id="old-password-display">We ask that you confirm your old password to change it.</p>
+            </div>
+            <h4>New password</h4>
+            <div>
+                <input type="password" id="new-password" placeholder="New Password" oninput="validatePasswordForm();" class="password" autocomplete="current-password">
+                <p class="message-display" id="new-password-display-1"></p>
+            </div>
+            <h4>Confirm new password</h4>
+            <div>
+                <input type="password" id="password-confirmation" placeholder="Confirm Password" oninput="validatePasswordForm();" class="password">
+                <p class="message-display" id="new-password-display-2">Here we will tell you whether your passwords match</p>
+            </div>
+            <div>
+                <button id="visibility-toggler" type="button" onclick="togglePasswordVisibility();">Show passwords</button>
+                <button id="password-submitter" type="button" onclick="submitNewPassword()" disabled>Save Password</button>
+            </div>
+            <p class="message-display quote" id="pw-change-response"></p>
+        </form>
+        <p>We aim to bring the following settings onto this page:</p>
+        <ol>
+            <li>Email change (to do this now, go to your <a href="<%= `/users/${shownUser.username}` %>">profile page</a>)</li>
+            <li>Single Sign On Integration</li>
+        </ol>    
+    </section>
+    <section>
+        <h2>Ergonomics</h2>
+        <p>We would like to incorporate personal settings for ergonomics, like:</p>
+        <ol>
+            <li>Choosing default landing page</li>
+            <li>Modifying your color scheme</li>
+        </ol>
+    </section>
+</div>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="scripts/nav.js"></script>
+<script src="scripts/userSettings.js"></script>
+</body></html>

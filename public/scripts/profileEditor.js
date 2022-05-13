@@ -106,13 +106,13 @@ async function toggleEditing(){
     }
     // Save changes
     else{
-        let bioHTML = tinymce.activeEditor.getContent();
-        profileUpdate = {
-            preferredName: preferredNameInput.property("value"),
-            email: emailInput.property("value"),
-            bio: bioHTML,
-            pfpLink: imageInput.property("value")
-        };
+        let bioHTML = tinymce.activeEditor.getContent(),
+            profileUpdate = {
+                preferredName: preferredNameInput.property("value"),
+                email: emailInput.property("value"),
+                bio: bioHTML,
+                pfpLink: imageInput.property("value")
+            };
         
         // Make an API call to get current user info to be up-to-date, then save the profile, returning and dislaying any error messages
         currentUser = await fetch("/auth/my_data")
@@ -139,14 +139,15 @@ async function toggleEditing(){
         console.log(response);
         // Check response status code
         // With failure code, change the failure message div's text but otherwise return from this function
-        
         //Success 
-        preferredName.text(profileUpdate.preferredName);
-        // handle.text(`@ ${profileUpdate.username}`);  // username changes need to be implemented
-        bioText.html(profileUpdate.bio);
-        emailDisplay.text(profileUpdate.email);
-        pfp.attr("src", profileUpdate.pfpLink);
-        stopEditing();
+        if(response === "Update successful!"){
+            preferredName.text(profileUpdate.preferredName);
+            // handle.text(`@ ${profileUpdate.username}`);  // username changes need to be implemented
+            bioText.html(profileUpdate.bio);
+            emailDisplay.text(profileUpdate.email);
+            pfp.attr("src", profileUpdate.pfpLink);
+            stopEditing();
+        }
     }
 }
 function stopEditing(){
@@ -167,7 +168,8 @@ function toggleField(id){
     // let fieldType = 
 }
 function displayMessage(message){
-    messageSpan.text(message);
     messageSpan.classed("revealed", false);
+    void messageSpan.node().offsetWidth;
+    messageSpan.text(message);
     messageSpan.classed("revealed", true);
 }

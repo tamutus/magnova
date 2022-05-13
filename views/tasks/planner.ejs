@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/magnova.css">
+	<link rel="stylesheet" type="text/css" href="/stylesheets/projects.css">
+    <link rel="stylesheet" type="text/css" href="/stylesheets/planner.css">
+	<link rel="preconnect" href="https://fonts.gstatic.com">
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Poppins:wght@500&display=swap" rel="stylesheet">
+	<base href="/">
+	<title><%= title %></title>
+</head>
+<body>
+<%- include("../partials/navbar") %>
+<div id="allContent" class="expanded">
+    <h1><%= currentUser.preferredName %>'s action</h1>
+    <%- include("../partials/actionlinks") %>
+    <section>
+        <p>
+            Once Local Tasks are implemented, we will develop a UI for managing the opportunities you've volunteered for. This will be your portal to directly improving lives.
+        </p>
+    </section>
+    <section id="planner-carousel" class="carousel">
+        <div class="views">
+            <div id="lists-view"></div>
+            <div id="boards-view"></div>
+            <div id="calendar-view"></div>
+        </div>
+    </section>
+</div>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="scripts/nav.js"></script>
+<script src="scripts/planner.js"></script>
+</body></html>

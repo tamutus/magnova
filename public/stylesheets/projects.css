@@ -23,6 +23,10 @@
     background-color: rgba(213, 247, 227, 0.205);
     border-radius: 20px;
     padding: 10px;
+    transition: max-height .4s ease-out;
+}
+#tasks-container.hidden {
+    max-height: 0;
 }
 #task-buttons {
     margin-bottom: 15px;

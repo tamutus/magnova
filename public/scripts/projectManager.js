@@ -1,6 +1,7 @@
 const   newTaskForm = document.querySelector("#task-submission form"),
-        taskList = d3.select("#task-list"),
-        taskViewer = d3.select("#task-viewer"),
+        taskContainer = d3.select("#tasks-container"),
+        taskList = taskContainer.select("#task-list"),
+        taskViewer = taskContainer.select("#task-viewer"),
         taskDisplay = d3.select("#task-display"),
         taskButtons = taskViewer.select("#task-buttons"),
         taskEditButton = taskButtons.select("#task-edit-button"),
@@ -12,6 +13,7 @@ const   newTaskForm = document.querySelector("#task-submission form"),
         taskCreationDisplay = taskDisplay.select("#task-creation"),
         taskCompletionDisplay = taskDisplay.select("#task-completion"),
         taskDataDisplays = taskDisplay.selectAll(".task-data"),
+        taskEmptyDisplay = d3.select("tasks-empty"),
         loggedInDiv = d3.select("#logged-in"),
         rootStyle = document.documentElement;
 
@@ -64,6 +66,13 @@ function displayTheseTasks(taskgraph){
     taskSelection.exit().remove();
     taskSelection = taskEnter.merge(taskSelection);
     taskSelection.on("click", taskEdge => displayThisTask(taskEdge.vertex));
+    if(taskgraph.edges.length === 0){
+        taskEmptyDisplay.classed("hidden", false);
+        taskContainer.classed("hidden", true);
+    } else {
+        taskEmptyDisplay.classed("hidden", true);
+        taskContainer.classed("hidden", false);
+    }
 }
 function displayThisTask(task){
     stopTaskEditing();
@@ -113,7 +122,6 @@ let pendingCreation = false;
 async function createTask(){
     if(pendingCreation){return};
     pendingCreation = true;
-
     if(routeBase === "project"){
         let formInput = new FormData(newTaskForm);
         let newTask = {

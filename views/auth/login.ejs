@@ -6,15 +6,15 @@
 <div id="login-form">
 	<form action="/auth/login" method="post">
 		<div>
-			<h5>
-				Username
-			</h5>
+			<h4>
+				Username or Email address
+            </h4>
 			<input type="text" name="username">
 		</div>
 		<div>
-			<h5>
+			<h4>
 				Password
-			</h5>
+			</h4>
 			<input type="password" name="password">
             <input type="hidden" name="referer" value=<%= referer %>>
 		</div>
@@ -24,5 +24,6 @@
 		</button>
 	</form>
 </div>
+<a href="/auth/forgot-password">I forgot my password!</a>
 
 <%- include('../partials/footer'); %>

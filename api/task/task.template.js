@@ -11,12 +11,12 @@ var TaskTemplateSchema = new Schema({
     edits: {type: Schema.Types.ObjectId, ref: "Patchlist"},
     version: {type: Number, default: 0},
     volunteers: [{
-        user: {type: Schema.Types.ObjectId, ref: "User"}, 
+        user: {type: Schema.Types.ObjectId, ref: "User"},
         signupDate: {type: Date, default: Date.now},
         hoursVolunteered: Number
     }],
     resources: [{
-        resource: {type: Schema.Types.ObjectId, ref: "Resource"}, 
+        resource: {type: Schema.Types.ObjectId, ref: "Resource"},
         needed: Number,
         received: {type: Number, default: 0}
     }],
