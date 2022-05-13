@@ -8,7 +8,8 @@
     "clean": "tsc --build --clean && rm -r dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "TS_NODE_PROJECT=tsconfig.dist.json node -r tsconfig-paths/register dist/app.js",
-    "dev": "nodemon -r tsconfig-paths/register app.ts"
+    "dev": "nodemon -r tsconfig-paths/register app.ts",
+    "docker-start": "node -r tsconfig-paths/register app.js"
   },
   "repository": {
     "type": "git",
@@ -50,6 +51,7 @@
     "passport-local-mongoose": "^6.1.0",
     "path": "^0.12.7",
     "serve-favicon": "^2.5.0",
+    "tsconfig-paths": "^3.14.1",
     "zod": "^3.14.4"
   },
   "devDependencies": {
@@ -62,7 +64,6 @@
     "@types/passport-local": "^1.0.34",
     "@types/passport-local-mongoose": "^6.1.1",
     "@types/serve-favicon": "^2.5.3",
-    "tsconfig-paths": "^3.14.1",
     "ts-node": "^10.7.0",
     "typescript": "^4.6.3"
   }
