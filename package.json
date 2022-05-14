@@ -1,13 +1,15 @@
 {
   "name": "magnova",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Global issue explorer, network builder, and crowdsourced task-planner",
   "main": "app.ts",
   "scripts": {
-    "build": "tsc && cp -R public dist",
+    "build": "tsc && cp -R public dist && cp -R views dist",
+    "buildw": "tsc && Xcopy /e .\\public .\\dist\\public\\ && Xcopy /E .\\views .\\dist\\public\\",
     "clean": "tsc --build --clean && rm -r dist",
+    "cleanw": "tsc --build --clean && del dist",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "TS_NODE_PROJECT=tsconfig.dist.json node -r tsconfig-paths/register dist/app.js",
+    "start": "set TS_NODE_PROJECT=.\\tsconfig.dist.json&& node -r tsconfig-paths/register dist/app.js",
     "dev": "nodemon -r tsconfig-paths/register app.ts",
     "docker-start": "node -r tsconfig-paths/register app.js"
   },

@@ -33,5 +33,5 @@
     "skipLibCheck": true
   },
 
-  "exclude": ["dist", "public"]
+  "exclude": ["dist", "public", "views"]
 }
