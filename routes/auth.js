@@ -209,9 +209,9 @@ router.post("/reset-password/:userID/:resetToken", async (req, res) => {
             if (!isValid) {
                 return res.render("errorLanding", invalidKeyErrorPage);
             } else {
-                User.findById(req.params.userID, (err, user) => {
-                    if(err){
-                        console.error(err);
+                User.findById(req.params.userID, (findError, user) => {
+                    if(findError){
+                        console.error(findError);
                         return res.render("errorLanding", {
                             title: "Error looking up user",
                             errorHTML: `<h3>An incorrect user ID was entered for this password reset, so it won't work.</h3>`
@@ -222,37 +222,47 @@ router.post("/reset-password/:userID/:resetToken", async (req, res) => {
                             errorHTML: `<h3>We tried to find a user with the ID we sent (or you entered). We couldn't.</h3>`
                         })
                     } else {
-                        user.setPassword(req.body.password, (err) => {
-                            if(err){
-                                console.error(err);
+                        user.setPassword(req.body.password, (setError) => {
+                            if(setError){
+                                console.error(setError);
                                 return res.render("errorLanding", {
                                     title: "Error Resetting Password",
                                     errorHTML: `<h3>We tried to change your password, but there was an error. Please reach out to ${reportAddress} to figure out how we can help.</h3>`
                                 })
                             } else {
-                                existingResetToken.deleteOne();
-                                smtpTransport.sendMail({
-                                    from: "Magnova <info@magnova.space>",
-                                    to: user.email,
-                                    subject: "We Reset Your Password",
-                                    text: `Hello ${user.preferredName},
-                                    We have successfully reset your Magnova password. If this wasn't you, please email ${reportAddress}. Otherwise, you can now log into Magnova with your new password.
-                                    https://magnova.space/auth/login
-                                    Automated message sent for your password reset only. You will not be subscribed to any email digests because of this email.`,
-                                    html: `<head>
-                                            <link href="https://fonts.googleapis.com/css2?family=Montserrat&amp;family=Poppins:wght@500&amp;display=swap" rel="stylesheet">
-                                        </head>
-                                        <body style="background-color: rgb(90, 35, 90);color: lavender;font-size: 20px;padding: 20px;font-family: 'Montserrat', sans-serif;">
-                                            <div style="background-color: rgb(180, 70, 180);padding: 20px 50px;">
-                                                <h1>Password Reset Complete</h1>
-                                                <p>Hello ${user.preferredName},</p>
-                                                <p>We have successfully reset your Magnova password. If this wasn't you, please <a href="mailto:${reportAddress}" style="color: rgb(173, 245, 215);">send us an email</a>. Otherwise, you can now log in with your new password:</p>
-                                                <a href="https://${req.headers.host}/auth/login" style="background-color: rgb(255, 158, 102);color: black;font-size: 30px;font-family: 'Poppins', sans-serif;border-radius: 0 0 30px 30px;margin-bottom: 20px;margin-top: 25px;margin-left: 25px;padding: 15px;border: 2px solid rgb(253, 144, 80);flex: 100px 0 0;width: 300px;">Log Into Magnova</a>
-                                                <p>Automated message sent for your password reset only. You will not be subscribed to any email digests because of this email.</p>
-                                            </div>
-                                        </body>`
+                                user.save(saveError => {
+                                    if(saveError){
+                                        console.error(saveError);
+                                        return res.render("errorLanding", {
+                                            title: "Error Saving New Password",
+                                            errorHTML: `<h3>We changed your password, but ran into an error when we tried to save it. Please reach out to ${reportAddress} to figure out how we can help.</h3>`
+                                        });
+                                    } else {
+                                        existingResetToken.deleteOne();
+                                        smtpTransport.sendMail({
+                                            from: "Magnova <info@magnova.space>",
+                                            to: user.email,
+                                            subject: "We Reset Your Password",
+                                            text: `Hello ${user.preferredName},
+                                            We have successfully reset your Magnova password. If this wasn't you, please email ${reportAddress}. Otherwise, you can now log into Magnova with your new password.
+                                            https://magnova.space/auth/login
+                                            Automated message sent for your password reset only. You will not be subscribed to any email digests because of this email.`,
+                                            html: `<head>
+                                                    <link href="https://fonts.googleapis.com/css2?family=Montserrat&amp;family=Poppins:wght@500&amp;display=swap" rel="stylesheet">
+                                                </head>
+                                                <body style="background-color: rgb(90, 35, 90);color: lavender;font-size: 20px;padding: 20px;font-family: 'Montserrat', sans-serif;">
+                                                    <div style="background-color: rgb(180, 70, 180);padding: 20px 50px;">
+                                                        <h1>Password Reset Complete</h1>
+                                                        <p>Hello ${user.preferredName},</p>
+                                                        <p>We have successfully reset your Magnova password. If this wasn't you, please <a href="mailto:${reportAddress}" style="color: rgb(173, 245, 215);">send us an email</a>. Otherwise, you can now log in with your new password:</p>
+                                                        <a href="https://${req.headers.host}/auth/login" style="background-color: rgb(255, 158, 102);color: black;font-size: 30px;font-family: 'Poppins', sans-serif;border-radius: 0 0 30px 30px;margin-bottom: 20px;margin-top: 25px;margin-left: 25px;padding: 15px;border: 2px solid rgb(253, 144, 80);flex: 100px 0 0;width: 300px;">Log Into Magnova</a>
+                                                        <p>Automated message sent for your password reset only. You will not be subscribed to any email digests because of this email.</p>
+                                                    </div>
+                                                </body>`
+                                        });
+                                        return res.redirect("/auth/login");
+                                    }
                                 });
-                                return res.redirect("/auth/login");
                             }
                         });
                     }
