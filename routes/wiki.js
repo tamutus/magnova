@@ -43,7 +43,7 @@ router.get("/nothing", (req, res) => {
 // router.get("/createIndex", async (req, res) => {
 //     User.find({}, async (err, users) => {
 //         if(err){console.log(err)}else {
-//             for(user of users){
+//             for(let user of users){
 //                 if(err){console.log(err)}else{
 //                     const username = user.username;
 //                     user.username = username;
@@ -298,7 +298,7 @@ router.get("/local/:id", (req, res) => {
                 } else {
                     instance.template.projects.edges = instance.template.projects.edges.filter(edge => edge.score > 0);
                     instance.localProjects = [];
-                    for(edge of instance.template.projects.edges){
+                    for(let edge of instance.template.projects.edges){
                         let localProject = edge.vertex.implementations.find(implementation => implementation.location === instance.location._id);
                         if(localProject){
                             instance.localProjects.push(localProject);

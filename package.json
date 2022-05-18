@@ -1,6 +1,6 @@
 {
   "name": "magnova",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Global issue explorer, network builder, and crowdsourced task-planner",
   "main": "app.ts",
   "scripts": {
@@ -30,7 +30,13 @@
     "resistance",
     "grassroots",
     "participatory",
-    "democracy"
+    "democracy",
+    "resource",
+    "resource-based",
+    "economy",
+    "rbe",
+    "moneyless",
+    "society"
   ],
   "author": "Lavra Tamutus",
   "license": "GPL-3.0-or-later",

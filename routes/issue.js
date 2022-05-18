@@ -230,14 +230,14 @@ router.post("/localize/:issueid/:locationid", isLoggedIn, (req, res) => {
     } else {
         return res.send("Reached the route");
     }
-})
+});
 // router.delete("/resetlinks", async (req, res) => {
 // 	await Issuegraph.find({}, (err, graphs) => {
 // 		if(err){
 // 			console.log(err);
 // 			return res.send(err);
 // 		}
-// 		for(graph of graphs){
+// 		for(let graph of graphs){
 // 			graph.edges = [];
 // 			graph.save();
 // 		}
@@ -248,7 +248,7 @@ router.post("/localize/:issueid/:locationid", isLoggedIn, (req, res) => {
 // 			console.log(err);
 // 			return res.send(err);
 // 		}
-// 		for(user of users){
+// 		for(let user of users){
 // 			user.edgeVotes = [];
 // 			user.save();
 // 		}
@@ -263,7 +263,7 @@ router.post("/localize/:issueid/:locationid", isLoggedIn, (req, res) => {
 //             console.log(err);
 //             return res.send("Error finding all issuegraphs to update: " + err);
 //         }
-//         for(issuegraph of issuegraphs){
+//         for(let issuegraph of issuegraphs){
 //             if(!issuegraph.rootType){ 
 //                 issuegraph.rootType = "Issue"; 
 //                 await issuegraph.save();
@@ -386,7 +386,7 @@ router.put("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
                                                     }
                                                     else{
                                                         let found = false;
-                                                        for(edge of rootGraph.edges){
+                                                        for(let edge of rootGraph.edges){
                                                             if(String(edge.vertex) == String(targetFound._id)){
                                                                 found = true;
                                                                 edge.score += scoreChange;
@@ -573,7 +573,7 @@ router.delete("/link/:rootid/:targetid", isLoggedIn, async (req, res) => {
                                                     }
                                                     else{
                                                         let found = false;
-                                                        for(edge of rootGraph.edges){
+                                                        for(let edge of rootGraph.edges){
                                                             if(String(edge.vertex) == String(req.params.targetid)){
                                                                 found = true;
                                                                 edge.score += scoreChange;
@@ -846,13 +846,13 @@ router.get("/data/:id", async (req, res) => {
 //             return res.send("Couldn't find users");
 //         }
 //         else{
-//             for(user of users){
-//                 for(edgeSet of user.edgeVotes){
+//             for(let user of users){
+//                 for(let edgeSet of user.edgeVotes){
 //                     let sourceVotes = allVotes[edgeSet.source];
 //                     if(!sourceVotes){
 //                         allVotes[edgeSet.source] = {};
 //                     }
-//                     for(edge of edgeSet.targets){
+//                     for(let edge of edgeSet.targets){
 //                         let scoreChange = edge.vote ? 1 : -1 ;
 //                         if(!allVotes[edgeSet.source][edge.target]){
 //                             allVotes[edgeSet.source][edge.target] = 0;
@@ -871,8 +871,8 @@ router.get("/data/:id", async (req, res) => {
 //             }
 //             else{
 //                 let changed = [];
-//                 for(issue of foundIssues){
-//                     for(edge of issue.issues.edges){
+//                 for(let issue of foundIssues){
+//                     for(let edge of issue.issues.edges){
 //                         let scoreChange = allVotes[issue._id][edge.vertex] - edge.score;
 //                         if(scoreChange != 0){
 //                             console.log(`Need to change score from ${issue.name} to ${edge.vertex} by ${scoreChange}`);
@@ -897,30 +897,6 @@ router.get("/data/:id", async (req, res) => {
 //         });
 // });
 
-router.post("/localize/:templateid/:locationid", (req, res) => {
-    if(req.params.templateid.match(/^[0-9a-fA-F]{24}$/)){
-        if(req.params.locationid.match(/^[0-9a-fA-F]{24}$/)){
-            if(LocalIssue.find(instance => String(instance.template) === req.params.templateid)){
-                return res.redirect("wiki")
-            }
-            Issue.findById(req.params.templateid, (err, template) => {
-                if(err){
-                    console.log(err);
-                    return res.send(`Problem finding the Issue you wanted to localize: ${err}`);
-                } else if(template){
-                    return res.send(template);
-                } else {
-                    return res.send("We didn't find an Issue template with that ID");
-                }
-            })
-        }
-        else {
-            return res.send(`The provided Location ID, ${req.params.locationid}, isn't valid.`);
-        }
-    } else {
-        return res.send(`The provided Issue template ID, ${req.params.templateid}, isn't valid.`);
-    }
-});
 
 router.get("/*", (req, res) => {
     res.status(404).redirect("/wiki/nothing");

@@ -396,7 +396,7 @@ router.put("/toissue/:projectid/:issueid", isLoggedIn, async (req, res) => {
                                             if(scoreChange > 0){
                                                 // First, the issue's projectgraph.
                                                 let projectFound = false;
-                                                for(edge of issue.projects.edges){
+                                                for(let edge of issue.projects.edges){
                                                     if(String(edge.vertex) == String(project._id)){
                                                         projectFound = true;
                                                         edge.score += scoreChange;
@@ -423,7 +423,7 @@ router.put("/toissue/:projectid/:issueid", isLoggedIn, async (req, res) => {
                                                 }
                                                 // Second, the project's issuegraph
                                                 let issueFound = false;
-                                                for(edge of project.issues.edges){
+                                                for(let edge of project.issues.edges){
                                                     if(String(edge.vertex) == String(issue._id)){
                                                         issueFound = true;
                                                         edge.score += scoreChange;
@@ -584,7 +584,7 @@ router.delete("/toissue/:projectid/:issueid", isLoggedIn, async (req, res) => {
                                             // If needed, change the value of the edge in the issue's issuegraph
                                             if(scoreChange < 0){
                                                 let projectFound = false;
-                                                for(edge of issue.projects.edges){
+                                                for(let edge of issue.projects.edges){
                                                     if(String(edge.vertex) == String(project._id)){
                                                         projectFound = true;
                                                         edge.score += scoreChange;
@@ -611,7 +611,7 @@ router.delete("/toissue/:projectid/:issueid", isLoggedIn, async (req, res) => {
                                                     }
                                                 }
                                                 let issueFound = false;
-                                                for(edge of project.issues.edges){
+                                                for(let edge of project.issues.edges){
                                                     if(String(edge.vertex) == String(issue._id)){                   // ****************
                                                         issueFound = true;
                                                         edge.score += scoreChange;

@@ -104,7 +104,7 @@ router.delete("/thread/:talkpageid/:threadindex", isLoggedIn, async (req, res) =
                     if(!thread){
                         return res.send("Didn't find a thread at that index");
                     }
-                    for(comment of thread.comments){
+                    for(let comment of thread.comments){
                         // For each comment, delete reference to it in the author's comments array. Replies are irrelevant when deleting the whole talkpage, since replies are made within a thread.
                         const userCommentsIndex = comment.author.comments.findIndex(c => String(c) === String(comment._id));
                         if(userCommentsIndex >= 0){
@@ -121,7 +121,7 @@ router.delete("/thread/:talkpageid/:threadindex", isLoggedIn, async (req, res) =
                             }
                         });
                     }
-                    for(author of authorsToSave){
+                    for(let author of authorsToSave){
                         author.save();
                     }
                     thread.subject = undefined;

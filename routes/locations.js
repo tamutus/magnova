@@ -37,11 +37,11 @@ router.get("/nowhere", (req, res) => {
 //             return res.send(err);
 //         } else {
 //             if(all.length > 0){
-//                 for(location of all){
+//                 for(let location of all){
 //                     if(location.color.slice(0, 3) === 'rgb'){
 //                         const rgbColorString = location.color.slice(4, location.color.length - 1);
 //                         const rgbArray = rgbColorString.split(',');
-//                         for(component of rgbArray){
+//                         for(let component of rgbArray){
 //                             component = component.trim();
 //                         }
 //                         location.color = rgbToHex(rgbArray[0], rgbArray[1], rgbArray[2]);
@@ -186,7 +186,7 @@ router.post("/", isLoggedIn, (req, res) => {
 //                     if(!earth.sublocations){
 //                         earth.sublocations = [];
 //                     }
-//                     for(country of countries){
+//                     for(let country of countries){
 //                         earth.sublocations.push(country._id);
 //                     }
 //                     earth.markModified("sublocations");
@@ -349,7 +349,7 @@ router.put("/adopt/:newParent/:child", isLoggedIn, (req, res) => {
                                 });
                             } else {
                                 if(exParents.length > 0) {
-                                    for(exParent of exParents){
+                                    for(let exParent of exParents){
                                         const exChildIndex = exParent.sublocations.find(ex => ex === child._id);
                                         exParent.sublocations.splice(exChildIndex, 1);
                                         exParent.markModified("sublocations");
