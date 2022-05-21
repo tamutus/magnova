@@ -352,12 +352,12 @@ router.post("/register", async (req, res) => {
     if(username.length > 30){
         return res.send("Sorry, that username is way too long. 30 characters max.");
     }
-    lowercaseUsername = username.slice(0).toLowerCase();
+    const lowercaseUsername = username.slice(0).toLowerCase();
 
     if(["all", "nobody", "unpopulated"].includes(lowercaseUsername)){
         return res.send("That word is reserved, sorry")
     }
-    lowercaseEmail = email.slice(0).toLowerCase();
+    const lowercaseEmail = email.slice(0).toLowerCase();
     User.findOne({ $or: [{username: lowercaseUsername}, {email: lowercaseUsername}] }, async (err, user) => {
         if(err){
             console.log(err);
