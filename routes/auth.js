@@ -3,8 +3,9 @@ const   User  = require('../api/user/user'),
         Token = require('../api/user/token');
 
 // Local imports
-const   { isLoggedIn, reportAddress } = require("../middleware"),
-        { expectEnv, smtpTransport }  = require("../util");
+const   { isLoggedIn, authorizeByRoles, reportAddress } = require("../middleware"),
+        { expectEnv, smtpTransport }  = require("../util"),
+        { ROLES } = require('../roles');
 
 // Library imports
 const express       = require('express'),
@@ -33,20 +34,29 @@ const invalidKeyErrorPage = {
 }
 
 router.get("/usernametaken/:name", (req, res) => {
-    User.find({username: req.params.name.toLowerCase()}, (err, user) => {
+    const lowercaseUsername = req.params.name.toLowerCase();
+    User.find({ $or: [
+        {username: lowercaseUsername},
+        {email: lowercaseUsername}
+    ] }, (err, user) => {
         if(err){
             console.log(err);
+            return res.status(400).send("Error searching for username:\n\n" + err); // Need to account for this error possibility in login page ajax
         }
         else if(user.length > 0){
-            res.send(true);
+            return res.send(true);
         }
         else{
-            res.send(false);
+            return res.send(false);
         }
     });
 });
 router.get("/emailtaken/:email", (req, res) => {
-    User.find({email: req.params.email.toLowerCase()}, (err, user) => {
+    const possibleEmail = req.params.email.toLowerCase();
+    User.find({ $or: [
+        {username: possibleEmail},
+        {email: possibleEmail}
+    ]}, (err, user) => {
         if(err){
             console.log(err);
         }
@@ -72,12 +82,12 @@ router.post("/login", usernameToLowerCase, passport.authenticate("local", {failu
         res.redirect("/");
     }
     // res.redirect(req.session.returnTo || '/nexus');     //this variable, req.sesson.returnTo, is captured for every visited page in app.js middleware
-})
+});
 router.get("/forgot-password", (req, res) => {
     return res.render("auth/forgotPassword", {
         title: "Forgot Magnova Password"
     });
-})
+});
 router.post("/forgot-password", usernameToLowerCase, (req, res, next) => {
     waterfall([
         function(done) {
@@ -150,15 +160,22 @@ router.post("/forgot-password", usernameToLowerCase, (req, res, next) => {
             });
         }
     ], err => {
-        if(err) return next(err);
+        if(err){return next(err);}
         return res.render("auth/resetPasswordSent", {
             title: "Emailing Password Reset – Magnova"
         });
     })
 });
 router.get("/reset-password/:userID/:resetToken", (req, res) => {
-    if(req.params.userID.match(/^[0-9a-fA-F]{24}$/)){
-        User.findById(req.params.userID, (err, user) => {
+    if(!req.params.userID.match(/^[0-9a-fA-F]{24}$/)){
+        return res.render("errorLanding", {
+            title: "No User found",
+            errorHTML: `<h3>An incorrect user ID was entered for this password reset, so it won't work.</h3>`
+        });
+    } 
+    User.findById(req.params.userID)
+        .select("-email")
+        .exec((err, user) => {
             if(err){
                 console.error(err);
             } else if(!user){
@@ -186,12 +203,6 @@ router.get("/reset-password/:userID/:resetToken", (req, res) => {
                 });
             }
         });
-    } else {
-        return res.render("errorLanding", {
-            title: "No User found",
-            errorHTML: `<h3>An incorrect user ID was entered for this password reset, so it won't work.</h3>`
-        });
-    }
 });
 router.post("/reset-password/:userID/:resetToken", async (req, res) => {
     if(!req.params.userID.match(/^[0-9a-fA-F]{24}$/)){
@@ -272,27 +283,22 @@ router.post("/reset-password/:userID/:resetToken", async (req, res) => {
     }
 });
 
-router.get("/loggedin", (req, res) => {
-    res.render("auth/loggedin", {
-        title: "Magnova Login Successful"
-    })
-});
 router.get("/logout", (req, res) => {
     req.logout();
-    res.redirect("back");
+    return res.redirect("back");
 });
 router.get("/register", (req, res) => {
-    res.render("auth/register", {
+    return res.render("auth/register", {
         title: "Magnova User Registration"
     });
 });
 router.get("/my_data", isLoggedIn, (req, res) => {
     User.findById(req.user._id, (err, user) => {
         if(err){
-            res.send(`Couldn't find your data... ${err}`);
+            return res.send(`Couldn't find your data... ${err}`);
         }
         else {
-            res.send(user);
+            return res.send(user);
         }
     });
     
@@ -358,23 +364,23 @@ router.post("/register", async (req, res) => {
         return res.send("That word is reserved, sorry")
     }
     const lowercaseEmail = email.slice(0).toLowerCase();
-    User.findOne({ $or: [{username: lowercaseUsername}, {email: lowercaseUsername}] }, async (err, user) => {
+    User.findOne({ $or: [{username: lowercaseUsername}, {email: lowercaseUsername}] }, async (err, userWithUsername) => {
         if(err){
             console.log(err);
         }
-        else if(user){
+        else if(userWithUsername){
             return res.send("Sorry, that username has been taken, or it is somebody's email address.");
         }
         else{
-            User.find({ $or: [{username: lowercaseEmail}, {email: lowercaseEmail}] }, async (err, user) => {
+            User.find({ $or: [{username: lowercaseEmail}, {email: lowercaseEmail}] }, async (err, users) => {
                 if(err){
                     console.log(err);
                 }
-                else if(user.length > 0){
+                else if(users.length > 0){
                     return res.send(`Sorry, that email has been taken, or it is somebody's username. Try resetting your password on the login screen, or contact ${reportAddress} if something is wrong.`);
                 }
                 else {
-                    const user = new User({username: lowercaseUsername, email: lowercaseEmail});
+                    const user = new User({username: lowercaseUsername, email: lowercaseEmail, roles: [ROLES.Editor, ROLES.Activist, ROLES.Commentor]});
                     const registeredUser = await User.register(user, password);
                     req.login(registeredUser, err => {
                         if(err) return next(err);
@@ -385,20 +391,118 @@ router.post("/register", async (req, res) => {
         }
     });
 });
-router.get("/delete-user/:id", isLoggedIn, async (req, res) => {
-    const user = await User.findById(req.params.id);
-    if(!user.equals(req.user._id)){
-        console.log("Somebody tried to delete another user");
-        res.redirect("back");
-    }
-    else{
-        User.deleteOne(user, (err) => {
-            if(err){
-                console.log(err);
-            }
-            res.redirect("back");
-        });
+// Thought must be given to how this works before it's allowed to be live.
+// router.get("/delete-user/:id", isLoggedIn, async (req, res) => {
+//     const user = await User.findById(req.params.id);
+//     if(!user.equals(req.user._id)){
+//         console.log("Somebody tried to delete another user");
+//         res.redirect("back");
+//     }
+//     else{
+//         User.deleteOne(user, (err) => {
+//             if(err){
+//                 console.log(err);
+//             }
+//             res.redirect("back");
+//         });
         
+//     }
+// });
+
+  //===============//
+ // Authorization //
+//===============//
+
+router.get("/unauthorized", (_req, res) => {
+    return res.status(401).render("auth/unauthorized", {
+        title: "Magnova – Not allowed here"
+    });
+});
+// router.get("/add/basic/roles", authorizeByRoles(ROLES.Developer), (_req, res) => {
+//     User.updateMany({}, {$addToSet: {roles: {$each: ["Activist", "Commentor", "Editor"]}}}, (err) => {
+//         if(err){
+//             console.error(err); // todo: report this
+//             return res.render("errorLanding", {
+//                 title: "Error loading users",
+//                 errorHTML: `<h3>There was an error loading all the Magnova users.</h3>`,
+//             });
+//         }
+//         return res.redirect("/auth/delegate");
+//     });
+// });
+router.get("/delegate", authorizeByRoles(ROLES.Delegator), (_req, res) => {
+    const userQuery = User.find({});
+    userQuery.exec((err, allUsers) => {
+        if(err){
+            console.error(err); // todo: report this
+            return res.render("errorLanding", {
+                title: "Error loading users",
+                errorHTML: `<h3>There was an error loading all the Magnova users.</h3>`,
+            });
+        }
+        if(!allUsers){
+            return res.render("errorLanding", {
+                title: "Error loading users",
+                errorHTML: `<h3>There was an error loading all the Magnova users.</h3>`,
+            });
+        }
+        res.render("auth/delegate", {
+            title: "Delegate Magnova User Roles",
+            allUsers: allUsers,
+            roles: ROLES
+        });
+    });
+});
+router.put("/toggle-role", authorizeByRoles(ROLES.Delegator), (req, res) => {
+    const { id, roleName, operation } = req.body;
+    if(!id || !roleName || !operation || !["add", "remove"].includes(operation)){
+        return res.status(400).send(`Not enough information was provided to toggle a role. id: ${id}; roleName: ${roleName}; operation: ${operation}`);
+    }
+    if(String(id) === String(req.user._id) && String(roleName) === "Delegator"){
+        return res.status(400).send("You can't remove your own Delegator role");
+    }
+    if(!id.match(/^[0-9a-fA-F]{24}$/)){
+        return res.status(400).send(`Invalid user ID (${id}) was sent. Contact ${reportAddress} if there's a bug to fix.`);
+    } else {
+        if(!ROLES[roleName]){
+            return res.status(400).send(`Invalid role was provided (${roleName}). Contact ${reportAddress} if there's a bug to fix.`);
+        } else {
+            User.findById(id, (err, user) => {
+                if(err){
+                    console.error(err);
+                    return res.status(400).send(`Error finding user with id ${id} 🙁`);
+                } else if(!user) {
+                    return res.status(404).send(`No user found with id ${id} 🙁`);
+                } else {
+                    if(!user.roles){
+                        user.roles = [];
+                        user.markModified("roles");
+                    }
+                    if(operation === "add"){
+                        if(user.roles.includes(ROLES[roleName])){
+                            return res.status(412).send("Already has role");
+                        } else {
+                            user.roles.push(ROLES[roleName]);
+                            user.save();
+                            return res.status(200).send(`${user.preferredName || user.username} now has the role ${ROLES[roleName]}`);
+                        }
+                    } else if(operation === "remove"){
+                        const existingIndex = user.roles.findIndex(role => {
+                            return role === ROLES[roleName];
+                        });
+                        if(existingIndex === -1){
+                            return res.status(412).send(`${user.preferredName || user.username} did not have the role ${ROLES[roleName]} to begin with`);
+                        } else {
+                            user.roles.splice(existingIndex, 1);
+                            user.save();
+                            return res.status(200).send(`The role ${ROLES[roleName]} has been revoked from ${user.preferredName || user.username}`);
+                        }
+                    }
+                    
+                }
+            });
+        }
     }
 });
+
 module.exports = router;

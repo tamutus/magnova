@@ -1,0 +1,41 @@
+<%- include("../partials/header") %>
+<title><%= title %></title>
+</head>
+<body>
+        <h1>Delegate Roles</h1>
+        <h3><em>Click to toggle.</em></h3>
+        <div class="table-bearer">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <% for (const role in roles){ %>
+                            <th><%= roles[role] %></th>
+                        <% } %>
+                        <th>Preferred Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (const userListing of allUsers){ %>
+                        <tr>
+                            <td><a href=<%= `/users/${encodeURI(userListing.username)}` %>><%= userListing.username %></a></td>
+                            <% for (const role in roles){ %>
+                                <td>
+                                    <% if(userListing.roles.includes(roles[role])){ %>
+                                        <button class="red" onclick="<%= `revoke('${userListing._id}', '${userListing.username}', '${role}', this);` %>" title="<%= `Revoke ${role} role from ${userListing.username}` %>">✅</button>
+                                    <% } else { %>
+                                        <button class="green" onclick="<%= `grant('${userListing._id}', '${userListing.username}', '${role}', this);` %>" title="<%= `Grant ${role} role to ${userListing.username}` %>">❌</button>
+                                    <% } %>
+                                </td>
+                            <% } %>
+                            <td><%= userListing.preferredName %></td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+        <div id="main-message"></div>
+
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="scripts/roleDelegation.js"></script>
+<%- include("../partials/footer") %>

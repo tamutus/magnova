@@ -1,6 +1,6 @@
 <%- include('../partials/header'); %>
 <ul>
-    <% for (userListing of allUsers){ %>
+    <% for (const userListing of allUsers){ %>
         <li><a href=<%= `/users/${encodeURI(userListing.username)}` %>><%= userListing.username %></a></li>
     <% } %>
 </ul>

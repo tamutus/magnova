@@ -62,6 +62,7 @@ var UserSchema = new mongoose.Schema({
         hours: Number
     }],
     badges: [{type: Schema.Types.ObjectId, ref: "Badge"}],
+    roles: [ String ],
     joinDate: {type: Date, default: Date.now}
 });
 UserSchema.plugin(passportLocalMongoose, {usernameQueryFields: ["email"]});
