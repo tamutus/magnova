@@ -11,7 +11,7 @@ const	express = require('express'),
         Location = require("../api/maps/location.model"),
 		User = require("../api/user/user");
 
-const { isLoggedIn } = require("../middleware");
+const { isLoggedIn, authorizeByRoles } = require("../middleware");
 
 router.get("/", (req, res) => {
     Comment.find({})
@@ -29,7 +29,7 @@ router.get("/silence", (req, res) => {
     });
 });
 
-router.post("/newthread/:talkpageid", isLoggedIn, async (req, res) => {
+router.post("/newthread/:talkpageid", authorizeByRoles("Commentor"), async (req, res) => {
     if(req.params.talkpageid.match(/^[0-9a-fA-F]{24}$/)){
         Talkpage.findById(req.params.talkpageid, async (err, page) => {
             if(err){
@@ -50,7 +50,7 @@ router.post("/newthread/:talkpageid", isLoggedIn, async (req, res) => {
         return res.send("Tried to add a thread to a talkpage using an invalid talkpage ID");
     }
 });
-router.put("/threadsubject/:talkpageid/:threadindex", isLoggedIn, (req, res) => {
+router.put("/threadsubject/:talkpageid/:threadindex", authorizeByRoles("Commentor"), (req, res) => {
     if(req.params.talkpageid.match(/^[0-9a-fA-F]{24}$/)){
         Talkpage.findById(req.params.talkpageid, (err, talkpage) => {
             if(err){
@@ -77,7 +77,7 @@ router.put("/threadsubject/:talkpageid/:threadindex", isLoggedIn, (req, res) => 
         return res.send("Tried to change a thread to a talkpage using an invalid talkpage ID");
     }
 });
-router.delete("/thread/:talkpageid/:threadindex", isLoggedIn, async (req, res) => {
+router.delete("/thread/:talkpageid/:threadindex", authorizeByRoles("Mediator"), async (req, res) => {
     if(req.params.talkpageid.match(/^[0-9a-fA-F]{24}$/)){
         let threadDeletionResult;
         Talkpage.findById(req.params.talkpageid)
@@ -144,7 +144,7 @@ router.delete("/thread/:talkpageid/:threadindex", isLoggedIn, async (req, res) =
         return res.send("");
     }
 });
-router.post("/comment/:talkpageid/:threadindex", isLoggedIn, (req, res) => {
+router.post("/comment/:talkpageid/:threadindex", authorizeByRoles("Commentor"), (req, res) => {
     if(req.params.talkpageid.match(/^[0-9a-fA-F]{24}$/)){
         Talkpage.findById(req.params.talkpageid, (err, page) => {
             if(err){
@@ -212,7 +212,7 @@ router.get("/comment/:id", (req, res) => {
 router.get("/commentdata/:id", (req, res) => {
     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         Comment.findById(req.params.id)
-            .populate("author")
+            .populate("author", "-email")
             .exec((err, comment) => {
                 if(err){
                     console.log(err);
@@ -227,19 +227,20 @@ router.get("/commentdata/:id", (req, res) => {
         return res.send({});
     }
 })
+// Logic below checks that user is mediator, or person who posted the comment to be deleted.
 router.delete("/comment/:id", isLoggedIn, (req, res) => {
     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         Comment.findById(req.params.id)
-            .populate("author")
+            .populate("author", "-email")
             .populate("topic")
             .exec((err, comment) => {
             if(err){
                 console.log(err);
                 return res.send(`Error finding comment to delete: ${err}`);
             } else if(comment){
-                if(String(comment.author._id) == String(req.user._id)){
-                    let userCommentsIndex = comment.author.comments.findIndex(c => String(comment._id) == String(c));
-                    let threadCommentsIndex = comment.topic.threads[comment.threadIndex].comments.findIndex(c => String(comment._id) == String(c));
+                if(String(comment.author._id) === String(req.user._id) || req.user.roles?.includes("Mediator")){
+                    let userCommentsIndex = comment.author.comments.findIndex(c => String(comment._id) === String(c));
+                    let threadCommentsIndex = comment.topic.threads[comment.threadIndex].comments.findIndex(c => String(comment._id) === String(c));
                     let stringResponse = `You'll be deleting comment ${comment._id}, made by ${comment.author.username}. Index in the user's comments is ${userCommentsIndex}, and index in thread comments is ${threadCommentsIndex}`;
                     comment.author.comments.splice(userCommentsIndex, 1);
                     comment.topic.threads[comment.threadIndex].comments.splice(threadCommentsIndex, 1);

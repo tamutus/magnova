@@ -1,10 +1,19 @@
+// External dependencies
+const   express = require('express'),
+        router  = express.Router();
+
+// Models
 const User = require('../api/user/user');
 
-const express = require('express'),
-		router = express.Router();
+// Local imports
+const { ROLES } = require("../roles");
 
 router.get("/all", (req, res) => {
-    User.find({}, (err, allUsers) => {
+    const userQuery = User.find({});
+    if(!(req.user?.roles?.includes(ROLES.Delegator))){
+        userQuery.select("-email");
+    }
+    userQuery.exec((err, allUsers) => {
         if(err){
             console.log(err);
             res.redirect("back");
@@ -21,22 +30,27 @@ router.get("/nobody", (req, res) => {
     });
 });
 router.get("/unpopulated/:name", (req, res) => {
-    User.findOne({username: req.params.name})
-        .exec((err, user) => {
-            if(err){
-                console.log(err);
-                res.status(404).end();
-            }
-            if(user && user.edgeVotes){
-                res.send(user);
-            }
-            else{
-                res.status(404).end();
-            }
-        });
+    const name = req.params.name;
+    const userQuery = User.findOne({username: name});
+    if(!(req.user?.username === name)){
+        userQuery.select("-email");
+    }
+    userQuery.exec((err, user) => {
+        if(err){
+            console.log(err);
+            res.status(404).end();
+        }
+        if(user && user.edgeVotes){
+            res.send(user);
+        }
+        else{
+            res.status(404).end();
+        }
+    });
 });
 router.get("/:name", (req, res) => {
-    User.findOne({username: req.params.name})
+    const name = req.params.name;
+    const userQuery = User.findOne({username: req.params.name})
         .populate("issues")
         .populate("projects")
         .populate({
@@ -44,22 +58,25 @@ router.get("/:name", (req, res) => {
             populate: {
                 path: "topic"
             }
-        })
-        .exec((err, user) => {
-            if(err){
-                console.log(err);
-                res.status(404).redirect("/users/nobody");
-            }
-            if(user){
-                res.render("users/viewUser", {
-                    title: `${user.username}'s Profile`,
-                    shownUser: user
-                });
-            }
-            else{
-                res.status(404).redirect("/users/nobody");
-            }
         });
+    if(!(req.user?.username === name)){
+        userQuery.select("-email");
+    }
+    userQuery.exec((err, user) => {
+        if(err){
+            console.log(err);
+            res.status(404).redirect("/users/nobody");
+        }
+        if(user){
+            res.render("users/viewUser", {
+                title: `${user.username}'s Profile`,
+                shownUser: user
+            });
+        }
+        else{
+            res.status(404).redirect("/users/nobody");
+        }
+    });
 });
 router.get("/*", (req, res) => {
     res.status(404).redirect("/users/nobody");

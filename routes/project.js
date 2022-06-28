@@ -1,4 +1,4 @@
-const { isLoggedIn } = require("../middleware");
+const { isLoggedIn, authorizeByRoles } = require("../middleware");
 
 const express = require('express'),
 		router = express.Router();
@@ -19,7 +19,7 @@ const 	User = require('../api/user/user'),
         Location = require("../api/maps/location.model");
 const taskTemplate = require("../api/task/task.template");
 
-router.post("/", isLoggedIn, (req, res) => {
+router.post("/", authorizeByRoles("Editor"), (req, res) => {
     const newProject = req.body.project;
     newProject.creator = req.user._id;
     if(newProject.image === ""){
@@ -188,7 +188,10 @@ router.get("/data/:id", async (req, res) => {
                     path: "edges",
                     populate: {
                         path: "vertex",
-                        populate: "creator"
+                        populate: {
+                            path: "creator",
+                            select: "username"
+                        }
                     }
                 }
             })
@@ -204,7 +207,7 @@ router.get("/data/:id", async (req, res) => {
     }
 });
 
-router.post("/addtask/:projectid", isLoggedIn, async (req, res) => {
+router.post("/addtask/:projectid", authorizeByRoles("Editor"), async (req, res) => {
     // Start out by finding the project you're making a task for
     if(req.params.projectid.match(/^[0-9a-fA-F]{24}$/)){
         Project.findById(req.params.projectid)
@@ -274,6 +277,8 @@ router.post("/addtask/:projectid", isLoggedIn, async (req, res) => {
         return res.send("The server received a request to add a task to a project with an improper ID");
     }
 });
+
+//This is a vote, not a wiki edit, so there is no role for this. Anybody can vote always.
 router.put("/toissue/:projectid/:issueid", isLoggedIn, async (req, res) => {
     if(req.params.projectid.match(/^[0-9a-fA-F]{24}$/) && req.params.issueid.match(/^[0-9a-fA-F]{24}$/)){
         Project.findById(req.params.projectid)
@@ -461,6 +466,7 @@ router.put("/toissue/:projectid/:issueid", isLoggedIn, async (req, res) => {
         return res.send("Either the project or issue you were trying to connect had an improper ID");
     }
 });
+//This is a vote, not a wiki edit, so there is no role for this. Anybody can vote always.
 router.delete("/toissue/:projectid/:issueid", isLoggedIn, async (req, res) => {
 // Mostly same logic as in PUT route above, with numbers inverted
 // First, make sure the issues are in the database.
@@ -719,7 +725,7 @@ router.get("/:id", (req, res) => {
         return res.redirect("/project/nothing");
     }
 });
-router.put("/:id", isLoggedIn, (req, res) => {
+router.put("/:id", authorizeByRoles("Editor"), (req, res) => {
     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         const {name, info, image, patch, latestVersion} = req.body;
         if(name.length == 0){

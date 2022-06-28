@@ -1,7 +1,7 @@
 // Routes related to issues and issue mapping.
 
 const { route } = require('.');
-const { isLoggedIn } = require("../middleware");
+const { isLoggedIn, authorizeByRoles, reportAddress } = require("../middleware");
 
 const express = require('express'),
 		router = express.Router();
@@ -20,7 +20,7 @@ const 	User = require('../api/user/user'),
         Talkpage = require("../api/comments/talkpage.model"),
         Location = require("../api/maps/location.model");
 
-router.post("/", isLoggedIn, (req, res) => {
+router.post("/", authorizeByRoles("Editor"), (req, res) => {
 	const newIssue = req.body.issue;
 	newIssue.identifier = req.user._id;
     newIssue.path = encodeURIComponent(newIssue.name);
@@ -81,7 +81,7 @@ router.post("/", isLoggedIn, (req, res) => {
 		else{ return res.redirect("back");}
 	});
 });
-router.get("/localize/:id", (req, res) => { // isLoggedIn,
+router.get("/localize/:id", authorizeByRoles("Editor"), (req, res) => { // isLoggedIn,
 	if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         Issue.findById(req.params.id)
             .populate({
@@ -104,132 +104,138 @@ router.get("/localize/:id", (req, res) => { // isLoggedIn,
         return res.status(404).redirect("/wiki/nothing");
     }
 });
-router.post("/localize/:issueid/:locationid", isLoggedIn, (req, res) => {
-    if(req.params.issueid.match(/^[0-9a-fA-F]{24}$/) && req.params.locationid.match(/^[0-9a-fA-F]{24}$/)){
-        LocalIssue.findOne({template: req.params.issueid, location: req.params.locationid}, (err, existing) => {
-            if(err){
-                console.log(err);
-                return res.send({
-                    message: `Error testing whether there was an existing Local Issue: ${err}`
-                });
-            } else if(existing) {
-                return res.send({
-                    message: "exists",
-                    localURL: `/wiki/local/${existing._id}`
-                });
-            } else {
-                User.findById(req.user._id, (err, user) => {
-                    if(err){
-                        console.log(err);
-                        return res.send({
-                            message: `Error finding the logged in user's profile: ${err}`
-                        });
-                    } else if(user){
-                        Issue.findById(req.params.issueid)
-                            .populate("issues")
-                            .populate("projects")
-                            .exec((err, issue) => {
-                                if(err){
-                                    console.log(err);
-                                    return res.send({
-                                        message: `Error finding an issue with ID ${req.params.issueid}: ${err}`
-                                    });
-                                } else if(!issue){
-                                    return res.status(404).send({
-                                        message: `Didn't find an issue with ID ${req.params.issueid}`
-                                    });
-                                } else {
-                                    Location.findById(req.params.locationid, (err, location) => {
-                                        if(err){
-                                            console.log(err);
-                                            return res.send({
-                                                message: `Error finding an location with ID ${req.params.locationid}: ${err}`
-                                            });
-                                        } else if(!location){
-                                            return res.send({
-                                                message: `Found ${issue.name}, but didn't find a location with id ${req.params.locationid}`
-                                            });
-                                        } else {
-                                            // Following properties must be set now: template, image, location, localizer, talkpage;
-                                            let newLocalIssue = {
-                                                template: issue._id,
-                                                image: issue.image,
-                                                location: location._id,
-                                                localizer: user._id,
-                                            }
-                                            // return res.send(newLocalIssue);
-                                            LocalIssue.create(newLocalIssue, (err, localIssue) => {
-                                                if(err){
-                                                    console.log(err);
-                                                    return res.send({
-                                                        message: `Error creating new local issue: ${err}`
-                                                    });
-                                                } else {
-                                                    // Put references to this local issue in its issue template, the location, and the user.
-                                                    if(!issue.instances){
-                                                        issue.instances = [];
-                                                        issue.markModified("instances");
-                                                    }
-                                                    issue.instances.push(localIssue._id);
-                                                    issue.save();
-                                                    
-                                                    if(!location.issues){
-                                                        location.issues = [];
-                                                        location.markModified("issues");
-                                                    }
-                                                    location.issues.push(localIssue._id);
-                                                    location.save();
-
-                                                    if(!user.contributions){
-                                                        user.contributions = {
-                                                            issues: [], projects: [], tasks: []
-                                                        };
-                                                        user.markModified("contributions");
-                                                    }
-                                                    if(!user.contributions.issues){
-                                                        user.contributions.issues = [];
-                                                        user.markModified("contributions.issues");
-                                                    }
-                                                    user.contributions.issues.push({
-                                                        issue: localIssue._id,
-                                                        hours: 0
-                                                    });
-                                                    user.save();
-                                                    
-                                                    //Create talkpage (edits at edit route)
-                                                    Talkpage.create({root: localIssue._id, rootType: "LocalIssue"}, (err, talkpage) => {
-                                                        if(err){
-                                                            console.log(`Trouble creating talkpage for local issue: ${err}`);
-                                                            // TO DO: report this bug
-                                                        }
-                                                        else{
-                                                            localIssue.talkpage = talkpage._id;
-                                                            localIssue.save();
-                                                            return res.send({
-                                                                message: "success",
-                                                                localURL: `/wiki/local/${localIssue._id}`
-                                                            });
-                                                        }
-                                                    });   
-                                                }
-                                            });
-                                        }
-                                    });
-                                }
-                            });
-                    } else {
-                        return res.send({
-                            message: "Even though you're logged in, we couldn't find your profile. This is a bug."
-                        })
-                        // TO DO: log this bug
-                    }
-                
-                });
-            }
+router.post("/localize/:issueid/:locationid", authorizeByRoles("Editor"), (req, res) => {
+    if(!req.params.issueid.match(/^[0-9a-fA-F]{24}$/)){
+        return res.send({
+            message: `The provided ID of ${req.params.issueid} isn't a valid object ID so this link is broken. You can report this to ${reportAddress}.`
         });
-    } else {
-        return res.send("Reached the route");
     }
+    if(!req.params.locationid.match(/^[0-9a-fA-F]{24}$/)){
+        return res.send({
+            message: `The provided ID of ${req.params.locationid} isn't a valid object ID so this link is broken. You can report this to ${reportAddress}.`
+        });
+    } 
+    LocalIssue.findOne({template: req.params.issueid, location: req.params.locationid}, (err, existing) => {
+        if(err){
+            console.log(err);
+            return res.send({
+                message: `Error testing whether there was an existing Local Issue: ${err}`
+            });
+        } else if(existing) {
+            return res.send({
+                message: "exists",
+                localURL: `/wiki/local/${existing._id}`
+            });
+        } else {
+            User.findById(req.user._id, (err, user) => {
+                if(err){
+                    console.log(err);
+                    return res.send({
+                        message: `Error finding the logged in user's profile: ${err}`
+                    });
+                } else if(user){
+                    Issue.findById(req.params.issueid)
+                        .populate("issues")
+                        .populate("projects")
+                        .exec((err, issue) => {
+                            if(err){
+                                console.log(err);
+                                return res.send({
+                                    message: `Error finding an issue with ID ${req.params.issueid}: ${err}`
+                                });
+                            } else if(!issue){
+                                return res.status(404).send({
+                                    message: `Didn't find an issue with ID ${req.params.issueid}`
+                                });
+                            } else {
+                                Location.findById(req.params.locationid, (err, location) => {
+                                    if(err){
+                                        console.log(err);
+                                        return res.send({
+                                            message: `Error finding an location with ID ${req.params.locationid}: ${err}`
+                                        });
+                                    } else if(!location){
+                                        return res.send({
+                                            message: `Found ${issue.name}, but didn't find a location with id ${req.params.locationid}`
+                                        });
+                                    } else {
+                                        // Following properties must be set now: template, image, location, localizer, talkpage;
+                                        let newLocalIssue = {
+                                            template: issue._id,
+                                            image: issue.image,
+                                            location: location._id,
+                                            localizer: user._id,
+                                        }
+                                        // return res.send(newLocalIssue);
+                                        LocalIssue.create(newLocalIssue, (err, localIssue) => {
+                                            if(err){
+                                                console.log(err);
+                                                return res.send({
+                                                    message: `Error creating new local issue: ${err}`
+                                                });
+                                            } else {
+                                                // Put references to this local issue in its issue template, the location, and the user.
+                                                if(!issue.instances){
+                                                    issue.instances = [];
+                                                    issue.markModified("instances");
+                                                }
+                                                issue.instances.push(localIssue._id);
+                                                issue.save();
+                                                
+                                                if(!location.issues){
+                                                    location.issues = [];
+                                                    location.markModified("issues");
+                                                }
+                                                location.issues.push(localIssue._id);
+                                                location.save();
+
+                                                if(!user.contributions){
+                                                    user.contributions = {
+                                                        issues: [], projects: [], tasks: []
+                                                    };
+                                                    user.markModified("contributions");
+                                                }
+                                                if(!user.contributions.issues){
+                                                    user.contributions.issues = [];
+                                                    user.markModified("contributions.issues");
+                                                }
+                                                user.contributions.issues.push({
+                                                    issue: localIssue._id,
+                                                    hours: 0
+                                                });
+                                                user.save();
+                                                
+                                                //Create talkpage (edits at edit route)
+                                                Talkpage.create({root: localIssue._id, rootType: "LocalIssue"}, (err, talkpage) => {
+                                                    if(err){
+                                                        console.log(`Trouble creating talkpage for local issue: ${err}`);
+                                                        // TO DO: report this bug
+                                                    }
+                                                    else{
+                                                        localIssue.talkpage = talkpage._id;
+                                                        localIssue.save();
+                                                        return res.send({
+                                                            message: "success",
+                                                            localURL: `/wiki/local/${localIssue._id}`
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                } else {
+                    return res.send({
+                        message: "Even though you're logged in, we couldn't find your profile. This is a bug."
+                    })
+                    // TO DO: log this bug
+                }
+            
+            });
+        }
+    });
 });
 // router.delete("/resetlinks", async (req, res) => {
 // 	await Issuegraph.find({}, (err, graphs) => {

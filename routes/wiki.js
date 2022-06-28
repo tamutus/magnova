@@ -9,7 +9,7 @@ const	express = require('express'),
         Talkpage = require("../api/comments/talkpage.model"),
         Patchlist = require("../api/patchlist.model"),
 		User = require("../api/user/user");
-const { isLoggedIn } = require("../middleware");
+const { isLoggedIn, authorizeByRoles } = require("../middleware");
 
 router.get('/', (req, res) => {
 	let currentDate = new Date();
@@ -92,13 +92,15 @@ router.get("/search", async (req, res) => {
             console.error(err);
             return res.send("Error fuzzy searching: " + err);
         });
+        for(const user of results["users"]){
+            user["email"] = undefined;
+        }
     }
     if(req.query.projects === "true"){
         results["projects"] = await Project.fuzzySearch(searchTerm).catch(err => {            
             console.error(err);
             return res.send("Error fuzzy searching: " + err);
         });
-        // results["projects"] = results["projects"].filter(project => project.confidenceScore > 10);
     }
     if(req.query.locations === "true"){
         results["locations"] = await Location.fuzzySearch(searchTerm).catch(err => {            
@@ -182,79 +184,78 @@ router.get("/all", (req, res) => {
     });
 });
 
-router.put("/local/:id", isLoggedIn, (req, res) => {
-    if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
-        const {info, image, patch, latestVersion} = req.body;
-        LocalIssue.findById(req.params.id)
-            .populate("edits")
-            .exec(async (err, localIssue) => {
-                if(err){
-                    console.log(err);
-                    return res.send(`Error trying to find that Local Issue: ${err}`);
-                }
-                else if(!localIssue){
-                    return res.send(`Didn't find a Local Issue with ID ${req.params.id}`);
-                }
-                else {
-                    let returnMessage = "Update ";
-                    if(localIssue.localInfo != info || localIssue.image != image){
-                        if(!localIssue.version){
-                            localIssue.version = 0;
-                            localIssue.markModified("version");
-                        }
-                        if(localIssue.version != latestVersion){
-                            return res.send("Latest version changed while you were creating a patch. Try again now.");
-                        }
-                        if(!localIssue.edits){
-                            Patchlist.create({root: localIssue._id, rootType: "LocalIssue"}, (err, patchlist) => {
-                                if(err){
-                                    console.log(err);
-                                    return res.send("No patch list for edits, and an error creating a new one: " + err);
-                                }
-                                else{
-                                    localIssue.edits = patchlist;
-                                    localIssue.markModified("edits");
-                                }
-                            });
-                        }
-                        if(localIssue.localInfo != info){
-                            returnMessage += "to this Local Issue's info, ";
-                            localIssue.edits.patches.push({
-                                editor: req.user._id,
-                                patch: patch
-                            });
-                            localIssue.edits.markModified("patches");
-                            localIssue.edits.save();
-                            
-                            localIssue.version++;
-                            localIssue.markModified("version");
-                            localIssue.localInfo = info;
-                        }
-                        
-                        if(!localIssue.editors){
-                            localIssue.editors = [];
-                            localIssue.markModified("editors");
-                        }
-                        if(!localIssue.editors.find(e => String(e) == String(req.user._id))){
-                            localIssue.editors.push(req.user._id);
-                            localIssue.markModified("editors");
-                        }
-                        if(localIssue.image != image){
-                            returnMessage += "to this Local Issue's image, ";
-                            localIssue.image = image;
-                        }
-
-                        returnMessage += "Successful!";
-                        localIssue.save();
-                    } else {
-                        returnMessage += "not needed.";
-                    }
-                    return res.send(returnMessage);
-                }
-            });
-    } else {
+router.put("/local/:id", authorizeByRoles("Editor"), (req, res) => {
+    if(!req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         return res.send(`The server received a PUT request for a Local Issue with an improper ID: ${req.params.id}`);
     }
+    const {info, image, patch, latestVersion} = req.body;
+    LocalIssue.findById(req.params.id)
+        .populate("edits")
+        .exec(async (err, localIssue) => {
+            if(err){
+                console.log(err);
+                return res.send(`Error trying to find that Local Issue: ${err}`);
+            }
+            else if(!localIssue){
+                return res.send(`Didn't find a Local Issue with ID ${req.params.id}`);
+            }
+            else {
+                let returnMessage = "Update ";
+                if(localIssue.localInfo != info || localIssue.image != image){
+                    if(!localIssue.version){
+                        localIssue.version = 0;
+                        localIssue.markModified("version");
+                    }
+                    if(localIssue.version != latestVersion){
+                        return res.send("Latest version changed while you were creating a patch. Try again now.");
+                    }
+                    if(!localIssue.edits){
+                        Patchlist.create({root: localIssue._id, rootType: "LocalIssue"}, (err, patchlist) => {
+                            if(err){
+                                console.log(err);
+                                return res.send("No patch list for edits, and an error creating a new one: " + err);
+                            }
+                            else{
+                                localIssue.edits = patchlist;
+                                localIssue.markModified("edits");
+                            }
+                        });
+                    }
+                    if(localIssue.localInfo != info){
+                        returnMessage += "to this Local Issue's info, ";
+                        localIssue.edits.patches.push({
+                            editor: req.user._id,
+                            patch: patch
+                        });
+                        localIssue.edits.markModified("patches");
+                        localIssue.edits.save();
+                        
+                        localIssue.version++;
+                        localIssue.markModified("version");
+                        localIssue.localInfo = info;
+                    }
+                    
+                    if(!localIssue.editors){
+                        localIssue.editors = [];
+                        localIssue.markModified("editors");
+                    }
+                    if(!localIssue.editors.find(e => String(e) == String(req.user._id))){
+                        localIssue.editors.push(req.user._id);
+                        localIssue.markModified("editors");
+                    }
+                    if(localIssue.image != image){
+                        returnMessage += "to this Local Issue's image, ";
+                        localIssue.image = image;
+                    }
+
+                    returnMessage += "Successful!";
+                    localIssue.save();
+                } else {
+                    returnMessage += "not needed.";
+                }
+                return res.send(returnMessage);
+            }
+        });
 });
 
 router.get("/local/:id", (req, res) => {
@@ -452,86 +453,85 @@ router.get('/:id', (req, res) => {
         return res.status(404).redirect("/wiki/nothing");
     }
 });
-router.put("/:id", isLoggedIn, (req, res) => {
-	if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
-        const {name, info, image, patch, latestVersion} = req.body;
-        if(name.length == 0){
-            res.send("You sent in a blank name!");
-        }
-        Issue.findById(req.params.id)
-            .populate("edits")
-            .exec(async (err, issue) => {
-                if(err){
-                    console.log(err);
-                }
-                else if(!issue){
-                    return res.send(`Didn't find an Issue with ID ${req.params.id}`);
-                }
-                else{
-                    let returnMessage = "Update ";
-                    if(issue.name != name || issue.info != info || issue.image != image){
-                        if(!issue.version){
-                            issue.version = 0;
-                            issue.markModified("version");
-                        }
-                        if(issue.version != latestVersion){
-                            return res.send("Latest version changed while you were creating a patch. Try again now.")
-                        }
-                        if(!issue.edits){
-                            Patchlist.create({root: issue._id, rootType: "IssueTemplate"}, (err, patchlist) => {
-                                if(err){
-                                    console.log(err);
-                                    return res.send("No patch list for edits, and an error creating a new one: " + err);
-                                }
-                                else{
-                                    issue.edits = patchlist;
-                                    issue.markModified("edits");
-                                }
-                            });
-                        }
-                        if(issue.info != info){
-                            returnMessage += "to this issue's info, ";
-                            issue.edits.patches.push({
-                                editor: req.user._id,
-                                patch: patch
-                            });
-                            issue.edits.markModified("patches");
-                            issue.edits.save();
-                            
-                            issue.version++;
-                            issue.markModified("version");
-                            issue.info = info;
-                        }
-                        
-                        if(!issue.editors){
-                            issue.editors = [];
-                            issue.markModified("editors");
-                        }
-                        if(!issue.editors.find(e => String(e) == String(req.user._id))){
-                            issue.editors.push(req.user._id);
-                            issue.markModified("editors");
-                        }
-
-                        if(issue.name != name){
-                            returnMessage += "to this issue's name, ";
-                            issue.name = name;
-                        }
-                        if(issue.image != image){
-                            returnMessage += "to this issue's image, ";
-                            issue.image = image;
-                        }
-
-                        returnMessage += "Successful!";
-                        issue.save();
-                    } else {
-                        returnMessage += "not needed.";
-                    }
-                    return res.send(returnMessage);
-                }
-            });
-    } else {
-        return res.send("The server received a PUT request for an issue with an improper ID");
+router.put("/:id", authorizeByRoles("Editor"), (req, res) => {
+	if(!req.params.id.match(/^[0-9a-fA-F]{24}$/)){
+        return res.status(400).send("The server received a PUT request for an issue with an improper ID");
     }
+    const {name, info, image, patch, latestVersion} = req.body;
+    if(name.length == 0){
+        return res.send("You sent in a blank name!");
+    }
+    Issue.findById(req.params.id)
+        .populate("edits")
+        .exec(async (err, issue) => {
+            if(err){
+                console.log(err);
+            }
+            else if(!issue){
+                return res.send(`Didn't find an Issue with ID ${req.params.id}`);
+            }
+            else{
+                let returnMessage = "Update ";
+                if(issue.name != name || issue.info != info || issue.image != image){
+                    if(!issue.version){
+                        issue.version = 0;
+                        issue.markModified("version");
+                    }
+                    if(issue.version != latestVersion){
+                        return res.send("Latest version changed while you were creating a patch. Try again now.")
+                    }
+                    if(!issue.edits){
+                        Patchlist.create({root: issue._id, rootType: "IssueTemplate"}, (err, patchlist) => {
+                            if(err){
+                                console.log(err);
+                                return res.send("No patch list for edits, and an error creating a new one: " + err);
+                            }
+                            else{
+                                issue.edits = patchlist;
+                                issue.markModified("edits");
+                            }
+                        });
+                    }
+                    if(issue.info != info){
+                        returnMessage += "to this issue's info, ";
+                        issue.edits.patches.push({
+                            editor: req.user._id,
+                            patch: patch
+                        });
+                        issue.edits.markModified("patches");
+                        issue.edits.save();
+                        
+                        issue.version++;
+                        issue.markModified("version");
+                        issue.info = info;
+                    }
+                    
+                    if(!issue.editors){
+                        issue.editors = [];
+                        issue.markModified("editors");
+                    }
+                    if(!issue.editors.find(e => String(e) == String(req.user._id))){
+                        issue.editors.push(req.user._id);
+                        issue.markModified("editors");
+                    }
+
+                    if(issue.name != name){
+                        returnMessage += "to this issue's name, ";
+                        issue.name = name;
+                    }
+                    if(issue.image != image){
+                        returnMessage += "to this issue's image, ";
+                        issue.image = image;
+                    }
+
+                    returnMessage += "Successful!";
+                    issue.save();
+                } else {
+                    returnMessage += "not needed.";
+                }
+                return res.send(returnMessage);
+            }
+        });
 });
 
 router.get("/*", (req, res) => {

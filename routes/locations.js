@@ -1,4 +1,4 @@
-const { isLoggedIn } = require("../middleware");
+const { isLoggedIn, authorizeByRoles } = require("../middleware");
 
 const express = require('express'),
 		router = express.Router();
@@ -67,7 +67,7 @@ router.get("/nowhere", (req, res) => {
 //     return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
 // }
 
-router.post("/", isLoggedIn, (req, res) => {
+router.post("/", authorizeByRoles("Editor", "Geographer"), (req, res) => { //todo: make and use authorizeByAllRoles here
     // To-do: verify that the location isn't its parent, and verify that the superlocation is a mongodb object (unless this is built in)
     
     let {name, geometry, geometrySource, color, sublocationWord, superlocation} = req.body;
@@ -276,7 +276,7 @@ router.get("/sublocations/:id", (req, res) => {
         });
     }
 })
-router.put("/geometry/:id", isLoggedIn, (req, res) => {
+router.put("/geometry/:id", authorizeByRoles("Editor", "Geographer"), isLoggedIn, (req, res) => { // todo: make and use authorizeByAllRoles here
     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         const {geometry, geometrySource, name, info, sublocationWord, patch, latestVersion} = req.body;
     } else {
@@ -300,7 +300,7 @@ router.get("/geometry/:id", (req, res) => {
     }
 });
 
-router.put("/color/:id", isLoggedIn, (req, res) => {
+router.put("/color/:id", authorizeByRoles("Editor"), (req, res) => {
     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         Location.findById(req.params.id, (err, location) => {
             if(err){
@@ -320,7 +320,7 @@ router.put("/color/:id", isLoggedIn, (req, res) => {
         return res.send("Tried coloring a location using an Invalid ID");
     }
 })
-router.put("/adopt/:newParent/:child", isLoggedIn, (req, res) => {
+router.put("/adopt/:newParent/:child", authorizeByRoles("Editor", "Geographer"), (req, res) => { //todo: make and use authorizeByAllRoles here
     const   childID = req.params.child,
             parentID = req.params.newParent;
     if(childID.match(/^[0-9a-fA-F]{24}$/) && parentID.match(/^[0-9a-fA-F]{24}$/)){
@@ -382,7 +382,8 @@ router.put("/adopt/:newParent/:child", isLoggedIn, (req, res) => {
     }
 });
 
-router.put("/:id", isLoggedIn, (req, res) => {
+// This role is for the wiki page, not map-related info, so the Geographer role is not used for authorization.
+router.put("/:id", authorizeByRoles("Editor"), (req, res) => {
     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         const {name, info, sublocationWord, patch, latestVersion} = req.body;
         

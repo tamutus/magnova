@@ -6,7 +6,7 @@ const express = require('express'),
 
 router.get("/", isLoggedIn, (req, res) => {
     return res.render("messaging/inbox", {
-        title: `${req.user.preferredName?.length > 0 ? req.user.preferredName : req.user.username}'s Settings`,
+        title: `${req.user.preferredName?.length > 0 ? req.user.preferredName : req.user.username}'s Messages`,
         currentUser: req.user
     });
 })

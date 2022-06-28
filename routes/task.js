@@ -1,6 +1,6 @@
 // API for working with Tasks.
 
-const { isLoggedIn, deleteTalkpage } = require("../middleware");
+const { isLoggedIn, authorizeByRoles, deleteTalkpage } = require("../middleware");
 
 const express = require('express'),
 		router = express.Router();
@@ -51,7 +51,7 @@ router.get("/:id", (req, res) => {
         return res.send("Tried to find a task using an invalid task ID");
     }
 });
-router.put("/:id", isLoggedIn, async (req, res) => {
+router.put("/:id", authorizeByRoles("Editor"), async (req, res) => {
     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         const {name, info, completionRequirements} = req.body;
         if(name.length == 0){
@@ -89,7 +89,8 @@ router.put("/:id", isLoggedIn, async (req, res) => {
 });
 
 // Deleting a task: Verify the id. Find the Task. Prevent deletion if there are substantial links, or if deleter isn't an admin/the author.
-//                  Find author. Find associated Project. Delete the Talkpage with all Comments. Delete task from Project's Taskgraph. Delete task from author's created Task list.
+//            Find author. Find associated Project. Delete the Talkpage with all Comments. Delete task from Project's Taskgraph. Delete task from author's created Task list.
+//            Only the author of a task, or a Mediator, can delete tasks.
 router.delete("/:id", isLoggedIn, (req, res) => {
     if(req.params.id.match(/^[0-9a-fA-F]{24}$/)){
         Task.findById(req.params.id, (err, task) => {
@@ -124,7 +125,7 @@ router.delete("/:id", isLoggedIn, (req, res) => {
                 if(task?.tags.length > 0){
                     return res.send("This Task has Tags. Remove them if you would like to delete the Task.");
                 }
-                if(String(req.user._id) === String(task.creator) || String(req.user._id) === "6064d749949511722c878e26"){ // To-do: replace hard-coded ID with mod role
+                if(String(req.user._id) === String(task.creator) || req.user.roles?.includes("Mediator")){
                     User.findById(task.creator, (err, creator) => {
                         if(err){
                             console.log(err);
@@ -179,7 +180,7 @@ router.delete("/:id", isLoggedIn, (req, res) => {
                         }
                     });
                 } else {
-                    return res.send("You aren't authorized to delete this. Only a Task's author can do that.");
+                    return res.send("You aren't authorized to delete this. Only a Task's author or somebody with the Mediator role can do that.");
                 }
             }
         });
