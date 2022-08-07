@@ -245,9 +245,6 @@ button:active {
 	-webkit-box-shadow: none;
 	        box-shadow: none;
 }
-button:focus {
-	outline: none;
-}
 a {
 	color: rgb(174, 247, 225);
 	text-decoration: none;
@@ -379,6 +376,16 @@ li {
 }
 .nodisplay {
 	display: none;
+}
+noscript {
+    position: fixed;
+    bottom:  30px;
+    width: 100%;
+    text-align: center;
+    margin: 0 auto 10px;
+    background-color: yellow;
+    color: black;
+    z-index: 100;
 }
 
   /* ============= */

@@ -329,6 +329,7 @@ router.put("/my_data", isLoggedIn, async (req, res) => {
             user.bannerLink = bannerLink; 
                 user.markModified("bannerLink");
             let returnMessage = `Update successful!`;
+            
             //Before changing email, check if other users' usernames or emails conflict with the updated email (or, once changeable, username)
             User.find({$and: [
                 { _id: { $not: { $eq: req.user._id } } },
@@ -459,7 +460,7 @@ router.put("/toggle-role", authorizeByRoles(ROLES.Delegator), (req, res) => {
         return res.status(400).send(`Not enough information was provided to toggle a role. id: ${id}; roleName: ${roleName}; operation: ${operation}`);
     }
     if(String(id) === String(req.user._id) && String(roleName) === "Delegator"){
-        return res.status(400).send("You can't remove your own Delegator role");
+        return res.status(400).send("You can't toggle your own Delegator role");
     }
     if(!id.match(/^[0-9a-fA-F]{24}$/)){
         return res.status(400).send(`Invalid user ID (${id}) was sent. Contact ${reportAddress} if there's a bug to fix.`);
