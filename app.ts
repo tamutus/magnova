@@ -39,14 +39,7 @@ import updateRoutes from './routes/updates';
 // Mongoose config
 // ===============
 
-mongoose.set('useUnifiedTopology', true);
-mongoose.set('useFindAndModify', false);
-mongoose.connect(expectEnv('DATABASEURL'), {
-	user: expectEnv('DB_USER'),
-	pass: expectEnv('DB_PASS'),
-	useNewUrlParser: true,
-	useCreateIndex: true
-});
+mongoose.connect(expectEnv('DATABASEURL'));
 
 // ================================
 // Express (app = express()) config
