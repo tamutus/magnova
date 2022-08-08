@@ -345,11 +345,12 @@ async function searchAll(){
     searchResults = await fetch(baseURL + fetchString)
         .then(res => handleErrors(res))
         .then(res => res.json())
-        .catch(err => {
-            console.log(err)
-        });
-    // console.log(searchResults.locations);
-    displayResults();
+        .catch(console.error);
+    if(searchResults.errorMessage){
+        console.error(searchResults.errorMessage);
+    } else {
+        displayResults();
+    }
 }
 // // Place buttons that run the upvote and downvote functions
 // d3.selectAll(".connection").each(function(){

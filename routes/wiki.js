@@ -83,14 +83,14 @@ router.get("/search", async (req, res) => {
     }
     if(req.query.issues === "true"){
         results["issues"] = await Issue.fuzzySearch(searchTerm).catch(err => {
+            results.errorMessage = ( results.errorMessage || "" ) + `Error fuzzy searching for issues: ${err}\n`;
             console.error(err);
-            return res.send("Error fuzzy searching: " + err);
         });
     }
     if(req.query.users === "true"){
         results["users"] = await User.fuzzySearch(searchTerm).catch(err => {
+            results.errorMessage = ( results.errorMessage || "" ) + `Error fuzzy searching for users: ${err}\n`;
             console.error(err);
-            return res.send("Error fuzzy searching: " + err);
         });
         for(const user of results["users"]){
             user["email"] = undefined;
@@ -98,22 +98,23 @@ router.get("/search", async (req, res) => {
     }
     if(req.query.projects === "true"){
         results["projects"] = await Project.fuzzySearch(searchTerm).catch(err => {            
+            results.errorMessage = ( results.errorMessage || "" ) + `Error fuzzy searching for projects: ${err}\n`;
             console.error(err);
-            return res.send("Error fuzzy searching: " + err);
         });
     }
     if(req.query.locations === "true"){
         results["locations"] = await Location.fuzzySearch(searchTerm).catch(err => {            
+            results.errorMessage = ( results.errorMessage || "" ) + `Error fuzzy searching for locations: ${err}\n`;
             console.error(err);
-            return res.send("Error fuzzy searching: " + err);
         });
         
         // results["projects"] = results["projects"].filter(project => project.confidenceScore > 10);
     }
     Object.keys(results).forEach(key => {
-        results[key] = results[key].filter(item => JSON.parse(JSON.stringify(item)).confidenceScore > (Math.min(5, searchTerm.length))); // https://stackoverflow.com/a/36522374 and https://stackoverflow.com/a/35038179 explain why this JSON conversion is necessary.
+        if(Array.isArray(results[key])){
+            results[key] = results[key].filter(item => JSON.parse(JSON.stringify(item)).confidenceScore > (Math.min(5, searchTerm.length))); // https://stackoverflow.com/a/36522374 and https://stackoverflow.com/a/35038179 explain why this JSON conversion is necessary.
+        }
     });
-
     if(req.query.locations === "true"){
         let trimmedLocations = [];
         for(let locationIndex = 0; locationIndex < results.locations.length; locationIndex++){
@@ -125,16 +126,17 @@ router.get("/search", async (req, res) => {
                     info: fullLocation.info
                 };
             if(fullLocation.superlocation){
-                await Location.findById(fullLocation.superlocation, (err, parent) => {
-                    if(err){
-                        console.log(err);
-                        return res.send(`Error loading ${fullLocation.name}'s superlocation (id: ${fullLocation.superlocation})`);
-                    } else if(parent) {
+                await Location.findById(fullLocation.superlocation).then((parent) => {
+                    if(parent) {
                         trimmedLocation.superlocation = {
                             name: parent.name,
                             _id: parent._id
                         };
                     }
+                })
+                .catch(err => {
+                    results.errorMessage = ( results.errorMessage || "" ) + `Error loading ${fullLocation.name}'s superlocation (id: ${fullLocation.superlocation}: ${err})`;
+                    console.error(err);
                 });
             }
             trimmedLocations.push(trimmedLocation);

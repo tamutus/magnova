@@ -9,7 +9,7 @@ const ResourceSchema = new Schema({
     edits: {type: Schema.Types.ObjectId, ref: "Patchlist"},
     version: {type: Number, default: 0},
     image: String,
-    unit: {type: String, default: "kg"},
+    unit: {type: String, default: "units"},
     identifier: {type: Schema.Types.ObjectId, ref: "User"},
     identificationDate: {type: Date, default: Date.now},
     tags: [{type: Schema.Types.ObjectId, ref: "Tag"}],

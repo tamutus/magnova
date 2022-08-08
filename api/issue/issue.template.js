@@ -1,5 +1,5 @@
 const mongoose = require("mongoose"),
-      mongoose_fuzzy_searching = require('mongoose-fuzzy-searching'),
+      mongoose_fuzzy_searching = require('mongoose-fuzzy-searching-v3'),
       Schema = mongoose.Schema;
 
 const IssueTemplateSchema = new Schema({

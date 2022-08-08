@@ -1,6 +1,6 @@
 const	mongoose = require("mongoose"),
 		Schema = mongoose.Schema,
-        mongoose_fuzzy_searching = require('mongoose-fuzzy-searching'),
+        mongoose_fuzzy_searching = require('mongoose-fuzzy-searching-v3'),
 		passportLocalMongoose = require("passport-local-mongoose");
 
 var UserSchema = new mongoose.Schema({
