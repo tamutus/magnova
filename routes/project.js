@@ -685,7 +685,7 @@ router.get("/:id", (req, res) => {
                 populate: { path: "edges.vertex" }
             })
             .populate("tags")
-            .populate("resources.resource")
+            // .populate("resources.resource")
             .populate("implementations")
             .populate({
                 path: "tasks",

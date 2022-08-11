@@ -284,8 +284,17 @@ router.post("/reset-password/:userID/:resetToken", async (req, res) => {
 });
 
 router.get("/logout", (req, res) => {
-    req.logout();
-    return res.redirect("back");
+    req.logout((err) => {
+        if(err){
+            console.error(err);
+            return res.render("errorLanding", {
+                title: "Error logging out",
+                errorHTML: `<h3>For some reason, we couldn't log you out. Please <a href="mailto:${reportAddress}">tell us about the problem you're having </a></h3>`
+            })
+        } else {   
+            return res.redirect("back");
+        }
+    });
 });
 router.get("/register", (req, res) => {
     return res.render("auth/register", {
