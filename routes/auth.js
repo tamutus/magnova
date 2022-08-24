@@ -139,7 +139,7 @@ router.post("/forgot-password", usernameToLowerCase, (req, res, next) => {
                 to: user.email,
                 subject: "Password Reset?",
                 text: `Time for a new password?
-                    Hello ${user.preferredName},
+                    Hello ${user.preferredName?.length > 0 ? user.preferredName : user.username},
                     We received a request to reset your password. If this wasn't you, please email ${reportAddress}. If you do want to reset your password, copy and paste this link into your browser:
                     https://${req.headers.host}/auth/reset-password/${user._id}/${token}
                     Automated message sent for your password reset only. You will not be subscribed to any email digests because of this email.`,
@@ -149,7 +149,7 @@ router.post("/forgot-password", usernameToLowerCase, (req, res, next) => {
                     <body style="background-color: rgb(90, 35, 90);color: lavender;font-size: 20px;padding: 20px;font-family: 'Montserrat', sans-serif;">
                         <div style="background-color: rgb(180, 70, 180);padding: 20px 50px;">
                             <h1>Time for a new password?</h1>
-                            <p>Hello ${user.preferredName},</p>
+                            <p>Hello ${user.preferredName?.length > 0 ? user.preferredName : user.username},</p>
                             <p>We received a request to reset your password. If this wasn't you, please <a href="mailto:${reportAddress}" style="color: rgb(173, 245, 215);">send us an email</a>. If you do want to reset your password, click this link:</p>
                             <a href="https://${req.headers.host}/auth/reset-password/${user._id}/${token}" style="background-color: rgb(255, 158, 102);color: black;font-size: 30px;font-family: 'Poppins', sans-serif;border-radius: 0 0 30px 30px;margin-bottom: 20px;margin-top: 25px;margin-left: 25px;padding: 15px;border: 2px solid rgb(253, 144, 80);flex: 100px 0 0;width: 300px;">Reset my password</a>
                             <p>Automated message sent for your password reset only. You will not be subscribed to any email digests because of this email.</p>
@@ -254,7 +254,7 @@ router.post("/reset-password/:userID/:resetToken", async (req, res) => {
                                             from: "Magnova <info@magnova.space>",
                                             to: user.email,
                                             subject: "We Reset Your Password",
-                                            text: `Hello ${user.preferredName},
+                                            text: `Hello ${user.preferredName?.length > 0 ? user.preferredName : user.username},
                                             We have successfully reset your Magnova password. If this wasn't you, please email ${reportAddress}. Otherwise, you can now log into Magnova with your new password.
                                             https://magnova.space/auth/login
                                             Automated message sent for your password reset only. You will not be subscribed to any email digests because of this email.`,
@@ -264,7 +264,7 @@ router.post("/reset-password/:userID/:resetToken", async (req, res) => {
                                                 <body style="background-color: rgb(90, 35, 90);color: lavender;font-size: 20px;padding: 20px;font-family: 'Montserrat', sans-serif;">
                                                     <div style="background-color: rgb(180, 70, 180);padding: 20px 50px;">
                                                         <h1>Password Reset Complete</h1>
-                                                        <p>Hello ${user.preferredName},</p>
+                                                        <p>Hello ${user.preferredName?.length > 0 ? user.preferredName : user.username},</p>
                                                         <p>We have successfully reset your Magnova password. If this wasn't you, please <a href="mailto:${reportAddress}" style="color: rgb(173, 245, 215);">send us an email</a>. Otherwise, you can now log in with your new password:</p>
                                                         <a href="https://${req.headers.host}/auth/login" style="background-color: rgb(255, 158, 102);color: black;font-size: 30px;font-family: 'Poppins', sans-serif;border-radius: 0 0 30px 30px;margin-bottom: 20px;margin-top: 25px;margin-left: 25px;padding: 15px;border: 2px solid rgb(253, 144, 80);flex: 100px 0 0;width: 300px;">Log Into Magnova</a>
                                                         <p>Automated message sent for your password reset only. You will not be subscribed to any email digests because of this email.</p>
@@ -494,18 +494,18 @@ router.put("/toggle-role", authorizeByRoles(ROLES.Delegator), (req, res) => {
                         } else {
                             user.roles.push(ROLES[roleName]);
                             user.save();
-                            return res.status(200).send(`${user.preferredName || user.username} now has the role ${ROLES[roleName]}`);
+                            return res.status(200).send(`${user.preferredName?.length > 0 ? user.preferredName : user.username} now has the role ${ROLES[roleName]}`);
                         }
                     } else if(operation === "remove"){
                         const existingIndex = user.roles.findIndex(role => {
                             return role === ROLES[roleName];
                         });
                         if(existingIndex === -1){
-                            return res.status(412).send(`${user.preferredName || user.username} did not have the role ${ROLES[roleName]} to begin with`);
+                            return res.status(412).send(`${user.preferredName?.length > 0 ? user.preferredName : user.username} did not have the role ${ROLES[roleName]} to begin with`);
                         } else {
                             user.roles.splice(existingIndex, 1);
                             user.save();
-                            return res.status(200).send(`The role ${ROLES[roleName]} has been revoked from ${user.preferredName || user.username}`);
+                            return res.status(200).send(`The role ${ROLES[roleName]} has been revoked from ${user.preferredName?.length > 0 ? user.preferredName : user.username}`);
                         }
                     }
                     
