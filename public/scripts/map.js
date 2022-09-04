@@ -637,7 +637,17 @@ async function zoomOutToParent(){
 // Refactor this to use d3 and add interactivity + links
 function readFeatureList(features){
     let displayText = `<h2>${ activeParent.properties.NAME }</h2> <ul>`;
-    for(feature of features){
+    for(const feature of 
+        features.sort((a, b) => {
+            if (a.properties.NAME < b.properties.NAME){
+                return -1;
+            } else if (a.properties.NAME > b.properties.NAME){
+                return 1;
+            } else {
+                return 0;
+            }
+        })
+    ){
         if(feature != activeParent){
             displayText += `<li onmouseover="highlightFeature('${feature.properties.NAME}');" onmouseout="resetHighlight('${feature.properties.NAME}')" onclick="zoomToFeature('${feature.properties.NAME}');">${feature.properties.NAME}</li>`
         }

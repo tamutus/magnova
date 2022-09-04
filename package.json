@@ -1,6 +1,6 @@
 {
   "name": "magnova",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "Global issue explorer, network builder, and crowdsourced task-planner",
   "main": "app.ts",
   "scripts": {
@@ -49,6 +49,8 @@
     "express": "^4.17.1",
     "express-mongo-sanitize": "^2.0.2",
     "express-session": "^1.17.1",
+    "firebase": "^9.9.3",
+    "firebase-admin": "^11.0.1",
     "method-override": "^3.0.0",
     "mongoose": "^6.5.1",
     "mongoose-fuzzy-searching-v3": "^2.1.0",
