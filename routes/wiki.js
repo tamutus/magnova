@@ -26,8 +26,8 @@ router.get('/', (req, res) => {
             }
             return res.render('wiki/landing', {
                 title: "Wiki view",
-                topIssues: recentIssues,
-                topProjects: recentProjects
+                topIssues: recentIssues.reverse(),
+                topProjects: recentProjects.reverse()
             });
         })
 	});
@@ -180,7 +180,7 @@ router.get("/all", (req, res) => {
         } else {
             res.render("wiki/allissues", {
                 title: "All Issues on Magnova",
-                issues: issues
+                issues: issues.reverse()
             });
         }
     });

@@ -669,7 +669,7 @@ router.get("/all", (req, res) => {
         } else {
             res.render("wiki/allprojects", {
                 title: "All Projects on Magnova",
-                projects: projects
+                projects: projects.reverse()
             });
         }
     });

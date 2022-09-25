@@ -479,17 +479,17 @@ h4.result-name {
     -webkit-box-align: start;
         -ms-flex-align: start;
             align-items: flex-start;
-    -ms-flex-line-pack: end;
-        align-content: flex-end;
-    -webkit-box-pack: end;
-        -ms-flex-pack: end;
-            justify-content: flex-end;
+    -ms-flex-line-pack: start;
+        align-content: flex-start;
+    -webkit-box-pack: start;
+        -ms-flex-pack: start;
+            justify-content: flex-start;
     -webkit-box-orient: horizontal;
     -webkit-box-direction: normal;
-        -ms-flex-flow: row-reverse wrap-reverse;
-            flex-flow: row-reverse wrap-reverse;
+        -ms-flex-flow: row wrap;
+            flex-flow: row wrap;
     overflow-y: auto;
-    border-radius: 15px;    
+    border-radius: 15px;
 }
 #issue-browse {
     border: 6px solid rgb(77, 30, 109);

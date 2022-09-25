@@ -20,7 +20,7 @@
 		<% if(projects?.length > 0){%>
             <p></p>
             <div id="project-browse">
-                <% projects.forEach(function(project){ %>
+                <% projects.forEach(project => { %>
                     <div class="project-snapshot" title="<%= project.name %>">
                         <a href="project/<%=project._id%>">
                             <div class="project-thumbnail"><img src="<%=project.image%>"></div>

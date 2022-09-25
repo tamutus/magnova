@@ -23,7 +23,7 @@
             <h1>All Identified Issues</h1>
             <p></p>
             <div id="issue-browse">
-                <% issues.forEach(function(issue){ %>
+                <% issues.forEach(issue => { %>
                     <div class="issue-snapshot" title="<%= issue.name %>">
                         <a href="wiki/<%=issue._id%>">
                             <div class="issue-thumbnail"><img src="<%=issue.image%>"></div>

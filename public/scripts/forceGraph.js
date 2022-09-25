@@ -290,8 +290,6 @@ function updateTools(toolset){
 
 let width = parseInt(svg.style("width"));
 let height = parseInt(svg.style("height"));
-console.log(width);
-console.log(height);
 let sim;
 initializeSim();
 function initializeSim(){
@@ -440,6 +438,9 @@ function updateSimDimensions(){
     sim.alpha(1).restart();
 }
 
+window.addEventListener('resize', updateSimDimensions);
+updateSimDimensions();
+
 // Load graph from cookies
 loadLastGraph();
 async function loadLastGraph(){
@@ -449,10 +450,6 @@ async function loadLastGraph(){
     updateSimData();
     sim.on("tick", ticked);
 }
-
-
-window.addEventListener('resize', updateSimDimensions);
-updateSimDimensions();
 
 function dragStart(d) {
     // console.log("Start");

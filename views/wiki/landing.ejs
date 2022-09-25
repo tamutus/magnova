@@ -108,11 +108,11 @@
     </section>
     <hr>
     <section id="issues">
-		<% if(topIssues?.length > 0){%>
+		<% if(topIssues?.length > 0){ %>
             <h2>Know: Recently Identified Issues</h2>
             <p></p>
             <div id="issue-browse">
-                <% topIssues.forEach(function(issue){ %>
+                <% topIssues.forEach(issue => { %>
                     <div class="issue-snapshot" title="<%= issue.name %>">
                         <a href="wiki/<%=issue._id%>">
                             <div class="issue-thumbnail"><img src="<%=issue.image%>"></div>
@@ -140,7 +140,7 @@
         <br>
         <% if(topProjects?.length > 0){%>
             <div id="project-browse">
-                <% topProjects.forEach(function(project){ %>
+                <% topProjects.forEach(project => { %>
                     <div class="project-snapshot" title="<%= project.name %>">
                         <a href="project/<%=project._id%>">
                             <div class="project-thumbnail"><img src="<%=project.image%>"></div>
