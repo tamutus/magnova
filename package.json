@@ -5,6 +5,7 @@
   "main": "app.ts",
   "scripts": {
     "build": "tsc && cp -R public dist && cp -R views dist",
+    "build-render": "npx tsc && cp -R public dist && cp -R views dist",
     "buildw": "tsc && Xcopy /e .\\public .\\dist\\public\\ && Xcopy /E .\\views .\\dist\\public\\",
     "clean": "tsc --build --clean && rm -r dist",
     "cleanw": "tsc --build --clean && del dist",
