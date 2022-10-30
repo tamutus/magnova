@@ -5,10 +5,10 @@
   "main": "app.ts",
   "scripts": {
     "build": "tsc && cp -R public dist && cp -R views dist",
-    "build-render": "tsc",
+    "build-render": "npx tsc",
     "buildw": "tsc && Xcopy /e .\\public .\\dist\\public\\ && Xcopy /E .\\views .\\dist\\public\\",
     "clean": "tsc --build --clean && rm -r dist",
-    "cleanw": "tsc --build --clean && del dist",
+    "cleanw": "tsc --build --clean && rd /s dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "set TS_NODE_PROJECT=.\\tsconfig.dist.json&& node -r tsconfig-paths/register dist/app.js",
     "start-render": "node ./dist/app.js",
