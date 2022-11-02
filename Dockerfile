@@ -12,6 +12,6 @@ COPY package*.json ./
 COPY tsconfig.json ./
 RUN npm ci --only=production
 COPY --from=build-stage /build/dist ./
-EXPOSE 3000
+EXPOSE 10000
 CMD ["npm", "run", "docker-start"]
 
